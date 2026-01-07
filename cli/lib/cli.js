@@ -6,7 +6,6 @@
  * 1. Asking team setup questions
  * 2. Deploying .teamspec/ folder with core files
  * 3. Creating project structure
- * 4. Configuring IDE-specific agent files (placeholder for later)
  */
 
 const fs = require('fs');
@@ -24,7 +23,6 @@ const colors = {
   green: '\x1b[92m',
   yellow: '\x1b[93m',
   blue: '\x1b[94m',
-  magenta: '\x1b[95m',
   cyan: '\x1b[96m',
 };
 
@@ -41,17 +39,18 @@ function colored(text, color) {
 
 function printBanner() {
   const banner = `
-╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║   ████████╗███████╗ █████╗ ███╗   ███╗███████╗██████╗ ███████╗  ║
-║   ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔════╝  ║
-║      ██║   █████╗  ███████║██╔████╔██║███████╗██████╔╝█████╗    ║
-║      ██║   ██╔══╝  ██╔══██║██║╚██╔╝██║╚════██║██╔═══╝ ██╔══╝    ║
-║      ██║   ███████╗██║  ██║██║ ╚═╝ ██║███████║██║     ███████╗  ║
-║      ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚══════╝  ║
-║                                                                  ║
-║         Feature Canon Operating Model v2.0                       ║
-╚══════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║ ████████╗███████╗ █████╗ ███╗   ███╗███████╗██████╗ ███████╗ ██████╗ ║
+║ ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔════╝██╔════╝ ║
+║    ██║   █████╗  ███████║██╔████╔██║███████╗██████╔╝█████╗  ██║      ║
+║    ██║   ██╔══╝  ██╔══██║██║╚██╔╝██║╚════██║██╔═══╝ ██╔══╝  ██║      ║
+║    ██║   ███████╗██║  ██║██║ ╚═╝ ██║███████║██║     ███████╗╚██████╗ ║
+║    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚══════╝ ╚═════╝ ║
+║                                                                      ║
+║                                                                      ║
+║         Feature Canon Operating Model v2.0                           ║
+╚══════════════════════════════════════════════════════════════════════╝
 `;
   console.log(colored(banner, colors.cyan));
 }
@@ -60,53 +59,6 @@ function printBanner() {
 // Configuration Options
 // =============================================================================
 
-// IDE/Agent framework configurations
-// Note: Agent files are placeholders - actual deployment handled later
-const IDE_CONFIGS = {
-  copilot: {
-    name: 'GitHub Copilot',
-    instructionPath: '.github/copilot-instructions.md',
-    description: 'GitHub Copilot (VS Code, JetBrains, Neovim)',
-  },
-  cursor: {
-    name: 'Cursor',
-    instructionPath: '.cursor/rules',
-    description: 'Cursor AI IDE',
-  },
-  claude: {
-    name: 'Claude (Anthropic)',
-    instructionPath: 'CLAUDE.md',
-    description: 'Claude Code / Claude Projects',
-  },
-  windsurf: {
-    name: 'Windsurf (Codeium)',
-    instructionPath: '.windsurfrules',
-    description: 'Windsurf AI IDE by Codeium',
-  },
-  aider: {
-    name: 'Aider',
-    instructionPath: '.aider/conventions.md',
-    description: 'Aider AI pair programming',
-  },
-  cline: {
-    name: 'Cline',
-    instructionPath: '.clinerules',
-    description: 'Cline VS Code extension',
-  },
-  continue: {
-    name: 'Continue',
-    instructionPath: '.continue/config.json',
-    description: 'Continue.dev AI assistant',
-    format: 'json',
-  },
-  generic: {
-    name: 'Generic / Manual',
-    instructionPath: '.teamspec/AGENT_INSTRUCTIONS.md',
-    description: 'Generic instructions - configure manually',
-  },
-};
-
-// Profile options
 const PROFILE_OPTIONS = {
   none: 'No specific profile - vanilla TeamSpec',
   regulated: 'Regulated industry (banking, healthcare, government) - strict compliance',
@@ -115,7 +67,6 @@ const PROFILE_OPTIONS = {
   enterprise: 'Enterprise - governance, audit trails, multi-team coordination',
 };
 
-// Industry options
 const INDUSTRY_OPTIONS = {
   technology: 'Technology / Software',
   finance: 'Financial Services / Banking',
@@ -126,14 +77,12 @@ const INDUSTRY_OPTIONS = {
   other: 'Other',
 };
 
-// Cadence options
 const CADENCE_OPTIONS = {
   scrum: 'Scrum (time-boxed sprints)',
   kanban: 'Kanban (continuous flow)',
   scrumban: 'Scrumban (hybrid)',
 };
 
-// Default project ID for single-project repos
 const DEFAULT_PROJECT_ID = 'main-project';
 
 // =============================================================================
@@ -142,9 +91,8 @@ const DEFAULT_PROJECT_ID = 'main-project';
 
 function parseArgs(args) {
   const options = {
-    command: 'init', // default command
+    command: 'init',
     target: process.cwd(),
-    ide: null,
     profile: null,
     org: null,
     team: null,
@@ -157,10 +105,9 @@ function parseArgs(args) {
 
   let i = 0;
 
-  // Check if first argument is a command
   if (args.length > 0 && !args[0].startsWith('-')) {
     const cmd = args[0].toLowerCase();
-    if (['init', 'update', 'version'].includes(cmd)) {
+    if (['init', 'update'].includes(cmd)) {
       options.command = cmd;
       i = 1;
     }
@@ -180,10 +127,6 @@ function parseArgs(args) {
       case '--target':
       case '-t':
         options.target = args[++i];
-        break;
-      case '--ide':
-      case '-i':
-        options.ide = args[++i];
         break;
       case '--profile':
       case '-p':
@@ -232,23 +175,12 @@ ${colored('OPTIONS:', colors.bold)}
   -h, --help              Show this help message
   -v, --version           Show version number
   -t, --target <dir>      Target directory (default: current directory)
-  -i, --ide <ide>         AI IDE to configure
   -p, --profile <profile> Team profile to use
   -o, --org <name>        Organization name
   --team <name>           Team name
   --project <id>          Project ID for folder structure (default: main-project)
   -y, --non-interactive   Run without prompts (use defaults)
   -f, --force             Force update without confirmation
-
-${colored('SUPPORTED IDEs:', colors.bold)}
-  copilot      GitHub Copilot (VS Code, JetBrains, Neovim)
-  cursor       Cursor AI IDE
-  claude       Claude Code / Claude Projects
-  windsurf     Windsurf AI IDE by Codeium
-  aider        Aider AI pair programming
-  cline        Cline VS Code extension
-  continue     Continue.dev AI assistant
-  generic      Generic instructions - configure manually
 
 ${colored('PROFILES:', colors.bold)}
   none           Vanilla TeamSpec
@@ -259,7 +191,7 @@ ${colored('PROFILES:', colors.bold)}
 
 ${colored('EXAMPLES:', colors.bold)}
   teamspec                              # Interactive setup
-  teamspec --ide copilot                # Quick setup for GitHub Copilot
+  teamspec --profile startup -y         # Quick setup with startup profile
   teamspec update                       # Update core files, keep context
   teamspec update --force               # Update without confirmation
 
@@ -267,8 +199,8 @@ ${colored('WHAT GETS CREATED:', colors.bold)}
   .teamspec/                 Core framework
     ├── templates/           Document templates
     ├── definitions/         DoR/DoD checklists
-    ├── context/             Team configuration (team.yml)
-    └── profiles/            Profile overlays
+    ├── profiles/            Profile overlays
+    └── context/team.yml     Team configuration
   projects/<project-id>/     Project artifacts
     ├── features/            Feature Canon (source of truth)
     ├── stories/             User stories (workflow folders)
@@ -367,16 +299,6 @@ async function runInteractive(options) {
   const rl = createReadlineInterface();
 
   try {
-    // IDE selection
-    if (!options.ide) {
-      options.ide = await promptChoice(
-        rl,
-        'Which AI IDE/Agent will you use?',
-        Object.fromEntries(Object.entries(IDE_CONFIGS).map(([k, v]) => [k, v.description])),
-        'copilot'
-      );
-    }
-
     // Profile selection
     if (!options.profile) {
       options.profile = await promptChoice(
@@ -447,7 +369,6 @@ async function runInteractive(options) {
 
     // Confirmation
     console.log(`\n${colored('Configuration:', colors.bold)}`);
-    console.log(`  IDE:             ${IDE_CONFIGS[options.ide].name}`);
     console.log(`  Profile:         ${options.profile}`);
     console.log(`  Organization:    ${options.org}`);
     console.log(`  Team:            ${options.team}`);
@@ -498,7 +419,6 @@ function copyTeamspecCore(targetDir, sourceDir) {
 
   fs.mkdirSync(targetTeamspec, { recursive: true });
 
-  // Copy directories
   for (const dirName of dirsToCopy) {
     const src = path.join(sourceDir, dirName);
     const dest = path.join(targetTeamspec, dirName);
@@ -511,7 +431,6 @@ function copyTeamspecCore(targetDir, sourceDir) {
     }
   }
 
-  // Copy files
   for (const fileName of filesToCopy) {
     const src = path.join(sourceDir, fileName);
     const dest = path.join(targetTeamspec, fileName);
@@ -521,11 +440,9 @@ function copyTeamspecCore(targetDir, sourceDir) {
     }
   }
 
-  // Create context directory
   const contextDir = path.join(targetTeamspec, 'context');
   fs.mkdirSync(contextDir, { recursive: true });
 
-  // Copy schema
   const schemaSrc = path.join(sourceDir, 'context', '_schema.yml');
   if (fs.existsSync(schemaSrc)) {
     fs.copyFileSync(schemaSrc, path.join(contextDir, '_schema.yml'));
@@ -567,24 +484,10 @@ team:
     - DEV  # Developer
     - QA   # Quality Assurance
     - SM   # Scrum Master
-    - DES  # Designer (optional)
-  
-  # Optional: Map roles to team members
-  # roster:
-  #   BA: ["alice@example.com"]
-  #   FA: ["bob@example.com"]
-  #   DEV: ["dev1@example.com", "dev2@example.com"]
-  #   QA: ["tester@example.com"]
   
   cadence:
     type: ${options.cadence}  # Options: scrum, kanban, scrumban
 ${options.sprintLengthDays ? `    sprint_length_days: ${options.sprintLengthDays}` : '    # sprint_length_days: N/A for kanban'}
-  
-  # Optional: Team communication channels
-  # channels:
-  #   slack: "#your-team"
-  #   jira_project: "PROJ"
-  #   confluence_space: "TeamSpace"
 
 # ==============================================================================
 # Technology Stack
@@ -598,14 +501,9 @@ tech:
   
   architecture:
     type: monolith  # Options: monolith, microservices, modular-monolith, serverless
-  
-  # Optional: Quality gates
-  # quality:
-  #   min_test_coverage: 80
-  #   require_code_review: true
 
 # ==============================================================================
-# Governance (customize based on your profile)
+# Governance
 # ==============================================================================
 governance:
   sign_off_required: ${options.profile === 'regulated' || options.profile === 'enterprise'}
@@ -616,16 +514,11 @@ governance:
 # Feature Canon Configuration
 # ==============================================================================
 feature_canon:
-  # Who owns different sections of feature files
   ownership:
     purpose_and_scope: BA
     behavior: FA
     change_log: FA
-  
-  # Require stories to link to features
   require_feature_links: true
-  
-  # Require delta format in stories
   require_delta_format: true
 `;
 
@@ -643,10 +536,8 @@ function createProjectStructure(targetDir, projectId) {
 
   console.log(`\n${colored(`Creating project structure: projects/${projectId}/...`, colors.blue)}`);
 
-  // Create project.yml
+  // project.yml
   const projectYml = `# Project Configuration: ${projectId}
-# This file defines project-specific settings and metadata.
-
 project:
   id: "${projectId}"
   name: "${projectId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}"
@@ -657,23 +548,14 @@ project:
   fs.writeFileSync(path.join(projectDir, 'project.yml'), projectYml, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/project.yml`);
 
-  // Create features/ directory (Feature Canon)
+  // features/
   const featuresDir = path.join(projectDir, 'features');
   fs.mkdirSync(featuresDir, { recursive: true });
 
-  const featuresIndex = `# Features Index (Feature Canon)
+  fs.writeFileSync(path.join(featuresDir, 'features-index.md'), `# Features Index (Feature Canon)
 
 This is the master index of all features in this project.
 The Feature Canon is the **source of truth** for system behavior.
-
-## Status Legend
-
-| Status | Description |
-|--------|-------------|
-| 🟢 Active | Feature is live in production |
-| 🟡 Draft | Feature is being specified |
-| 🔵 Planned | Feature is approved but not yet started |
-| ⚪ Deprecated | Feature is being phased out |
 
 ## Feature Registry
 
@@ -681,329 +563,117 @@ The Feature Canon is the **source of truth** for system behavior.
 |----|------|--------|-------|
 | _(none yet)_ | | | |
 
-## Next Available ID
-
-**F-001**
+## Next Available ID: **F-001**
 
 ---
 
-## ⚠️ How to Add Features
+> **To add features:** Run \`ts:ba feature\` — features are never created implicitly.
+`, 'utf-8');
 
-> **INVARIANT**: Features are NEVER created implicitly.
+  fs.writeFileSync(path.join(featuresDir, 'story-ledger.md'), `# Story Ledger
 
-To add a new feature:
-
-1. **Run \`ts:ba feature\`** — Analyzes and proposes new features
-2. **Review the proposal** — Each feature must explain why it's a Feature (not a Story)
-3. **Confirm creation** — Reply "Confirm" to create the feature files
-4. **Update this index** — Add the new feature to the registry above
-
-See \`/.teamspec/templates/feature-template.md\` for the feature format.
-`;
-  fs.writeFileSync(path.join(featuresDir, 'features-index.md'), featuresIndex, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/features/features-index.md`);
-
-  // Create story-ledger.md
-  const storyLedger = `# Story Ledger
-
-This ledger tracks all completed stories and their impact on the Feature Canon.
-
-## Purpose
-
-- Provides audit trail of feature evolution
-- Links stories to feature changes
-- Enables traceability for compliance
-
-## Completed Stories
+Tracks completed stories and their impact on the Feature Canon.
 
 | Story ID | Title | Sprint | Features Modified | Merged Date |
 |----------|-------|--------|-------------------|-------------|
 | _(none yet)_ | | | | |
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/features/`);
 
----
-
-> **Instructions**:
-> - FA updates this after running \`ts:fa sync\`
-> - Every completed story that modifies behavior MUST appear here
-`;
-  fs.writeFileSync(path.join(featuresDir, 'story-ledger.md'), storyLedger, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/features/story-ledger.md`);
-
-  // Create stories/ directory with workflow subfolders
+  // stories/ with workflow folders
   const storiesDir = path.join(projectDir, 'stories');
-  const storyFolders = ['backlog', 'ready-to-refine', 'ready-for-development'];
-  
-  for (const folder of storyFolders) {
+  for (const folder of ['backlog', 'ready-to-refine', 'ready-for-development']) {
     fs.mkdirSync(path.join(storiesDir, folder), { recursive: true });
   }
 
-  fs.writeFileSync(
-    path.join(storiesDir, 'README.md'),
-    `# Stories
-
-This directory contains user stories for the project.
+  fs.writeFileSync(path.join(storiesDir, 'README.md'), `# Stories
 
 ## Workflow Folders
 
 | Folder | Status | Owner |
 |--------|--------|-------|
-| \`backlog/\` | New stories | FA creates here |
-| \`ready-to-refine/\` | Ready for dev refinement | FA moves here |
-| \`ready-for-development/\` | Refined, ready for sprint | DEV moves here |
-
-## Key Rules
-
-1. **Every story must link to features** in the Feature Canon
-2. **Stories describe DELTAS** (changes), not full behavior
-3. Use \`ts:fa story\` to create properly formatted stories
-4. Check Definition of Ready before sprint planning
-
-## ⚠️ Before Creating Stories
-
-Stories can only exist if their parent **Feature** exists in the Feature Canon.
-
-If you need a new feature:
-1. Run \`ts:ba feature\` to propose new features
-2. Confirm the feature creation
-3. Then create stories linked to that feature
-
-**DO NOT** create stories for features that don't exist yet.
-`,
-    'utf-8'
-  );
-  console.log(`  ✓ Created projects/${projectId}/stories/ (with workflow folders)`);
-
-  // Create adr/ directory
-  const adrDir = path.join(projectDir, 'adr');
-  fs.mkdirSync(adrDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(adrDir, 'README.md'),
-    `# Architecture Decision Records
-
-This directory contains Architecture Decision Records (ADRs) for this project.
-
-## What is an ADR?
-
-An ADR captures an important architectural decision along with its context and consequences.
-
-## Naming Convention
-
-\`ADR-NNN-<slug>.md\`
-
-Example: \`ADR-001-use-postgresql-database.md\`
-
-## Usage
-
-Use the template in \`/.teamspec/templates/adr-template.md\`
-`,
-    'utf-8'
-  );
-  console.log(`  ✓ Created projects/${projectId}/adr/`);
-
-  // Create decisions/ directory
-  const decisionsDir = path.join(projectDir, 'decisions');
-  fs.mkdirSync(decisionsDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(decisionsDir, 'README.md'),
-    `# Decisions
-
-This directory contains business decision records (DEC) for this project.
-
-## Naming Convention
-
-\`DECISION-NNN-<slug>.md\`
-
-Example: \`DECISION-001-mvp-scope-q1.md\`
-
-## Usage
-
-Use the template in \`/.teamspec/templates/decision-log-template.md\`
-`,
-    'utf-8'
-  );
-  console.log(`  ✓ Created projects/${projectId}/decisions/`);
-
-  // Create dev-plans/ directory
-  const devPlansDir = path.join(projectDir, 'dev-plans');
-  fs.mkdirSync(devPlansDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(devPlansDir, 'README.md'),
-    `# Development Plans
-
-This directory contains development task breakdowns for stories.
-
-## Naming Convention
-
-\`story-NNN-tasks.md\`
-
-Example: \`story-001-tasks.md\`
+| \`backlog/\` | New stories | FA |
+| \`ready-to-refine/\` | Ready for dev refinement | FA |
+| \`ready-for-development/\` | Refined, ready for sprint | DEV |
 
 ## Rules
 
+- Every story must link to features in the Feature Canon
+- Stories describe DELTAS (changes), not full behavior
+- Use \`ts:fa story\` to create properly formatted stories
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/stories/`);
+
+  // adr/
+  fs.mkdirSync(path.join(projectDir, 'adr'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'adr', 'README.md'), `# Architecture Decision Records
+
+Naming: \`ADR-NNN-<slug>.md\`
+
+Use template: \`/.teamspec/templates/adr-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/adr/`);
+
+  // decisions/
+  fs.mkdirSync(path.join(projectDir, 'decisions'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'decisions', 'README.md'), `# Business Decisions
+
+Naming: \`DECISION-NNN-<slug>.md\`
+
+Use template: \`/.teamspec/templates/decision-log-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/decisions/`);
+
+  // dev-plans/
+  fs.mkdirSync(path.join(projectDir, 'dev-plans'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'dev-plans', 'README.md'), `# Development Plans
+
+Naming: \`story-NNN-tasks.md\`
+
+Rules:
 - NEVER start coding without a dev plan
-- Task files must have no TBD/TODO items before implementation
+- No TBD/TODO items before implementation
 - Mark tasks ✅ as completed
-- Track actual vs estimated effort
-`,
-    'utf-8'
-  );
+`, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/dev-plans/`);
 
-  // Create qa/ directory
-  const qaDir = path.join(projectDir, 'qa');
-  fs.mkdirSync(path.join(qaDir, 'test-cases'), { recursive: true });
-  fs.writeFileSync(
-    path.join(qaDir, 'README.md'),
-    `# Quality Assurance
-
-This directory contains QA artifacts for the project.
-
-## Structure
-
-\`\`\`
-qa/
-└── test-cases/     # Feature-level test cases
-\`\`\`
-
-## Key Principle
+  // qa/
+  fs.mkdirSync(path.join(projectDir, 'qa', 'test-cases'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'qa', 'README.md'), `# Quality Assurance
 
 Tests validate **Feature Canon** behavior, not individual stories.
 
-## Usage
-
-Use the template in \`/.teamspec/templates/testcases-template.md\`
-`,
-    'utf-8'
-  );
+Use template: \`/.teamspec/templates/testcases-template.md\`
+`, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/qa/`);
 
-  // Create sprints/ directory
-  const sprintsDir = path.join(projectDir, 'sprints');
-  fs.mkdirSync(sprintsDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(sprintsDir, 'sprints-index.md'),
-    `# Sprints Index
+  // sprints/
+  fs.mkdirSync(path.join(projectDir, 'sprints'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'sprints', 'sprints-index.md'), `# Sprints Index
 
-This is the index of all sprints in this project.
-
-## Current Sprint
-
-_None active_
+## Current Sprint: _None active_
 
 ## Sprint History
 
 | Sprint | Goal | Status | Stories | Canon Synced |
 |--------|------|--------|---------|--------------|
 | _(none yet)_ | | | | |
-
----
-
-## Sprint Management
-
-Use the following commands:
-- \`ts:sm sprint create\` — Create a new sprint
-- \`ts:sm sprint status\` — View sprint status
-- \`ts:sm sprint close\` — Close sprint with metrics
-`,
-    'utf-8'
-  );
+`, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/sprints/`);
 
-  // Create epics/ directory
-  const epicsDir = path.join(projectDir, 'epics');
-  fs.mkdirSync(epicsDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(epicsDir, 'epics-index.md'),
-    `# Epics Index
-
-This is the index of all epics in this project.
-
-## Epic Registry
+  // epics/
+  fs.mkdirSync(path.join(projectDir, 'epics'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'epics', 'epics-index.md'), `# Epics Index
 
 | ID | Name | Status | Features | Target |
 |----|------|--------|----------|--------|
 | _(none yet)_ | | | | |
 
-## Next Available ID
+## Next Available ID: **EPIC-001**
 
-**EPIC-001**
-
----
-
-## ⚠️ How to Add Epics
-
-> **INVARIANT**: Epics are NEVER created implicitly.
-
-To add a new epic:
-
-1. **Run \`ts:ba epic\`** — Proposes epic boundaries with justification
-2. **Review the proposal** — Each epic must explain why it's an Epic (not a Feature)
-3. **Confirm creation** — Reply "Confirm" to create the epic files
-`,
-    'utf-8'
-  );
+> **To add epics:** Run \`ts:ba epic\` — epics are never created implicitly.
+`, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/epics/`);
-}
-
-// =============================================================================
-// IDE/Agent Configuration
-// =============================================================================
-
-function setupIdeInstructions(targetDir, ide) {
-  const config = IDE_CONFIGS[ide];
-
-  console.log(`\n${colored(`Configuring ${config.name}...`, colors.blue)}`);
-
-  // Create placeholder file directing to manual setup
-  const instructionPath = path.join(targetDir, config.instructionPath);
-  fs.mkdirSync(path.dirname(instructionPath), { recursive: true });
-
-  const placeholder = `# TeamSpec Agent Instructions
-
-This file will contain ${config.name}-specific agent instructions.
-
-## Current Status
-
-Agent-specific prompts will be deployed in a future CLI update.
-
-## Manual Setup
-
-For now, copy the agent prompts from the TeamSpec repository:
-https://github.com/teamspec/teamspec/tree/main/agents
-
-## Available Agent Prompts
-
-- AGENT_BOOTSTRAP.md - Master system prompt
-- AGENT_BA.md - Business Analyst
-- AGENT_FA.md - Functional Analyst
-- AGENT_SA.md - Solution Architect
-- AGENT_DEV.md - Developer
-- AGENT_QA.md - Quality Assurance
-- AGENT_SM.md - Scrum Master
-- AGENT_DES.md - Designer
-
-## TeamSpec Commands
-
-Once configured, use these commands:
-- \`ts:ba create\` - Create business analysis
-- \`ts:fa story\` - Create user story
-- \`ts:dev plan\` - Create development plan
-- \`ts:qa test\` - Design test cases
-- \`ts:sm sprint create\` - Create sprint
-`;
-
-  if (config.format === 'json') {
-    const jsonContent = {
-      systemMessage: placeholder,
-      docs: [{ name: 'TeamSpec', startUrl: '.teamspec/' }],
-    };
-    fs.writeFileSync(instructionPath, JSON.stringify(jsonContent, null, 2), 'utf-8');
-  } else {
-    fs.writeFileSync(instructionPath, placeholder, 'utf-8');
-  }
-
-  console.log(`  ✓ Created ${config.instructionPath} (placeholder)`);
-  console.log(`  ℹ Agent-specific prompts will be added in a future update`);
 }
 
 // =============================================================================
@@ -1013,12 +683,7 @@ Once configured, use these commands:
 function updateTeamspecCore(targetDir, sourceDir) {
   const targetTeamspec = path.join(targetDir, '.teamspec');
 
-  const dirsToUpdate = [
-    'definitions',
-    'profiles',
-    'templates',
-  ];
-
+  const dirsToUpdate = ['definitions', 'profiles', 'templates'];
   const filesToUpdate = ['teamspec.yml'];
   const contextFilesToUpdate = ['_schema.yml'];
 
@@ -1027,7 +692,6 @@ function updateTeamspecCore(targetDir, sourceDir) {
   const updated = [];
   const skipped = [];
 
-  // Update directories
   for (const dirName of dirsToUpdate) {
     const src = path.join(sourceDir, dirName);
     const dest = path.join(targetTeamspec, dirName);
@@ -1041,7 +705,6 @@ function updateTeamspecCore(targetDir, sourceDir) {
     }
   }
 
-  // Update files
   for (const fileName of filesToUpdate) {
     const src = path.join(sourceDir, fileName);
     const dest = path.join(targetTeamspec, fileName);
@@ -1052,7 +715,6 @@ function updateTeamspecCore(targetDir, sourceDir) {
     }
   }
 
-  // Update context schema but preserve team.yml
   const contextDir = path.join(targetTeamspec, 'context');
   if (fs.existsSync(contextDir)) {
     for (const fileName of contextFilesToUpdate) {
@@ -1064,10 +726,9 @@ function updateTeamspecCore(targetDir, sourceDir) {
         console.log(`  ✓ Updated context/${fileName}`);
       }
     }
-    const teamYmlPath = path.join(contextDir, 'team.yml');
-    if (fs.existsSync(teamYmlPath)) {
+    if (fs.existsSync(path.join(contextDir, 'team.yml'))) {
       skipped.push('context/team.yml');
-      console.log(`  ⏭ Preserved context/team.yml (team configuration)`);
+      console.log(`  ⏭ Preserved context/team.yml`);
     }
   }
 
@@ -1078,56 +739,42 @@ function updateTeamspecCore(targetDir, sourceDir) {
 // Summary Output
 // =============================================================================
 
-function printNextSteps(targetDir, ide, profile, projectId) {
-  const config = IDE_CONFIGS[ide];
-
+function printNextSteps(targetDir, profile, projectId) {
   console.log(`\n${colored('='.repeat(70), colors.green)}`);
   console.log(colored('  ✅ TeamSpec 2.0 initialized successfully!', colors.green + colors.bold));
   console.log(colored('='.repeat(70), colors.green));
 
   console.log(`
 ${colored('📁 Created Structure:', colors.bold)}
-    .teamspec/                    - Core framework (templates, definitions)
-    .teamspec/context/team.yml    - Team configuration
-    projects/${projectId}/        - Project artifacts
+    .teamspec/                    - Core framework
+      ├── templates/              - Document templates
+      ├── definitions/            - DoR/DoD checklists
+      ├── profiles/               - Profile overlays
+      └── context/team.yml        - Team configuration
+    projects/${projectId}/
       ├── features/               - Feature Canon (source of truth)
       ├── stories/                - User stories (workflow folders)
-      │   ├── backlog/            - New stories
-      │   ├── ready-to-refine/    - Ready for dev refinement
-      │   └── ready-for-dev/      - Ready for sprint
       ├── adr/                    - Architecture decisions
       ├── decisions/              - Business decisions
       ├── dev-plans/              - Development task breakdowns
       ├── qa/                     - Test cases
       ├── sprints/                - Sprint management
       └── epics/                  - Epic specifications
-    ${config.instructionPath}     - AI agent instructions (placeholder)
 
 ${colored('🚀 Next Steps:', colors.bold + colors.yellow)}
 
-${colored('1. Configure Your Team Context', colors.cyan)}
-   Edit ${colored('.teamspec/context/team.yml', colors.bold)} to set:
-   - Technology stack
-   - Compliance requirements (if any)
-   - Additional team settings
+${colored('1. Configure Your Team', colors.cyan)}
+   Edit ${colored('.teamspec/context/team.yml', colors.bold)} to set your tech stack.
 
-${colored('2. Configure AI Agent', colors.cyan)}
-   The agent instructions file is a placeholder.
-   Copy agent prompts from: https://github.com/teamspec/teamspec/tree/main/agents
-
-${colored('3. Create Your First Feature', colors.cyan)}
-   ⚠️  Features are NEVER created implicitly — use the BA commands:
-   
+${colored('2. Create Your First Feature', colors.cyan)}
+   Features are NEVER created implicitly. Use:
    ${colored('ts:ba feature', colors.bold)}    - Propose and create features
 
-${colored('4. Start Using TeamSpec Commands', colors.cyan)}
-   Key commands for your AI assistant:
-   - ${colored('ts:ba create', colors.bold)}       - Create business analysis
-   - ${colored('ts:ba feature', colors.bold)}      - Create features (with justification)
-   - ${colored('ts:fa story', colors.bold)}        - Create user story
-   - ${colored('ts:dev plan', colors.bold)}        - Create development plan
-   - ${colored('ts:qa test', colors.bold)}         - Design test cases
-   - ${colored('ts:sm sprint create', colors.bold)} - Create sprint
+${colored('3. Start Using TeamSpec Commands', colors.cyan)}
+   ${colored('ts:ba create', colors.bold)}       - Create business analysis
+   ${colored('ts:fa story', colors.bold)}        - Create user story  
+   ${colored('ts:dev plan', colors.bold)}        - Create development plan
+   ${colored('ts:qa test', colors.bold)}         - Design test cases
 
 ${colored('📚 Documentation:', colors.bold)}
    - Templates:    .teamspec/templates/
@@ -1135,7 +782,7 @@ ${colored('📚 Documentation:', colors.bold)}
 `);
 }
 
-function printUpdateSummary(targetDir, coreResult) {
+function printUpdateSummary(coreResult) {
   const pkg = require('../package.json');
 
   console.log(`\n${colored('='.repeat(70), colors.green)}`);
@@ -1144,28 +791,17 @@ function printUpdateSummary(targetDir, coreResult) {
 
   console.log(`\n${colored('Version:', colors.bold)} ${pkg.version}`);
 
-  console.log(`\n${colored('📁 Updated Files:', colors.bold)}`);
+  console.log(`\n${colored('Updated:', colors.bold)}`);
   for (const item of coreResult.updated) {
     console.log(`    ✓ ${item}`);
   }
 
   if (coreResult.skipped.length > 0) {
-    console.log(`\n${colored('⏭ Preserved (team configuration):', colors.bold)}`);
+    console.log(`\n${colored('Preserved:', colors.bold)}`);
     for (const item of coreResult.skipped) {
       console.log(`    ⏭ ${item}`);
     }
   }
-
-  console.log(`
-${colored('💡 What was updated:', colors.bold)}
-   - Templates:    Latest document templates
-   - Definitions:  DoR/DoD checklists
-   - Profiles:     Profile overlays
-
-${colored('⏭ What was preserved:', colors.bold)}
-   - context/team.yml     Your team configuration
-   - projects/            Your project artifacts
-`);
 }
 
 // =============================================================================
@@ -1192,37 +828,35 @@ async function run(args) {
 
     if (!fs.existsSync(teamspecDir)) {
       console.error(colored(`❌ TeamSpec not found in: ${targetDir}`, colors.red));
-      console.error('Run `teamspec init` first to initialize TeamSpec.');
+      console.error('Run `teamspec init` first.');
       process.exit(1);
     }
 
     const pkg = require('../package.json');
     console.log(`\n${colored('TeamSpec Update', colors.bold + colors.cyan)} v${pkg.version}`);
-    console.log(`${colored('Target:', colors.bold)} ${targetDir}`);
 
     if (!options.force && !options.nonInteractive) {
       const rl = createReadlineInterface();
       const proceed = await promptYesNo(
         rl,
-        `\n${colored('This will update all TeamSpec core files but preserve your team context.', colors.yellow)}\n` +
-        `${colored('Continue?', colors.bold)}`,
+        `${colored('Update core files (preserves team.yml)?', colors.bold)}`,
         true
       );
       rl.close();
       if (!proceed) {
-        console.log('Update cancelled.');
+        console.log('Cancelled.');
         process.exit(0);
       }
     }
 
     const sourceDir = getTeamspecCoreDir();
     if (!fs.existsSync(sourceDir)) {
-      console.error(colored(`Error: TeamSpec core files not found at: ${sourceDir}`, colors.red));
+      console.error(colored(`Error: Core files not found at: ${sourceDir}`, colors.red));
       process.exit(1);
     }
 
     const coreResult = updateTeamspecCore(targetDir, sourceDir);
-    printUpdateSummary(targetDir, coreResult);
+    printUpdateSummary(coreResult);
     return;
   }
 
@@ -1232,19 +866,19 @@ async function run(args) {
   const targetDir = path.resolve(options.target);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(colored(`Error: Target directory does not exist: ${targetDir}`, colors.red));
+    console.error(colored(`Error: Directory does not exist: ${targetDir}`, colors.red));
     process.exit(1);
   }
 
   const teamspecDir = path.join(targetDir, '.teamspec');
   if (fs.existsSync(teamspecDir)) {
     if (options.nonInteractive) {
-      console.log(colored('TeamSpec already initialized. Overwriting...', colors.yellow));
+      console.log(colored('TeamSpec exists. Overwriting...', colors.yellow));
     } else {
       const rl = createReadlineInterface();
       const overwrite = await promptYesNo(
         rl,
-        colored('⚠️  TeamSpec already exists in this directory. Overwrite?', colors.yellow),
+        colored('⚠️  TeamSpec exists. Overwrite?', colors.yellow),
         false
       );
       rl.close();
@@ -1255,11 +889,10 @@ async function run(args) {
     }
   }
 
-  console.log(`\n${colored('Target directory:', colors.bold)} ${targetDir}`);
+  console.log(`\n${colored('Target:', colors.bold)} ${targetDir}`);
 
   // Set defaults for non-interactive mode
   if (options.nonInteractive) {
-    options.ide = options.ide || 'copilot';
     options.profile = options.profile || 'none';
     options.org = options.org || 'My Organization';
     options.team = options.team || 'My Team';
@@ -1271,38 +904,26 @@ async function run(args) {
     await runInteractive(options);
   }
 
-  // Validate IDE choice
-  if (!IDE_CONFIGS[options.ide]) {
-    console.error(colored(`Error: Unknown IDE: ${options.ide}`, colors.red));
-    console.error(`Valid options: ${Object.keys(IDE_CONFIGS).join(', ')}`);
-    process.exit(1);
-  }
-
-  // Validate profile choice
+  // Validate profile
   if (!PROFILE_OPTIONS[options.profile]) {
     console.error(colored(`Error: Unknown profile: ${options.profile}`, colors.red));
-    console.error(`Valid options: ${Object.keys(PROFILE_OPTIONS).join(', ')}`);
     process.exit(1);
   }
 
-  // Normalize project ID
   options.project = normalizeProjectId(options.project);
 
   console.log(`\n${colored('Initializing TeamSpec...', colors.bold)}`);
 
   const sourceDir = getTeamspecCoreDir();
   if (!fs.existsSync(sourceDir)) {
-    console.error(colored(`Error: TeamSpec core files not found at: ${sourceDir}`, colors.red));
-    console.error('This may indicate a corrupted installation. Try reinstalling the package.');
+    console.error(colored(`Error: Core files not found at: ${sourceDir}`, colors.red));
     process.exit(1);
   }
 
-  // Perform initialization
   copyTeamspecCore(targetDir, sourceDir);
   createTeamContext(targetDir, options);
   createProjectStructure(targetDir, options.project);
-  setupIdeInstructions(targetDir, options.ide);
-  printNextSteps(targetDir, options.ide, options.profile, options.project);
+  printNextSteps(targetDir, options.profile, options.project);
 }
 
 module.exports = { run };

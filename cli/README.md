@@ -38,16 +38,16 @@ teamspec
 ```
 
 The CLI will ask:
-1. Which AI IDE/Agent you'll use
-2. Your team profile (startup, enterprise, regulated, etc.)
-3. Organization and team name
+1. Your team profile (startup, enterprise, regulated, etc.)
+2. Organization and team name
+3. Industry sector
 4. Development cadence (scrum, kanban, scrumban)
 5. Initial project ID
 
 ### Non-Interactive Setup
 
 ```bash
-teamspec --ide copilot --profile startup --org "My Company" --team "Web Team" -y
+teamspec --profile startup --org "My Company" --team "Web Team" -y
 ```
 
 ## What Gets Created
@@ -74,7 +74,7 @@ your-repo/
 │   ├── qa/                       # Test cases
 │   ├── sprints/                  # Sprint management
 │   └── epics/                    # Epic specifications
-└── .github/copilot-instructions.md  # AI agent instructions (varies by IDE)
+
 ```
 
 ## Commands
@@ -90,7 +90,6 @@ teamspec [init] [options]
 | Option | Description |
 |--------|-------------|
 | `-t, --target <dir>` | Target directory (default: current) |
-| `-i, --ide <ide>` | AI IDE to configure |
 | `-p, --profile <profile>` | Team profile |
 | `-o, --org <name>` | Organization name |
 | `--team <name>` | Team name |
@@ -111,21 +110,6 @@ Updates templates, definitions, and profiles while preserving your team configur
 |--------|-------------|
 | `-f, --force` | Update without confirmation |
 | `-y, --non-interactive` | Skip confirmation prompt |
-
-## Supported IDEs
-
-| IDE | Instruction Path | Status |
-|-----|------------------|--------|
-| GitHub Copilot | `.github/copilot-instructions.md` | Placeholder* |
-| Cursor | `.cursor/rules` | Placeholder* |
-| Claude | `CLAUDE.md` | Placeholder* |
-| Windsurf | `.windsurfrules` | Placeholder* |
-| Aider | `.aider/conventions.md` | Placeholder* |
-| Cline | `.clinerules` | Placeholder* |
-| Continue | `.continue/config.json` | Placeholder* |
-| Generic | `.teamspec/AGENT_INSTRUCTIONS.md` | Placeholder* |
-
-*Agent-specific prompts will be added in a future update. For now, copy agent prompts from the [TeamSpec repository](https://github.com/teamspec/teamspec/tree/main/agents).
 
 ## Profiles
 
