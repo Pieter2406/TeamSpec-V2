@@ -83,6 +83,13 @@ const CADENCE_OPTIONS = {
   scrumban: 'Scrumban (hybrid)',
 };
 
+const IDE_OPTIONS = {
+  none: 'No IDE integration - just files',
+  vscode: 'VS Code with @teamspec chat participant',
+  cursor: 'Cursor (VS Code settings only, no chat participant)',
+  other: 'Other IDE (manual setup)',
+};
+
 const DEFAULT_PROJECT_ID = 'main-project';
 
 // =============================================================================
@@ -97,6 +104,7 @@ function parseArgs(args) {
     org: null,
     team: null,
     project: null,
+    ide: null,
     nonInteractive: false,
     help: false,
     version: false,
@@ -142,6 +150,9 @@ function parseArgs(args) {
       case '--project':
         options.project = args[++i];
         break;
+      case '--ide':
+        options.ide = args[++i];
+        break;
       case '--non-interactive':
       case '-y':
         options.nonInteractive = true;
@@ -180,6 +191,7 @@ ${colored('OPTIONS:', colors.bold)}
   -o, --org <name>        Organization name
   --team <name>           Team name
   --project <id>          Project ID for folder structure (default: main-project)
+  --ide <ide>             IDE integration (vscode, cursor, other, none)
   -y, --non-interactive   Run without prompts (use defaults)
   -f, --force             Force update without confirmation
 
@@ -370,6 +382,16 @@ async function runInteractive(options) {
       options.project = normalizeProjectId(options.project);
     }
 
+    // IDE Integration
+    if (!options.ide) {
+      options.ide = await promptChoice(
+        rl,
+        'Which IDE are you using?',
+        IDE_OPTIONS,
+        'vscode'
+      );
+    }
+
     // Confirmation
     console.log(`\n${colored('Configuration:', colors.bold)}`);
     console.log(`  Profile:         ${options.profile}`);
@@ -381,6 +403,7 @@ async function runInteractive(options) {
       console.log(`  Sprint Length:   ${options.sprintLengthDays} days`);
     }
     console.log(`  Project ID:      ${options.project}`);
+    console.log(`  IDE:             ${options.ide}`);
 
     const proceed = await promptYesNo(
       rl,
@@ -739,10 +762,107 @@ function updateTeamspecCore(targetDir, sourceDir) {
 }
 
 // =============================================================================
+// IDE Integration
+// =============================================================================
+
+async function setupIDEIntegration(targetDir, options) {
+  if (!options.ide || options.ide === 'none') {
+    return { skipped: true };
+  }
+
+  const { installExtension, copyExtensionToWorkspace, isVSCodeAvailable } = require('./extension-installer');
+
+  console.log(`\n${colored('Setting up IDE integration...', colors.blue)}`);
+
+  // Create .vscode folder with settings
+  const vscodeDir = path.join(targetDir, '.vscode');
+  fs.mkdirSync(vscodeDir, { recursive: true });
+
+  // Create or update settings.json
+  const settingsPath = path.join(vscodeDir, 'settings.json');
+  let settings = {};
+
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  // Add TeamSpec-specific settings
+  settings['teamspec.enforceGates'] = true;
+  settings['files.associations'] = settings['files.associations'] || {};
+  settings['files.associations']['*.teamspec'] = 'yaml';
+  settings['editor.formatOnSave'] = settings['editor.formatOnSave'] ?? true;
+
+  // Add markdown settings for better feature/story editing
+  settings['[markdown]'] = settings['[markdown]'] || {};
+  settings['[markdown]']['editor.wordWrap'] = 'on';
+
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+  console.log('  ✓ Created .vscode/settings.json');
+
+  // Create extensions.json to recommend the extension
+  const extensionsPath = path.join(vscodeDir, 'extensions.json');
+  const extensionsJson = {
+    recommendations: ['teamspec.teamspec']
+  };
+
+  if (fs.existsSync(extensionsPath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(extensionsPath, 'utf-8'));
+      if (existing.recommendations) {
+        const recs = new Set(existing.recommendations);
+        recs.add('teamspec.teamspec');
+        extensionsJson.recommendations = Array.from(recs);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  fs.writeFileSync(extensionsPath, JSON.stringify(extensionsJson, null, 2));
+  console.log('  ✓ Created .vscode/extensions.json');
+
+  // Try to install the VS Code extension (only for vscode option)
+  if (options.ide === 'vscode') {
+    if (isVSCodeAvailable()) {
+      console.log('  → Attempting to install @teamspec chat participant...');
+      
+      const result = await installExtension({
+        onProgress: (msg) => console.log(`    ${msg}`)
+      });
+
+      if (result.success) {
+        if (result.alreadyInstalled) {
+          console.log('  ✓ TeamSpec extension already installed');
+        } else {
+          console.log('  ✓ TeamSpec extension installed');
+        }
+        return { success: true, extensionInstalled: true };
+      } else {
+        console.log(`  ⚠ ${result.message}`);
+        if (result.hint) {
+          console.log(`    ${colored(result.hint, colors.yellow)}`);
+        }
+        return { success: true, extensionInstalled: false, message: result.message };
+      }
+    } else {
+      console.log('  ⚠ VS Code CLI not found - extension not installed');
+      console.log(`    ${colored('Install manually: teamspec.teamspec from VSIX', colors.yellow)}`);
+      return { success: true, extensionInstalled: false };
+    }
+  }
+
+  return { success: true };
+}
+
+// =============================================================================
 // Summary Output
 // =============================================================================
 
-function printNextSteps(targetDir, profile, projectId) {
+function printNextSteps(targetDir, profile, projectId, ide, ideResult) {
   console.log(`\n${colored('='.repeat(70), colors.green)}`);
   console.log(colored('  ✅ TeamSpec 2.0 initialized successfully!', colors.green + colors.bold));
   console.log(colored('='.repeat(70), colors.green));
@@ -763,22 +883,57 @@ ${colored('📁 Created Structure:', colors.bold)}
       ├── qa/                     - Test cases
       ├── sprints/                - Sprint management
       └── epics/                  - Epic specifications
+`);
 
-${colored('🚀 Next Steps:', colors.bold + colors.yellow)}
+  // IDE Integration Info
+  if (ide === 'vscode') {
+    console.log(`${colored('🖥️  VS Code Integration:', colors.bold)}`);
+    if (ideResult && ideResult.extensionInstalled) {
+      console.log(`   ✓ TeamSpec extension installed - use ${colored('@teamspec', colors.cyan)} in chat`);
+      console.log(`   ✓ Available commands: /ba, /fa, /dev, /qa, /sm, /arch, /des`);
+    } else {
+      console.log(`   ✓ VS Code settings configured`);
+      console.log(`   ⚠ Extension not installed - install manually:`);
+      console.log(`     ${colored('cd vscode-extension && npm install && npm run package', colors.yellow)}`);
+      console.log(`     Then: Extensions → Install from VSIX...`);
+    }
+    console.log('');
+  } else if (ide === 'cursor') {
+    console.log(`${colored('🖥️  Cursor Integration:', colors.bold)}`);
+    console.log(`   ✓ VS Code settings configured (compatible with Cursor)`);
+    console.log(`   ℹ Cursor uses its own AI - TeamSpec templates available in .teamspec/`);
+    console.log('');
+  }
+
+  console.log(`${colored('🚀 Next Steps:', colors.bold + colors.yellow)}
 
 ${colored('1. Configure Your Team', colors.cyan)}
    Edit ${colored('.teamspec/context/team.yml', colors.bold)} to set your tech stack.
 
 ${colored('2. Create Your First Feature', colors.cyan)}
-   Features are NEVER created implicitly. Use:
-   ${colored('ts:ba feature', colors.bold)}    - Propose and create features
+   Features are NEVER created implicitly. Use:`);
+  
+  if (ide === 'vscode' && ideResult && ideResult.extensionInstalled) {
+    console.log(`   ${colored('@teamspec /ba feature', colors.bold)}    - Create feature via chat`);
+  }
+  console.log(`   ${colored('ts:ba feature', colors.bold)}              - Or use manual command
 
-${colored('3. Start Using TeamSpec Commands', colors.cyan)}
-   ${colored('ts:ba create', colors.bold)}       - Create business analysis
+${colored('3. Start Using TeamSpec Commands', colors.cyan)}`);
+  
+  if (ide === 'vscode') {
+    console.log(`   ${colored('@teamspec /ba create', colors.bold)}     - Create business analysis
+   ${colored('@teamspec /fa story', colors.bold)}      - Create user story  
+   ${colored('@teamspec /dev plan', colors.bold)}      - Create development plan
+   ${colored('@teamspec /qa test', colors.bold)}       - Design test cases
+   ${colored('@teamspec /help', colors.bold)}          - Show all commands`);
+  } else {
+    console.log(`   ${colored('ts:ba create', colors.bold)}       - Create business analysis
    ${colored('ts:fa story', colors.bold)}        - Create user story  
    ${colored('ts:dev plan', colors.bold)}        - Create development plan
-   ${colored('ts:qa test', colors.bold)}         - Design test cases
+   ${colored('ts:qa test', colors.bold)}         - Design test cases`);
+  }
 
+  console.log(`
 ${colored('📚 Documentation:', colors.bold)}
    - Templates:    .teamspec/templates/
    - Definitions:  .teamspec/definitions/
@@ -925,6 +1080,7 @@ async function run(args) {
     options.org = options.org || 'My Organization';
     options.team = options.team || 'My Team';
     options.project = options.project || DEFAULT_PROJECT_ID;
+    options.ide = options.ide || 'none';
     options.industry = 'technology';
     options.cadence = 'scrum';
     options.sprintLengthDays = 14;
@@ -951,7 +1107,11 @@ async function run(args) {
   copyTeamspecCore(targetDir, sourceDir);
   createTeamContext(targetDir, options);
   createProjectStructure(targetDir, options.project);
-  printNextSteps(targetDir, options.profile, options.project);
+  
+  // Setup IDE integration
+  const ideResult = await setupIDEIntegration(targetDir, options);
+  
+  printNextSteps(targetDir, options.profile, options.project, options.ide, ideResult);
 }
 
 module.exports = { run };
