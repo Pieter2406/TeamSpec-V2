@@ -309,10 +309,17 @@ describe('PROMPT-005: Naming Convention', () => {
             .filter(f => f.endsWith('.prompt.md'));
 
         const validRoles = ['ba', 'fa', 'arch', 'dev', 'qa', 'sm'];
-        const pattern = /^([a-z]+)-([a-z-]+)\.prompt\.md$/;
+        const rolePattern = /^([a-z]+)-([a-z-]+)\.prompt\.md$/;
+        // Utility commands use just command name (e.g., fix.prompt.md)
+        const utilityCommands = ['fix'];
 
         for (const file of files) {
-            const match = file.match(pattern);
+            const isUtilityCmd = utilityCommands.some(cmd => file === `${cmd}.prompt.md`);
+            if (isUtilityCmd) {
+                // Utility commands don't need role prefix
+                continue;
+            }
+            const match = file.match(rolePattern);
             assert.ok(match, `${file} should match pattern role-command.prompt.md`);
             assert.ok(validRoles.includes(match[1]),
                 `${file} should have valid role prefix`);
@@ -383,10 +390,25 @@ describe('PROMPT-006: Agent File Links', () => {
             'sm': 'AGENT_SM'
         };
 
+        // Utility commands map directly to agent files
+        const utilityToAgent = {
+            'fix': 'AGENT_FIX'
+        };
+
         for (const file of files) {
             const content = fs.readFileSync(path.join(promptsDir, file), 'utf-8');
-            const role = file.split('-')[0];
-            const agentFile = roleToAgent[role];
+
+            // Check if it's a utility command (no role prefix)
+            const isUtility = !file.includes('-');
+            let agentFile;
+
+            if (isUtility) {
+                const cmdName = file.replace('.prompt.md', '');
+                agentFile = utilityToAgent[cmdName];
+            } else {
+                const role = file.split('-')[0];
+                agentFile = roleToAgent[role];
+            }
 
             assert.ok(content.includes(`.teamspec/agents/${agentFile}.md`),
                 `${file} should link to .teamspec/agents/${agentFile}.md`);
@@ -551,5 +573,87 @@ describe('PROMPT-009: CLI Integration', () => {
             assert.ok(Array.isArray(COMMANDS[role].commands), `${role} should have commands array`);
             assert.ok(COMMANDS[role].commands.length > 0, `${role} should have at least one command`);
         }
+    });
+});
+
+// =============================================================================
+// PROMPT-010: Utility Fix Command (S-001, S-002, F-007)
+// =============================================================================
+
+describe('PROMPT-010: Utility Fix Command', () => {
+    let tempDir;
+
+    beforeEach(() => {
+        tempDir = createTempDir();
+    });
+
+    afterEach(() => {
+        cleanupTempDir(tempDir);
+    });
+
+    test('utility role exists in COMMANDS', () => {
+        assert.ok(COMMANDS.utility, 'utility role should be defined');
+        assert.strictEqual(COMMANDS.utility.name, 'Utility', 'utility should have name "Utility"');
+        assert.ok(Array.isArray(COMMANDS.utility.commands), 'utility should have commands array');
+    });
+
+    test('fix command exists under utility', () => {
+        const fixCmd = COMMANDS.utility.commands.find(cmd => cmd.name === 'fix');
+        assert.ok(fixCmd, 'fix command should exist');
+        assert.strictEqual(fixCmd.description, 'Auto-fix linter errors');
+        assert.ok(fixCmd.prompt.includes('linter'), 'Prompt should mention linter');
+    });
+
+    test('fix.prompt.md is generated (not utility-fix.prompt.md)', () => {
+        generateAllPrompts(tempDir);
+        const promptPath = path.join(tempDir, '.github', 'prompts', 'fix.prompt.md');
+        const wrongPath = path.join(tempDir, '.github', 'prompts', 'utility-fix.prompt.md');
+
+        assert.ok(fs.existsSync(promptPath), 'fix.prompt.md should exist');
+        assert.ok(!fs.existsSync(wrongPath), 'utility-fix.prompt.md should NOT exist');
+    });
+
+    test('fix prompt has correct frontmatter with ts:fix name', () => {
+        generateAllPrompts(tempDir);
+        const promptPath = path.join(tempDir, '.github', 'prompts', 'fix.prompt.md');
+        const { frontmatter } = parsePromptFile(promptPath);
+
+        assert.strictEqual(frontmatter.name, 'ts:fix', 'Name should be ts:fix (not ts:utility-fix)');
+        assert.ok(frontmatter.description.includes('Auto-fix'), 'Description should mention Auto-fix');
+        assert.strictEqual(frontmatter.agent, 'agent', 'Agent should be "agent"');
+    });
+
+    test('fix prompt links to AGENT_FIX.md', () => {
+        generateAllPrompts(tempDir);
+        const promptPath = path.join(tempDir, '.github', 'prompts', 'fix.prompt.md');
+        const content = fs.readFileSync(promptPath, 'utf-8');
+
+        assert.ok(content.includes('AGENT_FIX.md'), 'Should link to AGENT_FIX.md');
+        assert.ok(content.includes('.teamspec/agents/AGENT_FIX.md'), 'Should have correct path');
+    });
+
+    test('README includes Utility section', () => {
+        generateAllPrompts(tempDir);
+        const readmePath = path.join(tempDir, '.github', 'prompts', 'README.md');
+        const content = fs.readFileSync(readmePath, 'utf-8');
+
+        assert.ok(content.includes('### Utility'), 'README should have Utility section');
+    });
+
+    test('README includes fix command', () => {
+        generateAllPrompts(tempDir);
+        const readmePath = path.join(tempDir, '.github', 'prompts', 'README.md');
+        const content = fs.readFileSync(readmePath, 'utf-8');
+
+        assert.ok(content.includes('ts:fix'), 'README should include ts:fix command');
+        assert.ok(content.includes('Auto-fix linter errors'), 'README should include fix description');
+    });
+
+    test('fix prompt mentions supported rule categories', () => {
+        const fixCmd = COMMANDS.utility.commands.find(cmd => cmd.name === 'fix');
+
+        assert.ok(fixCmd.prompt.includes('TS-PROJ'), 'Should mention TS-PROJ rules');
+        assert.ok(fixCmd.prompt.includes('TS-FEAT'), 'Should mention TS-FEAT rules');
+        assert.ok(fixCmd.prompt.includes('TS-STORY'), 'Should mention TS-STORY rules');
     });
 });

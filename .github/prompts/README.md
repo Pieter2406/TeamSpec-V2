@@ -57,6 +57,11 @@ Alternatively, run any prompt directly:
 - `/ts:sm-sprint-status` - Sprint status report
 
 
+### Utility
+
+- `/ts:fix` - Auto-fix linter errors
+
+
 ## How It Works
 
 1. Type `/` in Copilot Chat to see prompts

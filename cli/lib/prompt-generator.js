@@ -253,6 +253,22 @@ Report any gaps.`
 4. Report health metrics`
             }
         ]
+    },
+    utility: {
+        name: 'Utility',
+        commands: [
+            {
+                name: 'fix',
+                description: 'Auto-fix linter errors',
+                prompt: `Auto-fix TeamSpec linter errors:
+1. Run \`teamspec lint\` to identify errors
+2. Review the linter output
+3. Apply fixes for each error category
+4. Re-run linter to verify fixes
+
+Supports: TS-PROJ, TS-FEAT, TS-STORY, TS-ADR, TS-DEVPLAN, TS-DOD, TS-NAMING rules.`
+            }
+        ]
     }
 };
 
@@ -265,7 +281,8 @@ const ROLE_TO_AGENT = {
     arch: 'AGENT_SA',  // Solution Architect
     dev: 'AGENT_DEV',
     qa: 'AGENT_QA',
-    sm: 'AGENT_SM'
+    sm: 'AGENT_SM',
+    utility: 'AGENT_FIX'
 };
 
 /**
@@ -274,9 +291,12 @@ const ROLE_TO_AGENT = {
  * VS Code automatically includes linked Markdown files as context
  */
 function generatePromptFile(role, command, outputDir) {
-    const filename = `${role}-${command.name}.prompt.md`;
+    // Utility commands use just the command name (e.g., fix.prompt.md, ts:fix)
+    // Other roles use role-command pattern (e.g., ba-project.prompt.md, ts:ba-project)
+    const isUtility = role === 'utility';
+    const filename = isUtility ? `${command.name}.prompt.md` : `${role}-${command.name}.prompt.md`;
     const filepath = path.join(outputDir, filename);
-    const commandName = `ts:${role}-${command.name}`;
+    const commandName = isUtility ? `ts:${command.name}` : `ts:${role}-${command.name}`;
     const agentFile = ROLE_TO_AGENT[role] || `AGENT_${role.toUpperCase()}`;
 
     // Create minimal prompt that links to the agent file
@@ -343,11 +363,17 @@ Alternatively, run any prompt directly:
 
 ## Available Commands
 
-${Object.entries(COMMANDS).map(([role, config]) => `
+${Object.entries(COMMANDS).map(([role, config]) => {
+        const isUtility = role === 'utility';
+        return `
 ### ${config.name}
 
-${config.commands.map(cmd => `- \`/ts:${role}-${cmd.name}\` - ${cmd.description}`).join('\n')}
-`).join('\n')}
+${config.commands.map(cmd => {
+            const cmdName = isUtility ? `ts:${cmd.name}` : `ts:${role}-${cmd.name}`;
+            return `- \`/${cmdName}\` - ${cmd.description}`;
+        }).join('\n')}
+`;
+    }).join('\n')}
 
 ## How It Works
 

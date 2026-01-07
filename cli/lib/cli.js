@@ -105,6 +105,7 @@ function parseArgs(args) {
     team: null,
     project: null,
     ide: null,
+    copilot: null,
     nonInteractive: false,
     help: false,
     version: false,
@@ -153,6 +154,10 @@ function parseArgs(args) {
       case '--ide':
         options.ide = args[++i];
         break;
+      case '--copilot':
+        const copilotArg = args[++i];
+        options.copilot = copilotArg === 'true' || copilotArg === 'yes';
+        break;
       case '--non-interactive':
       case '-y':
         options.nonInteractive = true;
@@ -192,6 +197,7 @@ ${colored('OPTIONS:', colors.bold)}
   --team <name>           Team name
   --project <id>          Project ID for folder structure (default: main-project)
   --ide <ide>             IDE integration (vscode, cursor, other, none)
+  --copilot <yes|no>      Install GitHub Copilot instructions file (default: yes)
   -y, --non-interactive   Run without prompts (use defaults)
   -f, --force             Force update without confirmation
 
@@ -393,6 +399,15 @@ async function runInteractive(options) {
       );
     }
 
+    // GitHub Copilot Instructions
+    if (options.copilot === null) {
+      options.copilot = await promptYesNo(
+        rl,
+        `\n${colored('Install GitHub Copilot instructions file?', colors.bold)}\n  (Adds .github/copilot-instructions.md with TeamSpec guidance)`,
+        true
+      );
+    }
+
     // Confirmation
     console.log(`\n${colored('Configuration:', colors.bold)}`);
     console.log(`  Profile:         ${options.profile}`);
@@ -405,6 +420,7 @@ async function runInteractive(options) {
     }
     console.log(`  Project ID:      ${options.project}`);
     console.log(`  IDE:             ${options.ide}`);
+    console.log(`  Copilot:         ${options.copilot ? 'Yes' : 'No'}`);
 
     const proceed = await promptYesNo(
       rl,
@@ -475,6 +491,28 @@ function copyTeamspecCore(targetDir, sourceDir) {
   if (fs.existsSync(schemaSrc)) {
     fs.copyFileSync(schemaSrc, path.join(contextDir, '_schema.yml'));
     console.log('  ✓ Copied context/_schema.yml');
+  }
+}
+
+// =============================================================================
+// Copilot Instructions Deployment
+// =============================================================================
+
+function copyCopilotInstructions(targetDir, sourceDir) {
+  const githubDir = path.join(targetDir, '.github');
+  fs.mkdirSync(githubDir, { recursive: true });
+
+  const copilotSrc = path.join(sourceDir, 'copilot-instructions.md');
+  const copilotDest = path.join(githubDir, 'copilot-instructions.md');
+
+  if (fs.existsSync(copilotSrc)) {
+    fs.copyFileSync(copilotSrc, copilotDest);
+    console.log(`\n${colored('Copying GitHub Copilot instructions...', colors.blue)}`);
+    console.log('  ✓ Copied .github/copilot-instructions.md');
+    return true;
+  } else {
+    console.log(`  ⚠ Copilot instructions not found in source`);
+    return false;
   }
 }
 
@@ -839,36 +877,6 @@ async function setupIDEIntegration(targetDir, options) {
   fs.writeFileSync(extensionsPath, JSON.stringify(extensionsJson, null, 2));
   console.log('  ✓ Created .vscode/extensions.json');
 
-  // Try to install the VS Code extension (only for vscode option)
-  if (options.ide === 'vscode') {
-    if (isVSCodeAvailable()) {
-      console.log('  → Attempting to install @teamspec chat participant...');
-
-      const result = await installExtension({
-        onProgress: (msg) => console.log(`    ${msg}`)
-      });
-
-      if (result.success) {
-        if (result.alreadyInstalled) {
-          console.log('  ✓ TeamSpec extension already installed');
-        } else {
-          console.log('  ✓ TeamSpec extension installed');
-        }
-        return { success: true, extensionInstalled: true };
-      } else {
-        console.log(`  ⚠ ${result.message}`);
-        if (result.hint) {
-          console.log(`    ${colored(result.hint, colors.yellow)}`);
-        }
-        return { success: true, extensionInstalled: false, message: result.message };
-      }
-    } else {
-      console.log('  ⚠ VS Code CLI not found - extension not installed');
-      console.log(`    ${colored('Install manually: teamspec.teamspec from VSIX', colors.yellow)}`);
-      return { success: true, extensionInstalled: false };
-    }
-  }
-
   return { success: true };
 }
 
@@ -876,10 +884,14 @@ async function setupIDEIntegration(targetDir, options) {
 // Summary Output
 // =============================================================================
 
-function printNextSteps(targetDir, profile, projectId, ide, ideResult) {
+function printNextSteps(targetDir, profile, projectId, ide, ideResult, copilot) {
   console.log(`\n${colored('='.repeat(70), colors.green)}`);
   console.log(colored('  ✅ TeamSpec 2.0 initialized successfully!', colors.green + colors.bold));
   console.log(colored('='.repeat(70), colors.green));
+
+  const copilotSection = copilot !== false ? `
+    .github/
+      └── copilot-instructions.md - GitHub Copilot guidance` : '';
 
   console.log(`
 ${colored('📁 Created Structure:', colors.bold)}
@@ -887,7 +899,7 @@ ${colored('📁 Created Structure:', colors.bold)}
       ├── templates/              - Document templates
       ├── definitions/            - DoR/DoD checklists
       ├── profiles/               - Profile overlays
-      └── context/team.yml        - Team configuration
+      └── context/team.yml        - Team configuration${copilotSection}
     projects/${projectId}/
       ├── features/               - Feature Canon (source of truth)
       ├── stories/                - User stories (workflow folders)
@@ -902,76 +914,57 @@ ${colored('📁 Created Structure:', colors.bold)}
   // IDE Integration Info
   if (ide === 'vscode') {
     console.log(`${colored('🖥️  VS Code Integration:', colors.bold)}`);
-    if (ideResult && ideResult.extensionInstalled) {
-      console.log(`   ✓ TeamSpec extension installed - use ${colored('@teamspec', colors.cyan)} in chat`);
-      console.log(`   ✓ Available commands: /ba, /fa, /dev, /qa, /sm, /arch, /des`);
-    } else {
-      console.log(`   ✓ VS Code settings configured`);
-      console.log(`   ⚠ Extension not installed - install manually:`);
-      console.log(`     ${colored('cd vscode-extension && npm install && npm run package', colors.yellow)}`);
-      console.log(`     Then: Extensions → Install from VSIX...`);
-    }
+    console.log(`   ✓ Prompt templates generated in .github/prompts/`);
+    console.log(`   ℹ Use with GitHub Copilot, Cursor, or your preferred AI assistant`);
     console.log('');
   } else if (ide === 'cursor') {
     console.log(`${colored('🖥️  Cursor Integration:', colors.bold)}`);
-    console.log(`   ✓ VS Code settings configured (compatible with Cursor)`);
-    console.log(`   ℹ Cursor uses its own AI - TeamSpec templates available in .teamspec/`);
+    console.log(`   ✓ Prompt templates generated in .github/prompts/`);
+    console.log(`   ℹ VS Code settings configured for Cursor compatibility`);
     console.log('');
   }
 
   console.log(`${colored('🚀 Next Steps:', colors.bold + colors.yellow)}
 
-${colored('1. Configure Your Team', colors.cyan)}
-   Edit ${colored('.teamspec/context/team.yml', colors.bold)} to set your tech stack.
+  ${colored('1. Configure Your Team', colors.cyan)}
+    Edit ${colored('.teamspec/context/team.yml', colors.bold)} to set your tech stack.
 
-${colored('2. Create Your First Feature', colors.cyan)}
-   Features are NEVER created implicitly. Use:`);
+  ${colored('2. Create Your First Feature', colors.cyan)}
+    Features are NEVER created implicitly. Use:
+    ${colored('ts:ba feature', colors.bold)}              - Create feature
 
-  if (ide === 'vscode' && ideResult && ideResult.extensionInstalled) {
-    console.log(`   ${colored('@teamspec /ba feature', colors.bold)}    - Create feature via chat`);
-  }
-  console.log(`   ${colored('ts:ba feature', colors.bold)}              - Or use manual command
+  ${colored('3. Start Using TeamSpec Commands', colors.cyan)}
+    ${colored('ts:ba create', colors.bold)}       - Create business analysis
+    ${colored('ts:fa story', colors.bold)}        - Create user story
+    ${colored('ts:dev plan', colors.bold)}        - Create development plan
+    ${colored('ts:qa test', colors.bold)}         - Design test cases
 
-${colored('3. Start Using TeamSpec Commands', colors.cyan)}`);
+    Or use templates in .github/prompts/ with GitHub Copilot, Cursor, or Claude
 
-  if (ide === 'vscode') {
-    console.log(`   ${colored('@teamspec /ba create', colors.bold)}     - Create business analysis
-   ${colored('@teamspec /fa story', colors.bold)}      - Create user story  
-   ${colored('@teamspec /dev plan', colors.bold)}      - Create development plan
-   ${colored('@teamspec /qa test', colors.bold)}       - Design test cases
-   ${colored('@teamspec /help', colors.bold)}          - Show all commands`);
-  } else {
-    console.log(`   ${colored('ts:ba create', colors.bold)}       - Create business analysis
-   ${colored('ts:fa story', colors.bold)}        - Create user story  
-   ${colored('ts:dev plan', colors.bold)}        - Create development plan
-   ${colored('ts:qa test', colors.bold)}         - Design test cases`);
-  }
-
-  console.log(`
-${colored('📚 Documentation:', colors.bold)}
-   - Templates:    .teamspec/templates/
-   - Definitions:  .teamspec/definitions/
-`);
+  ${colored('📚 Documentation:', colors.bold)}
+    - Templates:    .teamspec/templates/
+    - Definitions:  .teamspec/definitions/
+  `);
 }
 
 function printUpdateSummary(coreResult) {
   const pkg = require('../package.json');
 
-  console.log(`\n${colored('='.repeat(70), colors.green)}`);
+  console.log(`\n${colored('='.repeat(70), colors.green)} `);
   console.log(colored('  ✅ TeamSpec updated successfully!', colors.green + colors.bold));
   console.log(colored('='.repeat(70), colors.green));
 
-  console.log(`\n${colored('Version:', colors.bold)} ${pkg.version}`);
+  console.log(`\n${colored('Version:', colors.bold)} ${pkg.version} `);
 
-  console.log(`\n${colored('Updated:', colors.bold)}`);
+  console.log(`\n${colored('Updated:', colors.bold)} `);
   for (const item of coreResult.updated) {
-    console.log(`    ✓ ${item}`);
+    console.log(`    ✓ ${item} `);
   }
 
   if (coreResult.skipped.length > 0) {
-    console.log(`\n${colored('Preserved:', colors.bold)}`);
+    console.log(`\n${colored('Preserved:', colors.bold)} `);
     for (const item of coreResult.skipped) {
-      console.log(`    ⏭ ${item}`);
+      console.log(`    ⏭ ${item} `);
     }
   }
 }
@@ -998,11 +991,11 @@ async function run(args) {
     const { Linter, SEVERITY } = require('./linter');
     const targetDir = path.resolve(options.target);
 
-    console.log(`\n${colored('TeamSpec Linter', colors.bold + colors.cyan)}`);
-    console.log(`${colored('Scanning:', colors.bold)} ${targetDir}`);
+    console.log(`\n${colored('TeamSpec Linter', colors.bold + colors.cyan)} `);
+    console.log(`${colored('Scanning:', colors.bold)} ${targetDir} `);
 
     if (options.project) {
-      console.log(`${colored('Project:', colors.bold)} ${options.project}`);
+      console.log(`${colored('Project:', colors.bold)} ${options.project} `);
     }
 
     const linter = new Linter(targetDir);
@@ -1023,16 +1016,16 @@ async function run(args) {
     const { generateAllPrompts } = require('./prompt-generator');
     const targetDir = path.resolve(options.target);
 
-    console.log(`\n${colored('TeamSpec Copilot Prompt Generator', colors.bold + colors.cyan)}`);
-    console.log(`${colored('Target:', colors.bold)} ${targetDir}\n`);
+    console.log(`\n${colored('TeamSpec Copilot Prompt Generator', colors.bold + colors.cyan)} `);
+    console.log(`${colored('Target:', colors.bold)} ${targetDir} \n`);
 
     try {
       generateAllPrompts(targetDir);
-      console.log(`\n${colored('✨ Done!', colors.green + colors.bold)}`);
+      console.log(`\n${colored('✨ Done!', colors.green + colors.bold)} `);
       console.log(`\nYou can now use ${colored('ts:role-command', colors.cyan)} in GitHub Copilot Chat.`);
-      console.log(`Example: ${colored('ts:ba-project', colors.cyan)} or ${colored('ts:fa-story', colors.cyan)}`);
+      console.log(`Example: ${colored('ts:ba-project', colors.cyan)} or ${colored('ts:fa-story', colors.cyan)} `);
     } catch (error) {
-      console.error(colored(`❌ Error: ${error.message}`, colors.red));
+      console.error(colored(`❌ Error: ${error.message} `, colors.red));
       process.exit(1);
     }
     return;
@@ -1044,19 +1037,19 @@ async function run(args) {
     const teamspecDir = path.join(targetDir, '.teamspec');
 
     if (!fs.existsSync(teamspecDir)) {
-      console.error(colored(`❌ TeamSpec not found in: ${targetDir}`, colors.red));
+      console.error(colored(`❌ TeamSpec not found in: ${targetDir} `, colors.red));
       console.error('Run `teamspec init` first.');
       process.exit(1);
     }
 
     const pkg = require('../package.json');
-    console.log(`\n${colored('TeamSpec Update', colors.bold + colors.cyan)} v${pkg.version}`);
+    console.log(`\n${colored('TeamSpec Update', colors.bold + colors.cyan)} v${pkg.version} `);
 
     if (!options.force && !options.nonInteractive) {
       const rl = createReadlineInterface();
       const proceed = await promptYesNo(
         rl,
-        `${colored('Update core files (preserves team.yml)?', colors.bold)}`,
+        `${colored('Update core files (preserves team.yml)?', colors.bold)} `,
         true
       );
       rl.close();
@@ -1068,11 +1061,35 @@ async function run(args) {
 
     const sourceDir = getTeamspecCoreDir();
     if (!fs.existsSync(sourceDir)) {
-      console.error(colored(`Error: Core files not found at: ${sourceDir}`, colors.red));
+      console.error(colored(`Error: Core files not found at: ${sourceDir} `, colors.red));
       process.exit(1);
     }
 
     const coreResult = updateTeamspecCore(targetDir, sourceDir);
+
+    // Update copilot instructions if they exist
+    const copilotPath = path.join(targetDir, '.github', 'copilot-instructions.md');
+    if (fs.existsSync(copilotPath)) {
+      console.log(`\n${colored('Updating GitHub Copilot instructions...', colors.blue)}`);
+      copyCopilotInstructions(targetDir, sourceDir);
+    }
+
+    // Regenerate prompt files if prompts folder exists
+    const promptsPath = path.join(targetDir, '.github', 'prompts');
+    if (fs.existsSync(promptsPath)) {
+      console.log(`\n${colored('Regenerating prompt files...', colors.blue)}`);
+      // Delete old prompts folder to remove obsolete files
+      fs.rmSync(promptsPath, { recursive: true });
+      const { generateAllPrompts } = require('./prompt-generator');
+      try {
+        const generatedFiles = generateAllPrompts(targetDir);
+        console.log(`  ✓ Regenerated ${generatedFiles.length} prompt files`);
+        coreResult.updated.push('.github/prompts/');
+      } catch (error) {
+        console.log(`  ⚠ Failed to regenerate prompts: ${error.message}`);
+      }
+    }
+
     printUpdateSummary(coreResult);
     return;
   }
@@ -1083,7 +1100,7 @@ async function run(args) {
   const targetDir = path.resolve(options.target);
 
   if (!fs.existsSync(targetDir)) {
-    console.error(colored(`Error: Directory does not exist: ${targetDir}`, colors.red));
+    console.error(colored(`Error: Directory does not exist: ${targetDir} `, colors.red));
     process.exit(1);
   }
 
@@ -1106,7 +1123,7 @@ async function run(args) {
     }
   }
 
-  console.log(`\n${colored('Target:', colors.bold)} ${targetDir}`);
+  console.log(`\n${colored('Target:', colors.bold)} ${targetDir} `);
 
   // Set defaults for non-interactive mode
   if (options.nonInteractive) {
@@ -1115,6 +1132,7 @@ async function run(args) {
     options.team = options.team || 'My Team';
     options.project = options.project || DEFAULT_PROJECT_ID;
     options.ide = options.ide || 'none';
+    options.copilot = options.copilot !== false; // Default to true unless explicitly set to false
     options.industry = 'technology';
     options.cadence = 'scrum';
     options.sprintLengthDays = 14;
@@ -1124,17 +1142,17 @@ async function run(args) {
 
   // Validate profile
   if (!PROFILE_OPTIONS[options.profile]) {
-    console.error(colored(`Error: Unknown profile: ${options.profile}`, colors.red));
+    console.error(colored(`Error: Unknown profile: ${options.profile} `, colors.red));
     process.exit(1);
   }
 
   options.project = normalizeProjectId(options.project);
 
-  console.log(`\n${colored('Initializing TeamSpec...', colors.bold)}`);
+  console.log(`\n${colored('Initializing TeamSpec...', colors.bold)} `);
 
   const sourceDir = getTeamspecCoreDir();
   if (!fs.existsSync(sourceDir)) {
-    console.error(colored(`Error: Core files not found at: ${sourceDir}`, colors.red));
+    console.error(colored(`Error: Core files not found at: ${sourceDir} `, colors.red));
     process.exit(1);
   }
 
@@ -1142,10 +1160,15 @@ async function run(args) {
   createTeamContext(targetDir, options);
   createProjectStructure(targetDir, options.project);
 
+  // Copy GitHub Copilot instructions if requested
+  if (options.copilot !== false) {
+    copyCopilotInstructions(targetDir, sourceDir);
+  }
+
   // Setup IDE integration
   const ideResult = await setupIDEIntegration(targetDir, options);
 
-  printNextSteps(targetDir, options.profile, options.project, options.ide, ideResult);
+  printNextSteps(targetDir, options.profile, options.project, options.ide, ideResult, options.copilot);
 }
 
 module.exports = { run };

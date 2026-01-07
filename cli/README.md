@@ -60,6 +60,8 @@ your-repo/
 │   ├── profiles/                 # Profile overlays
 │   └── context/
 │       └── team.yml              # Your team configuration
+├── .github/
+│   └── copilot-instructions.md   # GitHub Copilot guidance (optional)
 ├── projects/main-project/        # Project artifacts
 │   ├── features/                 # Feature Canon (source of truth)
 │   │   ├── features-index.md     # Feature registry
@@ -94,6 +96,8 @@ teamspec [init] [options]
 | `-o, --org <name>` | Organization name |
 | `--team <name>` | Team name |
 | `--project <id>` | Project ID |
+| `--ide <ide>` | IDE integration (vscode, cursor, other, none) |
+| `--copilot <yes\|no>` | Install GitHub Copilot instructions (default: yes) |
 | `-y, --non-interactive` | Skip prompts, use defaults |
 
 ### Update TeamSpec
