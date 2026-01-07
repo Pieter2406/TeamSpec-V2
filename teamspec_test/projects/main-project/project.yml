@@ -1,0 +1,7 @@
+# Project Configuration: main-project
+project:
+  id: "main-project"
+  name: "Main Project"
+  description: |
+    # TODO: Add project description
+  status: active  # active, paused, completed, archived

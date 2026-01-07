@@ -1,0 +1,24 @@
+project_id: "acme-webshop"
+name: "ACME Webshop Platform"
+description: "E-commerce platform for ACME retail with product catalog, shopping cart, and checkout."
+owner: "ACME Digital Team"
+status: "active"
+feature_id_prefix: "F"
+stakeholders:
+  - name: "Product Owner"
+    role: "PO"
+  - name: "Jane FA"
+    role: "FA"
+  - name: "Dev Team Lead"
+    role: "DEV"
+roles:
+  - BA
+  - FA
+  - DEV
+  - QA
+  - SM
+epics:
+  - "EPIC-001-product-catalog"
+  - "EPIC-002-shopping-cart"
+  - "EPIC-003-checkout-payments"
+  - "EPIC-004-customer-accounts"

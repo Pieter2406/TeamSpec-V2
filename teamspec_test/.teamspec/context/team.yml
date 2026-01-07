@@ -1,0 +1,62 @@
+# Team Context Configuration
+# This file parameterizes the TeamSpec Core for your specific team.
+# See _schema.yml for full schema documentation.
+
+# ==============================================================================
+# Organization
+# ==============================================================================
+org:
+  name: "My Organization"
+  department: "Engineering"
+  industry: technology
+  profile: none  # Options: regulated, startup, platform-team, enterprise, none
+  compliance: []  # Options: SOX, PCI-DSS, HIPAA, GDPR, SOC2, ISO27001, FedRAMP, POPIA
+
+# ==============================================================================
+# Team
+# ==============================================================================
+team:
+  name: "My Team"
+  roles:
+    - BA   # Business Analyst
+    - FA   # Functional Analyst
+    - SA   # Solution Architect
+    - DEV  # Developer
+    - QA   # Quality Assurance
+    - SM   # Scrum Master
+  
+  cadence:
+    type: scrum  # Options: scrum, kanban, scrumban
+    sprint_length_days: 14
+
+# ==============================================================================
+# Technology Stack
+# ==============================================================================
+tech:
+  stack: []
+    # Add your technologies, e.g.:
+    # - Python
+    # - React
+    # - PostgreSQL
+  
+  architecture:
+    type: monolith  # Options: monolith, microservices, modular-monolith, serverless
+
+# ==============================================================================
+# Governance
+# ==============================================================================
+governance:
+  sign_off_required: false
+  audit_trail: false
+  change_control_board: false
+
+# ==============================================================================
+# Feature Canon Configuration
+# ==============================================================================
+feature_canon:
+  ownership:
+    purpose_and_scope: BA
+    behavior: FA
+    change_log: FA
+  require_feature_links: true
+  require_delta_format: true
