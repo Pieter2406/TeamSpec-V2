@@ -125,6 +125,7 @@ teamspec update           # Update TeamSpec core files
 - `ts:ba epic` → Propose epic structure
 - `ts:ba feature` → Extract feature from requirements
 - `ts:ba decision` → Log business decision
+- `ts:ba analysis` → Create business analysis document (process documentation)
 
 #### FA Commands (Functional Analysis)
 - `ts:fa story` → Create story in backlog

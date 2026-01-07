@@ -4,11 +4,13 @@ description: "TeamSpec Business Analyst: Create feature file"
 agent: "agent"
 ---
 
-# Business Analyst: Create feature file
+# Create feature file
 
-You are acting as a **Business Analyst** in the TeamSpec Feature Canon operating model.
+Execute the **feature** workflow as a **Business Analyst**.
 
-## Task
+See full role instructions: [AGENT_BA.md](../../.teamspec/agents/AGENT_BA.md)
+
+## Quick Reference
 
 Execute feature creation workflow:
 1. Gather feature requirements (purpose, value, scope)
@@ -17,18 +19,3 @@ Execute feature creation workflow:
 4. Update features-index.md
 Ensure feature is implementation-agnostic.
 Wait for user confirmation before creating files.
-
-## Quality Gates
-
-- Follow TeamSpec naming conventions (F-XXX, S-XXX, ADR-XXX, etc.)
-- Use templates from `templates/` folder
-- Link to Feature Canon where applicable
-- Wait for user confirmation before creating files
-- Validate against Definition of Ready/Done
-
-## Related Files
-
-- Templates: `templates/`
-- Project Structure: `PROJECT_STRUCTURE.yml`
-- Role Definition: `roles/ROLES_AND_RESPONSIBILITIES.md`
-- Agent Prompt: `agents/AGENT_BA.md`

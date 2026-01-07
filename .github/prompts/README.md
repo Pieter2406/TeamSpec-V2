@@ -20,6 +20,7 @@ Alternatively, run any prompt directly:
 - `/ts:ba-epic` - Define an epic
 - `/ts:ba-feature` - Create feature file
 - `/ts:ba-decision` - Log business decision
+- `/ts:ba-analysis` - Create business analysis document
 
 
 ### Functional Analyst

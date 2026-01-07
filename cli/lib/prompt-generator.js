@@ -55,6 +55,37 @@ Wait for user confirmation before creating files.`
 3. Record rationale
 4. Link to affected features
 5. Create decision file in decisions/ folder using DECISION-XXX-name.md format`
+            },
+            {
+                name: 'analysis',
+                description: 'Create business analysis document',
+                prompt: `Create a business analysis document to describe business processes:
+
+1. **Understand the business domain** - Ask about:
+   - What business problem needs to be analyzed?
+   - Who are the stakeholders?
+   - What business processes are involved?
+
+2. **Document Current State (As-Is)**
+   - How do users solve the problem today?
+   - What are the pain points?
+   - What processes exist?
+
+3. **Define Future State (To-Be)**
+   - What will the improved workflow look like?
+   - What business rules apply?
+   - What are the success metrics?
+
+4. **Create business analysis document** using templates/business-analysis-template.md
+   - Place in analysis/ folder (create if needed)
+   - Name format: BA-XXX-description.md
+
+5. **Link to related artifacts**
+   - Identify candidate features that will come from this analysis
+   - Note decisions that need to be made
+   - Identify risks and constraints
+
+⚠️ This is a PLANNING artifact - Feature Canon becomes Source of Truth after features are created.`
             }
         ]
     },
@@ -226,42 +257,45 @@ Report any gaps.`
 };
 
 /**
+ * Map role codes to agent file names
+ */
+const ROLE_TO_AGENT = {
+    ba: 'AGENT_BA',
+    fa: 'AGENT_FA',
+    arch: 'AGENT_SA',  // Solution Architect
+    dev: 'AGENT_DEV',
+    qa: 'AGENT_QA',
+    sm: 'AGENT_SM'
+};
+
+/**
  * Generate GitHub Copilot prompt file in VS Code format
- * Uses YAML frontmatter with name, description, and agent fields
+ * Creates minimal prompts that link to the full agent files
+ * VS Code automatically includes linked Markdown files as context
  */
 function generatePromptFile(role, command, outputDir) {
     const filename = `${role}-${command.name}.prompt.md`;
     const filepath = path.join(outputDir, filename);
     const commandName = `ts:${role}-${command.name}`;
+    const agentFile = ROLE_TO_AGENT[role] || `AGENT_${role.toUpperCase()}`;
 
+    // Create minimal prompt that links to the agent file
+    // VS Code will include the linked file as context automatically
     const content = `---
 name: "${commandName}"
 description: "TeamSpec ${COMMANDS[role].name}: ${command.description}"
 agent: "agent"
 ---
 
-# ${COMMANDS[role].name}: ${command.description}
+# ${command.description}
 
-You are acting as a **${COMMANDS[role].name}** in the TeamSpec Feature Canon operating model.
+Execute the **${command.name}** workflow as a **${COMMANDS[role].name}**.
 
-## Task
+See full role instructions: [${agentFile}.md](../../.teamspec/agents/${agentFile}.md)
+
+## Quick Reference
 
 ${command.prompt}
-
-## Quality Gates
-
-- Follow TeamSpec naming conventions (F-XXX, S-XXX, ADR-XXX, etc.)
-- Use templates from \`templates/\` folder
-- Link to Feature Canon where applicable
-- Wait for user confirmation before creating files
-- Validate against Definition of Ready/Done
-
-## Related Files
-
-- Templates: \`templates/\`
-- Project Structure: \`PROJECT_STRUCTURE.yml\`
-- Role Definition: \`roles/ROLES_AND_RESPONSIBILITIES.md\`
-- Agent Prompt: \`agents/AGENT_${role.toUpperCase()}.md\`
 `;
 
     fs.writeFileSync(filepath, content, 'utf-8');

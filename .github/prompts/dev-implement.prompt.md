@@ -4,11 +4,13 @@ description: "TeamSpec Developer: Execute implementation"
 agent: "agent"
 ---
 
-# Developer: Execute implementation
+# Execute implementation
 
-You are acting as a **Developer** in the TeamSpec Feature Canon operating model.
+Execute the **implement** workflow as a **Developer**.
 
-## Task
+See full role instructions: [AGENT_DEV.md](../../.teamspec/agents/AGENT_DEV.md)
+
+## Quick Reference
 
 Execute implementation:
 1. Load dev plan
@@ -16,18 +18,3 @@ Execute implementation:
 3. Update task completion status
 4. Create/modify code files
 5. Track actual vs estimated effort
-
-## Quality Gates
-
-- Follow TeamSpec naming conventions (F-XXX, S-XXX, ADR-XXX, etc.)
-- Use templates from `templates/` folder
-- Link to Feature Canon where applicable
-- Wait for user confirmation before creating files
-- Validate against Definition of Ready/Done
-
-## Related Files
-
-- Templates: `templates/`
-- Project Structure: `PROJECT_STRUCTURE.yml`
-- Role Definition: `roles/ROLES_AND_RESPONSIBILITIES.md`
-- Agent Prompt: `agents/AGENT_DEV.md`

@@ -435,6 +435,7 @@ function copyTeamspecCore(targetDir, sourceDir) {
   const targetTeamspec = path.join(targetDir, '.teamspec');
 
   const dirsToCopy = [
+    'agents',
     'definitions',
     'profiles',
     'templates',
@@ -710,7 +711,7 @@ Use template: \`/.teamspec/templates/testcases-template.md\`
 function updateTeamspecCore(targetDir, sourceDir) {
   const targetTeamspec = path.join(targetDir, '.teamspec');
 
-  const dirsToUpdate = ['definitions', 'profiles', 'templates'];
+  const dirsToUpdate = ['agents', 'definitions', 'profiles', 'templates'];
   const filesToUpdate = ['teamspec.yml'];
   const contextFilesToUpdate = ['_schema.yml'];
 
@@ -772,8 +773,20 @@ async function setupIDEIntegration(targetDir, options) {
   }
 
   const { installExtension, copyExtensionToWorkspace, isVSCodeAvailable } = require('./extension-installer');
+  const { generateAllPrompts } = require('./prompt-generator');
 
   console.log(`\n${colored('Setting up IDE integration...', colors.blue)}`);
+
+  // Generate GitHub Copilot prompt files for VS Code and Cursor
+  if (options.ide === 'vscode' || options.ide === 'cursor') {
+    try {
+      console.log('  → Generating GitHub Copilot prompt files...');
+      const generatedFiles = generateAllPrompts(targetDir);
+      console.log(`  ✓ Generated ${generatedFiles.length} prompt files in .github/prompts/`);
+    } catch (error) {
+      console.log(`  ⚠ Failed to generate prompts: ${error.message}`);
+    }
+  }
 
   // Create .vscode folder with settings
   const vscodeDir = path.join(targetDir, '.vscode');
@@ -830,7 +843,7 @@ async function setupIDEIntegration(targetDir, options) {
   if (options.ide === 'vscode') {
     if (isVSCodeAvailable()) {
       console.log('  → Attempting to install @teamspec chat participant...');
-      
+
       const result = await installExtension({
         onProgress: (msg) => console.log(`    ${msg}`)
       });
@@ -913,14 +926,14 @@ ${colored('1. Configure Your Team', colors.cyan)}
 
 ${colored('2. Create Your First Feature', colors.cyan)}
    Features are NEVER created implicitly. Use:`);
-  
+
   if (ide === 'vscode' && ideResult && ideResult.extensionInstalled) {
     console.log(`   ${colored('@teamspec /ba feature', colors.bold)}    - Create feature via chat`);
   }
   console.log(`   ${colored('ts:ba feature', colors.bold)}              - Or use manual command
 
 ${colored('3. Start Using TeamSpec Commands', colors.cyan)}`);
-  
+
   if (ide === 'vscode') {
     console.log(`   ${colored('@teamspec /ba create', colors.bold)}     - Create business analysis
    ${colored('@teamspec /fa story', colors.bold)}      - Create user story  
@@ -984,19 +997,19 @@ async function run(args) {
   if (options.command === 'lint') {
     const { Linter, SEVERITY } = require('./linter');
     const targetDir = path.resolve(options.target);
-    
+
     console.log(`\n${colored('TeamSpec Linter', colors.bold + colors.cyan)}`);
     console.log(`${colored('Scanning:', colors.bold)} ${targetDir}`);
-    
+
     if (options.project) {
       console.log(`${colored('Project:', colors.bold)} ${options.project}`);
     }
-    
+
     const linter = new Linter(targetDir);
     const results = await linter.run({ project: options.project });
-    
+
     console.log(linter.formatResults(results));
-    
+
     // Exit with error code if there are errors or blockers
     const hasErrors = results.some(r => r.severity === SEVERITY.ERROR || r.severity === SEVERITY.BLOCKER);
     if (hasErrors) {
@@ -1009,10 +1022,10 @@ async function run(args) {
   if (options.command === 'generate-prompts') {
     const { generateAllPrompts } = require('./prompt-generator');
     const targetDir = path.resolve(options.target);
-    
+
     console.log(`\n${colored('TeamSpec Copilot Prompt Generator', colors.bold + colors.cyan)}`);
     console.log(`${colored('Target:', colors.bold)} ${targetDir}\n`);
-    
+
     try {
       generateAllPrompts(targetDir);
       console.log(`\n${colored('✨ Done!', colors.green + colors.bold)}`);
@@ -1128,10 +1141,10 @@ async function run(args) {
   copyTeamspecCore(targetDir, sourceDir);
   createTeamContext(targetDir, options);
   createProjectStructure(targetDir, options.project);
-  
+
   // Setup IDE integration
   const ideResult = await setupIDEIntegration(targetDir, options);
-  
+
   printNextSteps(targetDir, options.profile, options.project, options.ide, ideResult);
 }
 
