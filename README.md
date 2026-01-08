@@ -1,4 +1,4 @@
-# TeamSpec 2.0
+# TeamSpec
 
 > **Feature Canon Operating Model for AI-Assisted Software Delivery**
 
