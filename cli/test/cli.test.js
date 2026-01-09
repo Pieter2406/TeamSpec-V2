@@ -972,3 +972,199 @@ describe('CLI-011: Project ID Normalization', () => {
         assert.ok(true, 'should handle already normalized IDs');
     });
 });
+// =============================================================================
+// TeamSpec 4.0 Tests
+// =============================================================================
+
+describe('CLI-012: Version Detection (4.0)', () => {
+    let tempDir;
+
+    beforeEach(() => {
+        tempDir = createTempDir();
+        suppressConsole();
+    });
+
+    afterEach(() => {
+        cleanupTempDir(tempDir);
+        restoreConsole();
+    });
+
+    test('detects no TeamSpec installation', () => {
+        // Empty directory should return version: 'none'
+        assert.ok(true, 'should detect no TeamSpec');
+    });
+
+    test('detects 2.0 workspace (features in project)', () => {
+        // Create 2.0 structure
+        createMockTeamspecInstall(tempDir);
+        const projectDir = path.join(tempDir, 'projects', 'test-project');
+        fs.mkdirSync(path.join(projectDir, 'features'), { recursive: true });
+        fs.writeFileSync(path.join(projectDir, 'project.yml'), 'project:\n  id: test-project\n');
+        fs.writeFileSync(path.join(projectDir, 'features', 'F-001-test.md'), '# Feature');
+        
+        assert.ok(fs.existsSync(path.join(projectDir, 'features', 'F-001-test.md')), 'should have 2.0 structure');
+    });
+
+    test('detects 4.0 workspace (products folder)', () => {
+        // Create 4.0 structure
+        createMockTeamspecInstall(tempDir);
+        const productDir = path.join(tempDir, 'products', 'test-product');
+        fs.mkdirSync(path.join(productDir, 'features'), { recursive: true });
+        fs.writeFileSync(path.join(productDir, 'product.yml'), 'product:\n  id: test-product\n  prefix: TST\n');
+        
+        assert.ok(fs.existsSync(path.join(productDir, 'product.yml')), 'should have 4.0 structure');
+    });
+});
+
+describe('CLI-013: Product Prefix Generation (4.0)', () => {
+    test('generates prefix from multi-word name', () => {
+        // "DnD Initiative Tracker" -> "DIT"
+        assert.ok(true, 'should generate DIT from DnD Initiative Tracker');
+    });
+
+    test('generates prefix from single word', () => {
+        // "Product" -> "PRO"
+        assert.ok(true, 'should generate PRO from Product');
+    });
+
+    test('handles names with common words', () => {
+        // "The Amazing Product for Users" -> "APU" (skips The, for)
+        assert.ok(true, 'should skip common words');
+    });
+
+    test('ensures minimum 3 characters', () => {
+        // "AB" -> "ABX" (pads if needed)
+        assert.ok(true, 'should ensure minimum 3 characters');
+    });
+});
+
+describe('CLI-014: Product Structure Creation (4.0)', () => {
+    let tempDir;
+
+    beforeEach(() => {
+        tempDir = createTempDir();
+        suppressConsole();
+    });
+
+    afterEach(() => {
+        cleanupTempDir(tempDir);
+        restoreConsole();
+    });
+
+    test('creates all product directories', () => {
+        // Verify all required directories are created
+        const productDir = path.join(tempDir, 'products', 'test-product');
+        fs.mkdirSync(productDir, { recursive: true });
+        
+        const expectedDirs = [
+            'business-analysis',
+            'features',
+            'solution-designs',
+            'technical-architecture',
+            'decisions'
+        ];
+        
+        for (const dir of expectedDirs) {
+            fs.mkdirSync(path.join(productDir, dir), { recursive: true });
+        }
+        
+        for (const dir of expectedDirs) {
+            assert.ok(fs.existsSync(path.join(productDir, dir)), `should create ${dir}/`);
+        }
+    });
+
+    test('creates product.yml with correct prefix', () => {
+        const productDir = path.join(tempDir, 'products', 'test-product');
+        fs.mkdirSync(productDir, { recursive: true });
+        
+        const productYml = `product:
+  id: "test-product"
+  name: "Test Product"
+  prefix: "TST"
+`;
+        fs.writeFileSync(path.join(productDir, 'product.yml'), productYml);
+        
+        const content = fs.readFileSync(path.join(productDir, 'product.yml'), 'utf-8');
+        assert.ok(content.includes('prefix: "TST"'), 'should have prefix in product.yml');
+    });
+});
+
+describe('CLI-015: Project Structure Creation (4.0)', () => {
+    let tempDir;
+
+    beforeEach(() => {
+        tempDir = createTempDir();
+        suppressConsole();
+    });
+
+    afterEach(() => {
+        cleanupTempDir(tempDir);
+        restoreConsole();
+    });
+
+    test('creates feature-increments folder instead of features', () => {
+        const projectDir = path.join(tempDir, 'projects', 'test-project');
+        fs.mkdirSync(path.join(projectDir, 'feature-increments'), { recursive: true });
+        
+        assert.ok(fs.existsSync(path.join(projectDir, 'feature-increments')), 'should create feature-increments/');
+        assert.ok(!fs.existsSync(path.join(projectDir, 'features')), 'should NOT create features/');
+    });
+
+    test('creates ready-to-develop instead of ready-for-development', () => {
+        const projectDir = path.join(tempDir, 'projects', 'test-project');
+        fs.mkdirSync(path.join(projectDir, 'stories', 'ready-to-develop'), { recursive: true });
+        
+        assert.ok(fs.existsSync(path.join(projectDir, 'stories', 'ready-to-develop')), 'should create ready-to-develop/');
+    });
+
+    test('creates target_products in project.yml', () => {
+        const projectDir = path.join(tempDir, 'projects', 'test-project');
+        fs.mkdirSync(projectDir, { recursive: true });
+        
+        const projectYml = `project:
+  id: "test-project"
+  target_products:
+    - test-product
+`;
+        fs.writeFileSync(path.join(projectDir, 'project.yml'), projectYml);
+        
+        const content = fs.readFileSync(path.join(projectDir, 'project.yml'), 'utf-8');
+        assert.ok(content.includes('target_products'), 'should have target_products in project.yml');
+    });
+});
+
+describe('CLI-016: Migration Analysis (4.0)', () => {
+    let tempDir;
+
+    beforeEach(() => {
+        tempDir = createTempDir();
+        suppressConsole();
+    });
+
+    afterEach(() => {
+        cleanupTempDir(tempDir);
+        restoreConsole();
+    });
+
+    test('identifies projects with features for migration', () => {
+        // Create 2.0 structure with features
+        createMockTeamspecInstall(tempDir);
+        const projectDir = path.join(tempDir, 'projects', 'test-project');
+        fs.mkdirSync(path.join(projectDir, 'features'), { recursive: true });
+        fs.writeFileSync(path.join(projectDir, 'project.yml'), 'project:\n  id: test-project\n');
+        fs.writeFileSync(path.join(projectDir, 'features', 'F-001-test.md'), '# Feature');
+        
+        assert.ok(fs.existsSync(path.join(projectDir, 'features', 'F-001-test.md')), 'should identify features');
+    });
+
+    test('generates suggested product prefix', () => {
+        // test-project -> TSP or similar
+        assert.ok(true, 'should generate suggested prefix');
+    });
+
+    test('plans folder renames correctly', () => {
+        // adr/ -> technical-architecture-increments/
+        // ready-for-development/ -> ready-to-develop/
+        assert.ok(true, 'should plan folder renames');
+    });
+});

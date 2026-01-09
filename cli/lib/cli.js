@@ -1,11 +1,11 @@
 /**
  * TeamSpec Init CLI - Pure JavaScript implementation
- * Version 3.0.0 - Feature Canon Operating Model
+ * Version 4.0.0 - Product/Project Operating Model
  * 
- * This CLI bootstraps TeamSpec 2.0 in any repository by:
+ * This CLI bootstraps TeamSpec 4.0 in any repository by:
  * 1. Asking team setup questions
  * 2. Deploying .teamspec/ folder with core files
- * 3. Creating project structure
+ * 3. Creating product/project structure
  */
 
 const fs = require('fs');
@@ -49,7 +49,7 @@ function printBanner() {
 ║    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚══════╝ ╚═════╝ ║
 ║                                                                      ║
 ║                                                                      ║
-║         Feature Canon Operating Model v2.0                           ║
+║         Product/Project Operating Model v4.0                         ║
 ╚══════════════════════════════════════════════════════════════════════╝
 `;
   console.log(colored(banner, colors.cyan));
@@ -110,13 +110,14 @@ function parseArgs(args) {
     help: false,
     version: false,
     force: false,
+    fix: false,
   };
 
   let i = 0;
 
   if (args.length > 0 && !args[0].startsWith('-')) {
     const cmd = args[0].toLowerCase();
-    if (['init', 'update', 'lint', 'generate-prompts'].includes(cmd)) {
+    if (['init', 'update', 'lint', 'generate-prompts', 'migrate'].includes(cmd)) {
       options.command = cmd;
       i = 1;
     }
@@ -166,6 +167,9 @@ function parseArgs(args) {
       case '-f':
         options.force = true;
         break;
+      case '--fix':
+        options.fix = true;
+        break;
     }
   }
 
@@ -199,7 +203,8 @@ ${colored('OPTIONS:', colors.bold)}
   --ide <ide>             IDE integration (vscode, cursor, other, none)
   --copilot <yes|no>      Install GitHub Copilot instructions file (default: yes)
   -y, --non-interactive   Run without prompts (use defaults)
-  -f, --force             Force update without confirmation
+  -f, --force             Force update/migrate without confirmation
+  --fix                   Apply migration changes (default: dry-run)
 
 ${colored('PROFILES:', colors.bold)}
   none           Vanilla TeamSpec
@@ -209,24 +214,30 @@ ${colored('PROFILES:', colors.bold)}
   enterprise     Full governance, audit trails
 
 ${colored('EXAMPLES:', colors.bold)}
-  teamspec                              # Interactive setup
+  teamspec                              # Interactive setup (4.0)
   teamspec --profile startup -y         # Quick setup with startup profile
   teamspec update                       # Update core files, keep context
   teamspec update --force               # Update without confirmation
   teamspec lint                         # Lint all projects
   teamspec lint --project my-project    # Lint specific project
+  teamspec migrate                      # Analyze 2.0 → 4.0 migration (dry-run)
+  teamspec migrate --fix                # Execute 2.0 → 4.0 migration
   teamspec generate-prompts             # Generate GitHub Copilot prompt files
 
-${colored('WHAT GETS CREATED:', colors.bold)}
+${colored('WHAT GETS CREATED (4.0):', colors.bold)}
   .teamspec/                 Core framework
     ├── templates/           Document templates
     ├── definitions/         DoR/DoD checklists
     ├── profiles/            Profile overlays
     └── context/team.yml     Team configuration
-  projects/<project-id>/     Project artifacts
-    ├── features/            Feature Canon (source of truth)
-    ├── stories/             User stories (workflow folders)
-    ├── adr/                 Architecture decisions
+  products/<product-id>/     Product artifacts (AS-IS, source of truth)
+    ├── features/            Feature Canon
+    ├── business-analysis/   BA documents
+    └── ...
+  projects/<project-id>/     Project artifacts (TO-BE changes)
+    ├── feature-increments/  Changes to product features
+    ├── epics/               Story containers
+    ├── stories/             User stories
     └── ...
 `);
 }
@@ -258,6 +269,162 @@ function copyDirRecursive(src, dest) {
       fs.copyFileSync(srcPath, destPath);
     }
   }
+}
+
+// =============================================================================
+// TeamSpec Version Detection (4.0)
+// =============================================================================
+
+/**
+ * Detect the TeamSpec version of a workspace
+ * @param {string} targetDir - Path to workspace root
+ * @returns {{ version: string, hasProducts: boolean, hasProjects: boolean, productCount: number, projectCount: number }}
+ */
+function detectWorkspaceVersion(targetDir) {
+  const teamspecDir = path.join(targetDir, '.teamspec');
+  const productsDir = path.join(targetDir, 'products');
+  const projectsDir = path.join(targetDir, 'projects');
+
+  // Not a TeamSpec workspace
+  if (!fs.existsSync(teamspecDir)) {
+    return { version: 'none', hasProducts: false, hasProjects: false, productCount: 0, projectCount: 0 };
+  }
+
+  const hasProducts = fs.existsSync(productsDir);
+  const hasProjects = fs.existsSync(projectsDir);
+
+  // Count products and projects
+  let productCount = 0;
+  let projectCount = 0;
+
+  if (hasProducts) {
+    productCount = fs.readdirSync(productsDir, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .filter(d => fs.existsSync(path.join(productsDir, d.name, 'product.yml')))
+      .length;
+  }
+
+  if (hasProjects) {
+    projectCount = fs.readdirSync(projectsDir, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .filter(d => fs.existsSync(path.join(projectsDir, d.name, 'project.yml')))
+      .length;
+  }
+
+  // Detect 4.0 vs 2.0
+  // 4.0 indicators: products/ folder with product.yml files, or product-index.md
+  // 2.0 indicators: projects/ with features/ (features as canon in project)
+
+  if (hasProducts && productCount > 0) {
+    return { version: '4.0', hasProducts: true, hasProjects, productCount, projectCount };
+  }
+
+  // Check if any project has features/ folder (2.0 pattern)
+  if (hasProjects && projectCount > 0) {
+    const projects = fs.readdirSync(projectsDir, { withFileTypes: true })
+      .filter(d => d.isDirectory());
+
+    for (const project of projects) {
+      const featuresDir = path.join(projectsDir, project.name, 'features');
+      if (fs.existsSync(featuresDir)) {
+        // 2.0 pattern: features inside projects
+        return { version: '2.0', hasProducts: false, hasProjects: true, productCount: 0, projectCount };
+      }
+    }
+  }
+
+  // Has .teamspec but no recognizable structure
+  return { version: 'unknown', hasProducts, hasProjects, productCount, projectCount };
+}
+
+/**
+ * Find all products in a workspace
+ * @param {string} targetDir - Path to workspace root
+ * @returns {Array<{ id: string, prefix: string, path: string, name: string }>}
+ */
+function findProducts(targetDir) {
+  const productsDir = path.join(targetDir, 'products');
+
+  if (!fs.existsSync(productsDir)) {
+    return [];
+  }
+
+  const products = [];
+  const entries = fs.readdirSync(productsDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+
+    const productYmlPath = path.join(productsDir, entry.name, 'product.yml');
+    if (!fs.existsSync(productYmlPath)) continue;
+
+    try {
+      const content = fs.readFileSync(productYmlPath, 'utf-8');
+      // Simple YAML parsing for prefix and name
+      const prefixMatch = content.match(/prefix:\s*["']?([A-Z]{3,4})["']?/);
+      const nameMatch = content.match(/name:\s*["']?(.+?)["']?\s*$/m);
+
+      products.push({
+        id: entry.name,
+        prefix: prefixMatch ? prefixMatch[1] : entry.name.substring(0, 3).toUpperCase(),
+        path: path.join(productsDir, entry.name),
+        name: nameMatch ? nameMatch[1].trim() : entry.name
+      });
+    } catch (e) {
+      // Skip malformed product.yml
+    }
+  }
+
+  return products;
+}
+
+/**
+ * Generate a product prefix from a name
+ * @param {string} name - Product name (e.g., "DnD Initiative Tracker")
+ * @returns {string} - 3-4 char uppercase prefix (e.g., "DIT")
+ */
+function generateProductPrefix(name) {
+  // Extract first letter of each significant word
+  const words = name
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .split(/\s+/)
+    .filter(w => w.length > 0 && !['the', 'a', 'an', 'and', 'or', 'for', 'of', 'in', 'to'].includes(w.toLowerCase()));
+
+  if (words.length === 0) return 'PRD';
+  if (words.length === 1) return words[0].substring(0, 3).toUpperCase();
+
+  // Take first letter of first 3-4 words
+  return words
+    .slice(0, 4)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase();
+}
+
+/**
+ * Validate a product prefix
+ * @param {string} prefix - The prefix to validate
+ * @param {string} targetDir - Workspace path to check for conflicts
+ * @returns {{ valid: boolean, error?: string }}
+ */
+function validateProductPrefix(prefix, targetDir) {
+  if (!prefix || prefix.length < 3 || prefix.length > 4) {
+    return { valid: false, error: 'Prefix must be 3-4 characters' };
+  }
+
+  if (!/^[A-Z]{3,4}$/.test(prefix)) {
+    return { valid: false, error: 'Prefix must be uppercase letters only' };
+  }
+
+  // Check for conflicts with existing products
+  const existingProducts = findProducts(targetDir);
+  const conflict = existingProducts.find(p => p.prefix === prefix);
+
+  if (conflict) {
+    return { valid: false, error: `Prefix "${prefix}" already used by product "${conflict.id}"` };
+  }
+
+  return { valid: true };
 }
 
 // =============================================================================
@@ -377,16 +544,73 @@ async function runInteractive(options) {
       options.sprintLengthDays = null;
     }
 
-    // Project ID
-    if (!options.project) {
-      console.log(`\n${colored('Project Structure', colors.bold)}`);
-      console.log('  TeamSpec organizes artifacts in project folders: projects/<project-id>/');
-      options.project = await prompt(
+    // 4.0: Product vs Project-only mode
+    console.log(`\n${colored('TeamSpec 4.0 Structure', colors.bold)}`);
+    console.log('  Products = AS-IS (what exists, source of truth)');
+    console.log('  Projects = TO-BE (changes to products)');
+
+    const setupMode = await promptChoice(
+      rl,
+      'How do you want to set up your workspace?',
+      {
+        'product-first': 'Start with a Product (recommended) - creates product + optional project',
+        'project-only': 'Project only - for quick starts, can add products later',
+      },
+      'product-first'
+    );
+    options.setupMode = setupMode;
+
+    // Product setup (if product-first)
+    if (setupMode === 'product-first') {
+      console.log(`\n${colored('Product Setup', colors.bold)}`);
+      console.log('  Products have a unique prefix (PRX) used in artifact naming.');
+      console.log('  Example: "DnD Initiative Tracker" → prefix "DIT" → files like f-DIT-001.md');
+
+      options.productName = await prompt(
         rl,
-        `${colored('Initial project ID', colors.bold)} (lowercase, hyphenated)`,
-        DEFAULT_PROJECT_ID
+        `${colored('Product name', colors.bold)}`,
+        'My Product'
       );
-      options.project = normalizeProjectId(options.project);
+
+      // Generate suggested prefix
+      const suggestedPrefix = generateProductPrefix(options.productName);
+      options.productPrefix = await prompt(
+        rl,
+        `${colored('Product prefix (3-4 uppercase letters)', colors.bold)}`,
+        suggestedPrefix
+      );
+      options.productPrefix = options.productPrefix.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 4);
+
+      // Validate prefix
+      if (options.productPrefix.length < 3) {
+        options.productPrefix = suggestedPrefix;
+      }
+
+      // Generate product ID from name
+      options.productId = options.productName.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-');
+
+      // Ask if they want a project too
+      options.createProject = await promptYesNo(
+        rl,
+        `\n${colored('Also create an initial project for this product?', colors.bold)}`,
+        true
+      );
+    }
+
+    // Project ID
+    if (setupMode === 'project-only' || options.createProject) {
+      if (!options.project) {
+        console.log(`\n${colored('Project Structure', colors.bold)}`);
+        console.log('  TeamSpec organizes artifacts in project folders: projects/<project-id>/');
+        options.project = await prompt(
+          rl,
+          `${colored('Initial project ID', colors.bold)} (lowercase, hyphenated)`,
+          DEFAULT_PROJECT_ID
+        );
+        options.project = normalizeProjectId(options.project);
+      }
     }
 
     // IDE Integration
@@ -418,7 +642,13 @@ async function runInteractive(options) {
     if (options.sprintLengthDays) {
       console.log(`  Sprint Length:   ${options.sprintLengthDays} days`);
     }
-    console.log(`  Project ID:      ${options.project}`);
+    console.log(`  Setup Mode:      ${options.setupMode}`);
+    if (options.productName) {
+      console.log(`  Product:         ${options.productName} (${options.productPrefix})`);
+    }
+    if (options.project) {
+      console.log(`  Project ID:      ${options.project}`);
+    }
     console.log(`  IDE:             ${options.ide}`);
     console.log(`  Copilot:         ${options.copilot ? 'Yes' : 'No'}`);
 
@@ -593,35 +823,89 @@ feature_canon:
 }
 
 // =============================================================================
-// Project Structure Creation
+// Product Structure Creation (4.0)
 // =============================================================================
 
-function createProjectStructure(targetDir, projectId) {
-  const projectDir = path.join(targetDir, 'projects', projectId);
-  fs.mkdirSync(projectDir, { recursive: true });
+/**
+ * Create a new product structure
+ * @param {string} targetDir - Workspace root path
+ * @param {string} productId - Slug identifier (e.g., "dnd-initiative-tracker")
+ * @param {string} productName - Human-readable name (e.g., "DnD Initiative Tracker")
+ * @param {string} prefix - 3-4 char uppercase prefix (e.g., "DIT")
+ * @returns {string} - Path to created product folder
+ */
+function createProductStructure(targetDir, productId, productName, prefix) {
+  const productDir = path.join(targetDir, 'products', productId);
+  fs.mkdirSync(productDir, { recursive: true });
 
-  console.log(`\n${colored(`Creating project structure: projects/${projectId}/...`, colors.blue)}`);
+  console.log(`\n${colored(`Creating product structure: products/${productId}/ (${prefix})...`, colors.blue)}`);
 
-  // project.yml
-  const projectYml = `# Project Configuration: ${projectId}
-project:
-  id: "${projectId}"
-  name: "${projectId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}"
+  // product.yml
+  const productYml = `# Product Configuration: ${productName}
+product:
+  id: "${productId}"
+  name: "${productName}"
+  prefix: "${prefix}"
   description: |
-    # TODO: Add project description
-  status: active  # active, paused, completed, archived
+    # TODO: Add product description - what IS this product (AS-IS)?
+  status: active  # active, deprecated, archived
+  
+  # List of projects currently modifying this product
+  active_projects: []
 `;
-  fs.writeFileSync(path.join(projectDir, 'project.yml'), projectYml, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/project.yml`);
+  fs.writeFileSync(path.join(productDir, 'product.yml'), productYml, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/product.yml`);
+
+  // README.md
+  const readme = `# ${productName}
+
+> **Product Prefix:** \`${prefix}\`
+
+## Overview
+
+_TODO: Describe what this product IS (current state, AS-IS)._
+
+## Structure
+
+| Folder | Purpose | Artifact Pattern |
+|--------|---------|------------------|
+| \`business-analysis/\` | Business context & processes | \`ba-${prefix}-XXX-*.md\` |
+| \`features/\` | Feature Canon (source of truth) | \`f-${prefix}-XXX-*.md\` |
+| \`solution-designs/\` | Solution designs & architecture | \`sd-${prefix}-XXX-*.md\` |
+| \`technical-architecture/\` | Technical architecture decisions | \`ta-${prefix}-XXX-*.md\` |
+| \`decisions/\` | Product-level business decisions | \`dec-${prefix}-XXX-*.md\` |
+
+## Active Projects
+
+_See \`product.yml\` for the list of projects currently modifying this product._
+`;
+  fs.writeFileSync(path.join(productDir, 'README.md'), readme, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/README.md`);
+
+  // business-analysis/
+  const baDir = path.join(productDir, 'business-analysis');
+  fs.mkdirSync(baDir, { recursive: true });
+  fs.writeFileSync(path.join(baDir, 'README.md'), `# Business Analysis
+
+Documents the business context, processes, and domain knowledge for this product.
+
+**Naming:** \`ba-${prefix}-XXX-<slug>.md\`
+
+**Template:** \`/.teamspec/templates/business-analysis-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/business-analysis/`);
 
   // features/
-  const featuresDir = path.join(projectDir, 'features');
+  const featuresDir = path.join(productDir, 'features');
   fs.mkdirSync(featuresDir, { recursive: true });
 
   fs.writeFileSync(path.join(featuresDir, 'features-index.md'), `# Features Index (Feature Canon)
 
-This is the master index of all features in this project.
-The Feature Canon is the **source of truth** for system behavior.
+> **Product:** ${productName}  
+> **Prefix:** \`${prefix}\`
+
+This is the master index of all features for this product.
+The Feature Canon is the **source of truth** for system behavior (AS-IS).
 
 ## Feature Registry
 
@@ -629,26 +913,208 @@ The Feature Canon is the **source of truth** for system behavior.
 |----|------|--------|-------|
 | _(none yet)_ | | | |
 
-## Next Available ID: **F-001**
+## Next Available ID: **f-${prefix}-001**
 
 ---
 
-> **To add features:** Run \`ts:ba feature\` — features are never created implicitly.
+> **To add features:** Features are created by the Product Owner or extracted from business analysis.
 `, 'utf-8');
 
   fs.writeFileSync(path.join(featuresDir, 'story-ledger.md'), `# Story Ledger
 
 Tracks completed stories and their impact on the Feature Canon.
 
-| Story ID | Title | Sprint | Features Modified | Merged Date |
-|----------|-------|--------|-------------------|-------------|
-| _(none yet)_ | | | | |
+| Story ID | Title | Project | Sprint | Features Modified | Synced Date |
+|----------|-------|---------|--------|-------------------|-------------|
+| _(none yet)_ | | | | | |
 `, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/features/`);
+  console.log(`  ✓ Created products/${productId}/features/`);
 
-  // stories/ with workflow folders
+  // solution-designs/
+  const sdDir = path.join(productDir, 'solution-designs');
+  fs.mkdirSync(sdDir, { recursive: true });
+  fs.writeFileSync(path.join(sdDir, 'README.md'), `# Solution Designs
+
+High-level solution architecture and design documents for this product.
+
+**Naming:** \`sd-${prefix}-XXX-<slug>.md\`
+
+**Template:** \`/.teamspec/templates/solution-design-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/solution-designs/`);
+
+  // technical-architecture/
+  const taDir = path.join(productDir, 'technical-architecture');
+  fs.mkdirSync(taDir, { recursive: true });
+  fs.writeFileSync(path.join(taDir, 'README.md'), `# Technical Architecture
+
+Technical architecture decisions and documentation for this product.
+
+**Naming:** \`ta-${prefix}-XXX-<slug>.md\`
+
+**Template:** \`/.teamspec/templates/adr-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/technical-architecture/`);
+
+  // decisions/
+  const decisionsDir = path.join(productDir, 'decisions');
+  fs.mkdirSync(decisionsDir, { recursive: true });
+  fs.writeFileSync(path.join(decisionsDir, 'README.md'), `# Product Decisions
+
+Product-level business decisions.
+
+**Naming:** \`dec-${prefix}-XXX-<slug>.md\`
+
+**Template:** \`/.teamspec/templates/decision-log-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created products/${productId}/decisions/`);
+
+  return productDir;
+}
+
+/**
+ * Create products-index.md in the workspace root
+ * @param {string} targetDir - Workspace root path
+ */
+function createProductsIndex(targetDir) {
+  const productsDir = path.join(targetDir, 'products');
+  fs.mkdirSync(productsDir, { recursive: true });
+
+  const indexContent = `# Products Index
+
+Master index of all products in this workspace.
+
+## Product Registry
+
+| Prefix | ID | Name | Status | Active Projects |
+|--------|-----|------|--------|-----------------|
+| _(none yet)_ | | | | |
+
+---
+
+> **To add products:** Run \`ts:po product\` or use \`teamspec init --product\`
+`;
+  fs.writeFileSync(path.join(productsDir, 'products-index.md'), indexContent, 'utf-8');
+  console.log(`  ✓ Created products/products-index.md`);
+}
+
+// =============================================================================
+// Project Structure Creation (4.0)
+// =============================================================================
+
+/**
+ * Create a new project structure (4.0 format)
+ * @param {string} targetDir - Workspace root path
+ * @param {string} projectId - Slug identifier
+ * @param {Object} options - Optional settings
+ * @param {string[]} options.targetProducts - Products this project modifies
+ */
+function createProjectStructure(targetDir, projectId, options = {}) {
+  const projectDir = path.join(targetDir, 'projects', projectId);
+  fs.mkdirSync(projectDir, { recursive: true });
+
+  console.log(`\n${colored(`Creating project structure: projects/${projectId}/...`, colors.blue)}`);
+
+  const targetProducts = options.targetProducts || [];
+
+  // project.yml (4.0 format with target_products)
+  const projectYml = `# Project Configuration: ${projectId}
+# TeamSpec 4.0 - TO-BE changes project
+project:
+  id: "${projectId}"
+  name: "${projectId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}"
+  description: |
+    # TODO: Add project description - what CHANGES will this project deliver?
+  status: active  # active, paused, completed, archived
+  
+  # Products this project modifies (populated via ts:ba feature-increment)
+  target_products: ${targetProducts.length > 0 ? '\n    - ' + targetProducts.join('\n    - ') : '[]'}
+`;
+  fs.writeFileSync(path.join(projectDir, 'project.yml'), projectYml, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/project.yml`);
+
+  // feature-increments/ (replaces features/ in 4.0)
+  const fiDir = path.join(projectDir, 'feature-increments');
+  fs.mkdirSync(fiDir, { recursive: true });
+  fs.writeFileSync(path.join(fiDir, 'increments-index.md'), `# Feature Increments Index
+
+> **Project:** ${projectId}
+
+Feature Increments describe TO-BE changes to Product Features.
+They are NOT the source of truth - the Product Canon is.
+
+## Increment Registry
+
+| ID | Product | Feature | Status | Epic |
+|----|---------|---------|--------|------|
+| _(none yet)_ | | | | |
+
+## Next Available ID: _Derived from product prefix (fi-PRX-XXX)_
+
+---
+
+> **To add feature-increments:** Run \`ts:ba feature-increment <product-id> <feature-id>\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/feature-increments/`);
+
+  // business-analysis-increments/
+  const baiDir = path.join(projectDir, 'business-analysis-increments');
+  fs.mkdirSync(baiDir, { recursive: true });
+  fs.writeFileSync(path.join(baiDir, 'README.md'), `# Business Analysis Increments
+
+TO-BE changes to product business analysis documents.
+
+**Naming:** \`bai-PRX-XXX-<slug>.md\` (PRX = Product Prefix)
+
+**Template:** \`/.teamspec/templates/business-analysis-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/business-analysis-increments/`);
+
+  // solution-design-increments/
+  const sdiDir = path.join(projectDir, 'solution-design-increments');
+  fs.mkdirSync(sdiDir, { recursive: true });
+  fs.writeFileSync(path.join(sdiDir, 'README.md'), `# Solution Design Increments
+
+TO-BE changes to product solution designs.
+
+**Naming:** \`sdi-PRX-XXX-<slug>.md\` (PRX = Product Prefix)
+
+**Template:** \`/.teamspec/templates/solution-design-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/solution-design-increments/`);
+
+  // technical-architecture-increments/
+  const taiDir = path.join(projectDir, 'technical-architecture-increments');
+  fs.mkdirSync(taiDir, { recursive: true });
+  fs.writeFileSync(path.join(taiDir, 'README.md'), `# Technical Architecture Increments
+
+TO-BE technical architecture decisions for this project.
+
+**Naming:** \`tai-PRX-XXX-<slug>.md\` (PRX = Product Prefix)
+
+**Template:** \`/.teamspec/templates/adr-template.md\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/technical-architecture-increments/`);
+
+  // epics/ (now required containers for stories)
+  fs.mkdirSync(path.join(projectDir, 'epics'), { recursive: true });
+  fs.writeFileSync(path.join(projectDir, 'epics', 'epics-index.md'), `# Epics Index
+
+Epics are required containers for stories. Each Epic links to Feature-Increments.
+
+| ID | Name | Status | Feature Increments | Stories |
+|----|------|--------|--------------------|---------|
+| _(none yet)_ | | | | |
+
+## Next Available ID: _Derived from product prefix (epic-PRX-XXX)_
+
+> **To add epics:** Run \`ts:ba epic\`
+`, 'utf-8');
+  console.log(`  ✓ Created projects/${projectId}/epics/`);
+
+  // stories/ with workflow folders (updated folder names)
   const storiesDir = path.join(projectDir, 'stories');
-  for (const folder of ['backlog', 'ready-to-refine', 'ready-for-development']) {
+  for (const folder of ['backlog', 'ready-to-refine', 'ready-to-develop']) {
     fs.mkdirSync(path.join(storiesDir, folder), { recursive: true });
   }
 
@@ -660,31 +1126,24 @@ Tracks completed stories and their impact on the Feature Canon.
 |--------|--------|-------|
 | \`backlog/\` | New stories | FA |
 | \`ready-to-refine/\` | Ready for dev refinement | FA |
-| \`ready-for-development/\` | Refined, ready for sprint | DEV |
+| \`ready-to-develop/\` | Refined, ready for sprint | DEV |
 
-## Rules
+## Rules (4.0)
 
-- Every story must link to features in the Feature Canon
-- Stories describe DELTAS (changes), not full behavior
-- Use \`ts:fa story\` to create properly formatted stories
+- **Stories MUST link to an Epic** via filename: \`s-eXXX-YYY-description.md\`
+- Stories MAY reference Feature-Increments (fi-PRX-XXX) in content
+- Stories describe DELTAS (before/after) not full behavior
+- Use \`ts:fa story <epic-id>\` to create properly formatted stories
 `, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/stories/`);
 
-  // adr/
-  fs.mkdirSync(path.join(projectDir, 'adr'), { recursive: true });
-  fs.writeFileSync(path.join(projectDir, 'adr', 'README.md'), `# Architecture Decision Records
-
-Naming: \`ADR-NNN-<slug>.md\`
-
-Use template: \`/.teamspec/templates/adr-template.md\`
-`, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/adr/`);
-
-  // decisions/
+  // decisions/ (project-level decisions)
   fs.mkdirSync(path.join(projectDir, 'decisions'), { recursive: true });
-  fs.writeFileSync(path.join(projectDir, 'decisions', 'README.md'), `# Business Decisions
+  fs.writeFileSync(path.join(projectDir, 'decisions', 'README.md'), `# Project Decisions
 
-Naming: \`DECISION-NNN-<slug>.md\`
+Project-level business decisions.
+
+**Naming:** \`dec-XXX-<slug>.md\`
 
 Use template: \`/.teamspec/templates/decision-log-template.md\`
 `, 'utf-8');
@@ -694,7 +1153,7 @@ Use template: \`/.teamspec/templates/decision-log-template.md\`
   fs.mkdirSync(path.join(projectDir, 'dev-plans'), { recursive: true });
   fs.writeFileSync(path.join(projectDir, 'dev-plans', 'README.md'), `# Development Plans
 
-Naming: \`story-NNN-tasks.md\`
+**Naming:** \`dp-sXXX-YYY-<slug>.md\` (matches story s-eXXX-YYY)
 
 Rules:
 - NEVER start coding without a dev plan
@@ -707,7 +1166,7 @@ Rules:
   fs.mkdirSync(path.join(projectDir, 'qa', 'test-cases'), { recursive: true });
   fs.writeFileSync(path.join(projectDir, 'qa', 'README.md'), `# Quality Assurance
 
-Tests validate **Feature Canon** behavior, not individual stories.
+Tests validate **Feature Canon** behavior (AS-IS + TO-BE changes).
 
 Use template: \`/.teamspec/templates/testcases-template.md\`
 `, 'utf-8');
@@ -721,25 +1180,13 @@ Use template: \`/.teamspec/templates/testcases-template.md\`
 
 ## Sprint History
 
-| Sprint | Goal | Status | Stories | Canon Synced |
-|--------|------|--------|---------|--------------|
-| _(none yet)_ | | | | |
+| Sprint | Goal | Status | Stories | Deployed | Canon Synced |
+|--------|------|--------|---------|----------|--------------|
+| _(none yet)_ | | | | | |
 `, 'utf-8');
   console.log(`  ✓ Created projects/${projectId}/sprints/`);
 
-  // epics/
-  fs.mkdirSync(path.join(projectDir, 'epics'), { recursive: true });
-  fs.writeFileSync(path.join(projectDir, 'epics', 'epics-index.md'), `# Epics Index
-
-| ID | Name | Status | Features | Target |
-|----|------|--------|----------|--------|
-| _(none yet)_ | | | | |
-
-## Next Available ID: **EPIC-001**
-
-> **To add epics:** Run \`ts:ba epic\` — epics are never created implicitly.
-`, 'utf-8');
-  console.log(`  ✓ Created projects/${projectId}/epics/`);
+  return projectDir;
 }
 
 // =============================================================================
@@ -1011,6 +1458,96 @@ async function run(args) {
     return;
   }
 
+  // Handle migrate command
+  if (options.command === 'migrate') {
+    const { analyzeMigration, printMigrationPlan, executeMigration } = require('./migrate');
+    const targetDir = path.resolve(options.target);
+
+    console.log(`\n${colored('TeamSpec Migration Tool', colors.bold + colors.cyan)} `);
+    console.log(`${colored('Target:', colors.bold)} ${targetDir} `);
+
+    // Detect workspace version
+    const versionInfo = detectWorkspaceVersion(targetDir);
+    console.log(`${colored('Detected version:', colors.bold)} ${versionInfo.version}`);
+
+    if (versionInfo.version === 'none') {
+      console.error(colored(`\n❌ No TeamSpec workspace found in: ${targetDir}`, colors.red));
+      console.error('Run `teamspec init` first to create a new workspace.');
+      process.exit(1);
+    }
+
+    if (versionInfo.version === '4.0') {
+      console.log(colored(`\n✅ Workspace is already at version 4.0`, colors.green));
+      console.log(`  Products: ${versionInfo.productCount}`);
+      console.log(`  Projects: ${versionInfo.projectCount}`);
+      return;
+    }
+
+    if (versionInfo.version !== '2.0') {
+      console.error(colored(`\n❌ Unknown workspace version: ${versionInfo.version}`, colors.red));
+      console.error('Manual migration may be required.');
+      process.exit(1);
+    }
+
+    // Analyze and plan migration
+    console.log(`\nAnalyzing workspace for migration...`);
+    const plan = analyzeMigration(targetDir);
+    printMigrationPlan(plan);
+
+    if (!plan.canMigrate) {
+      process.exit(1);
+    }
+
+    // Dry run by default unless --fix is specified
+    const dryRun = !options.fix;
+    
+    if (dryRun) {
+      console.log(`\n${colored('ℹ️  Dry run mode', colors.yellow)} - no changes will be made.`);
+      console.log(`   Run with ${colored('--fix', colors.bold)} to apply changes.`);
+    } else {
+      if (!options.force && !options.nonInteractive) {
+        const rl = createReadlineInterface();
+        const proceed = await promptYesNo(
+          rl,
+          `\n${colored('Proceed with migration?', colors.bold)}`,
+          false
+        );
+        rl.close();
+        if (!proceed) {
+          console.log('Cancelled.');
+          process.exit(0);
+        }
+      }
+    }
+
+    // Execute migration
+    console.log(`\n${colored('Executing migration...', colors.bold)}`);
+    const result = executeMigration(targetDir, plan, { dryRun });
+
+    // Summary
+    console.log(`\n${colored('Migration Summary:', colors.bold)}`);
+    console.log(`  Actions completed: ${result.actionsCompleted}`);
+    console.log(`  Actions failed:    ${result.actionsFailed}`);
+
+    if (result.errors.length > 0) {
+      console.log(`\n${colored('Errors:', colors.red)}`);
+      for (const error of result.errors) {
+        console.log(`  • ${error}`);
+      }
+      process.exit(1);
+    }
+
+    if (!dryRun) {
+      console.log(`\n${colored('✅ Migration complete!', colors.green + colors.bold)}`);
+      console.log(`\nNext steps:`);
+      console.log(`  1. Review the migrated product structure in products/`);
+      console.log(`  2. Update product descriptions in product.yml files`);
+      console.log(`  3. Run ${colored('teamspec lint', colors.cyan)} to verify the migration`);
+    }
+
+    return;
+  }
+
   // Handle generate-prompts command
   if (options.command === 'generate-prompts') {
     const { generateAllPrompts } = require('./prompt-generator');
@@ -1136,6 +1673,7 @@ async function run(args) {
     options.industry = 'technology';
     options.cadence = 'scrum';
     options.sprintLengthDays = 14;
+    options.setupMode = options.setupMode || 'project-only'; // Default to project-only for non-interactive
   } else {
     await runInteractive(options);
   }
@@ -1146,9 +1684,11 @@ async function run(args) {
     process.exit(1);
   }
 
-  options.project = normalizeProjectId(options.project);
+  if (options.project) {
+    options.project = normalizeProjectId(options.project);
+  }
 
-  console.log(`\n${colored('Initializing TeamSpec...', colors.bold)} `);
+  console.log(`\n${colored('Initializing TeamSpec 4.0...', colors.bold)} `);
 
   const sourceDir = getTeamspecCoreDir();
   if (!fs.existsSync(sourceDir)) {
@@ -1158,7 +1698,24 @@ async function run(args) {
 
   copyTeamspecCore(targetDir, sourceDir);
   createTeamContext(targetDir, options);
-  createProjectStructure(targetDir, options.project);
+
+  // Create products-index.md
+  createProductsIndex(targetDir);
+
+  // Create product structure (if product-first mode)
+  if (options.setupMode === 'product-first' && options.productName) {
+    createProductStructure(targetDir, options.productId, options.productName, options.productPrefix);
+
+    // Create project linked to product
+    if (options.createProject && options.project) {
+      createProjectStructure(targetDir, options.project, {
+        targetProducts: [options.productId]
+      });
+    }
+  } else if (options.project) {
+    // Project-only mode
+    createProjectStructure(targetDir, options.project);
+  }
 
   // Copy GitHub Copilot instructions if requested
   if (options.copilot !== false) {
