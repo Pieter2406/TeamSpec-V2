@@ -1001,7 +1001,7 @@ describe('CLI-012: Version Detection (4.0)', () => {
         fs.mkdirSync(path.join(projectDir, 'features'), { recursive: true });
         fs.writeFileSync(path.join(projectDir, 'project.yml'), 'project:\n  id: test-project\n');
         fs.writeFileSync(path.join(projectDir, 'features', 'F-001-test.md'), '# Feature');
-        
+
         assert.ok(fs.existsSync(path.join(projectDir, 'features', 'F-001-test.md')), 'should have 2.0 structure');
     });
 
@@ -1011,7 +1011,7 @@ describe('CLI-012: Version Detection (4.0)', () => {
         const productDir = path.join(tempDir, 'products', 'test-product');
         fs.mkdirSync(path.join(productDir, 'features'), { recursive: true });
         fs.writeFileSync(path.join(productDir, 'product.yml'), 'product:\n  id: test-product\n  prefix: TST\n');
-        
+
         assert.ok(fs.existsSync(path.join(productDir, 'product.yml')), 'should have 4.0 structure');
     });
 });
@@ -1055,7 +1055,7 @@ describe('CLI-014: Product Structure Creation (4.0)', () => {
         // Verify all required directories are created
         const productDir = path.join(tempDir, 'products', 'test-product');
         fs.mkdirSync(productDir, { recursive: true });
-        
+
         const expectedDirs = [
             'business-analysis',
             'features',
@@ -1063,11 +1063,11 @@ describe('CLI-014: Product Structure Creation (4.0)', () => {
             'technical-architecture',
             'decisions'
         ];
-        
+
         for (const dir of expectedDirs) {
             fs.mkdirSync(path.join(productDir, dir), { recursive: true });
         }
-        
+
         for (const dir of expectedDirs) {
             assert.ok(fs.existsSync(path.join(productDir, dir)), `should create ${dir}/`);
         }
@@ -1076,14 +1076,14 @@ describe('CLI-014: Product Structure Creation (4.0)', () => {
     test('creates product.yml with correct prefix', () => {
         const productDir = path.join(tempDir, 'products', 'test-product');
         fs.mkdirSync(productDir, { recursive: true });
-        
+
         const productYml = `product:
   id: "test-product"
   name: "Test Product"
   prefix: "TST"
 `;
         fs.writeFileSync(path.join(productDir, 'product.yml'), productYml);
-        
+
         const content = fs.readFileSync(path.join(productDir, 'product.yml'), 'utf-8');
         assert.ok(content.includes('prefix: "TST"'), 'should have prefix in product.yml');
     });
@@ -1105,7 +1105,7 @@ describe('CLI-015: Project Structure Creation (4.0)', () => {
     test('creates feature-increments folder instead of features', () => {
         const projectDir = path.join(tempDir, 'projects', 'test-project');
         fs.mkdirSync(path.join(projectDir, 'feature-increments'), { recursive: true });
-        
+
         assert.ok(fs.existsSync(path.join(projectDir, 'feature-increments')), 'should create feature-increments/');
         assert.ok(!fs.existsSync(path.join(projectDir, 'features')), 'should NOT create features/');
     });
@@ -1113,21 +1113,21 @@ describe('CLI-015: Project Structure Creation (4.0)', () => {
     test('creates ready-to-develop instead of ready-for-development', () => {
         const projectDir = path.join(tempDir, 'projects', 'test-project');
         fs.mkdirSync(path.join(projectDir, 'stories', 'ready-to-develop'), { recursive: true });
-        
+
         assert.ok(fs.existsSync(path.join(projectDir, 'stories', 'ready-to-develop')), 'should create ready-to-develop/');
     });
 
     test('creates target_products in project.yml', () => {
         const projectDir = path.join(tempDir, 'projects', 'test-project');
         fs.mkdirSync(projectDir, { recursive: true });
-        
+
         const projectYml = `project:
   id: "test-project"
   target_products:
     - test-product
 `;
         fs.writeFileSync(path.join(projectDir, 'project.yml'), projectYml);
-        
+
         const content = fs.readFileSync(path.join(projectDir, 'project.yml'), 'utf-8');
         assert.ok(content.includes('target_products'), 'should have target_products in project.yml');
     });
@@ -1153,7 +1153,7 @@ describe('CLI-016: Migration Analysis (4.0)', () => {
         fs.mkdirSync(path.join(projectDir, 'features'), { recursive: true });
         fs.writeFileSync(path.join(projectDir, 'project.yml'), 'project:\n  id: test-project\n');
         fs.writeFileSync(path.join(projectDir, 'features', 'F-001-test.md'), '# Feature');
-        
+
         assert.ok(fs.existsSync(path.join(projectDir, 'features', 'F-001-test.md')), 'should identify features');
     });
 

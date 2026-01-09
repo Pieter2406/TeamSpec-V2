@@ -1,9 +1,9 @@
 # TeamSpec Linter Fix Agent
 
-> **Version:** 2.0  
+> **Version:** 4.0  
 > **Role Code:** FIX  
 > **Inherits:** [AGENT_BOOTSTRAP.md](./AGENT_BOOTSTRAP.md)  
-> **Last Updated:** 2026-01-07
+> **Last Updated:** 2026-01-09
 
 ---
 
@@ -18,14 +18,15 @@
 - All lint errors resolved
 - No content deleted (only additions/renames)
 - Cross-references updated correctly
-- Feature Canon integrity maintained
+- Product/Project Canon integrity maintained
 
 ---
 
 ## 2. Inherited Rules
 
 This agent inherits all rules from [AGENT_BOOTSTRAP.md](./AGENT_BOOTSTRAP.md), including:
-- Feature Canon model
+- Product/Project model (4.0)
+- PRX naming conventions
 - Role boundary philosophy
 - Escalation principles
 - Quality gates
@@ -50,7 +51,7 @@ This agent inherits all rules from [AGENT_BOOTSTRAP.md](./AGENT_BOOTSTRAP.md), i
 
 Fix errors in this order:
 1. **BLOCKER** → ERROR → WARNING → INFO
-2. **TS-PROJ** → TS-NAMING → TS-FEAT → TS-STORY → TS-ADR → TS-DEVPLAN → TS-DOD
+2. **TS-PROD** → TS-PROJ → TS-FI → TS-EPIC → TS-NAMING → TS-FEAT → TS-STORY → TS-TA → TS-SD → TS-DEVPLAN → TS-DOD
 
 ### 3.3 Critical Rules
 
@@ -61,10 +62,158 @@ Fix errors in this order:
 | **FIX-003** | Preserve existing content when adding sections |
 | **FIX-004** | Update ALL cross-references when renaming files |
 | **FIX-005** | Run lint after each batch of fixes to verify |
+| **FIX-006** | Respect PRX consistency (4.0) |
 
 ---
 
 ## 4. Linting Rules Reference
+
+### 4.0 Product Rules (TS-PROD) — 4.0 ONLY
+
+#### TS-PROD-001: Product folder must be registered
+
+**Error:** `Product 'X' is not registered in products-index.md`
+
+**Fix:** Add entry to `products/products-index.md`:
+```markdown
+| product-id | PRX | Product Name | PO: Owner | active |
+```
+
+#### TS-PROD-002: product.yml required with minimum metadata
+
+**Error:** `product.yml is missing` or `missing required field: 'X'`
+
+**Required fields:** `product.id`, `product.prefix` (PRX), `product.name`, `product.status`, `product.owner`
+
+**Fix:** Create or update `products/<product>/product.yml`:
+```yaml
+product:
+  id: "product-id"
+  prefix: "PRX"  # 3-4 uppercase characters
+  name: "Product Name"
+  status: "active"
+  owner: "Product Owner Name"
+```
+
+**PRX Validation:**
+- Must be 3-4 uppercase characters
+- Must be unique across all products
+- Once assigned, never changes
+
+#### TS-PROD-003: Product-Project bidirectional consistency
+
+**Error:** `Project 'X' targets product 'Y' but product doesn't list it in active_projects`
+
+**Fix:** Add project to product's `product.yml`:
+```yaml
+active_projects:
+  - project_id: "project-x"
+    status: "active"
+```
+
+#### TS-PROD-004: Product features-index.md required
+
+**Error:** `Product 'X' is missing features/features-index.md`
+
+**Fix:** Create `products/<product>/features/features-index.md`:
+```markdown
+# Features Index — Product Name (PRX)
+
+| Feature ID | Name | Status | Last Updated |
+|------------|------|--------|--------------|
+| f-PRX-001 | Feature Name | Active | YYYY-MM-DD |
+```
+
+#### TS-PROD-005: Product story-ledger.md required
+
+**Error:** `Product 'X' is missing features/story-ledger.md`
+
+**Fix:** Create `products/<product>/features/story-ledger.md`:
+```markdown
+# Story Ledger — Product Name (PRX)
+
+| Date | Story | Epic | Feature | Change Summary |
+|------|-------|------|---------|----------------|
+```
+
+---
+
+### 4.0a Feature-Increment Rules (TS-FI) — 4.0 ONLY
+
+#### TS-FI-001: Feature-Increment must reference product and feature
+
+**Error:** `Feature-Increment must specify Target Product` or `must specify Target Feature`
+
+**Fix:** Add to Feature-Increment header:
+```markdown
+**Target Product:** product-id (PRX)  
+**Target Feature:** f-PRX-XXX (Feature Name)
+```
+
+#### TS-FI-002: Feature-Increment must have AS-IS and TO-BE sections
+
+**Error:** `Feature-Increment is missing required section: 'X'`
+
+**Fix:** Add sections:
+```markdown
+## AS-IS (Current Behavior)
+
+Current behavior reference from f-PRX-XXX.
+
+## TO-BE (Target Behavior)
+
+New behavior after implementation.
+```
+
+#### TS-FI-003: Feature-Increment target feature must exist
+
+**Error:** `Target Feature 'f-PRX-XXX' does not exist in product`
+
+**Fix Options:**
+1. Create the feature in `products/<product>/features/f-PRX-XXX-description.md`
+2. Correct the feature reference in the FI
+
+#### TS-FI-004: Feature-Increment IDs must be unique
+
+**Error:** `Duplicate Feature-Increment ID 'fi-PRX-XXX' found`
+
+**Fix:** Rename one duplicate file to use unique ID, update all references.
+
+---
+
+### 4.0b Epic Rules (TS-EPIC) — 4.0 ONLY
+
+#### TS-EPIC-001: Epic must link to Feature-Increments
+
+**Error:** `Epic must link to at least one Feature-Increment (fi-PRX-XXX)`
+
+**Fix:** Add to Epic:
+```markdown
+## Feature-Increments
+
+| FI ID | Description | Status |
+|-------|-------------|--------|
+| [fi-PRX-001](../feature-increments/fi-PRX-001-description.md) | Description | Planned |
+```
+
+#### TS-EPIC-002: Epic must define TO-BE state
+
+**Error:** `Epic is missing required section: 'TO-BE'`
+
+**Fix:** Add section:
+```markdown
+## TO-BE (Target State)
+
+Description of the target state after epic completion.
+```
+
+#### TS-EPIC-003: Epic IDs must be unique
+
+**Error:** `Duplicate Epic ID 'epic-PRX-XXX' found`
+
+**Fix:** Rename one duplicate file to use unique ID, update all story references.
+
+---
 
 ### 4.1 Project Rules (TS-PROJ)
 
@@ -81,26 +230,48 @@ Fix errors in this order:
 
 **Error:** `project.yml is missing` or `missing required field: 'X'`
 
-**Required fields:** `project_id`, `name`, `status`, `stakeholders`, `roles`
+**Required fields (4.0):** `project.id`, `project.name`, `project.status`, `project.owner`, `target_products`
 
 **Fix:** Create or update `projects/<project>/project.yml`:
 ```yaml
-project_id: "project-id"
-name: "Project Name"
-description: "Brief description"
-status: "active"
-stakeholders:
-  - name: "Product Owner"
-    role: "PO"
-  - name: "Team Lead"
-    role: "DEV"
-roles:
-  - BA
-  - FA
-  - DEV
-  - QA
-  - SM
+project:
+  id: "project-id"
+  name: "Project Name"
+  description: "Brief description"
+  status: "active"
+  owner: "Project Lead"
+
+target_products:
+  - product_id: "product-id"
+    prefix: "PRX"
+
+team:
+  roles:
+    - BA
+    - FA
+    - DEV
+    - QA
+    - SM
 ```
+
+#### TS-PROJ-003: Project must target at least one product (4.0)
+
+**Error:** `Project must target at least one product in target_products`
+
+**Fix:** Add `target_products` section to `project.yml`:
+```yaml
+target_products:
+  - product_id: "product-id"
+    prefix: "PRX"
+```
+
+#### TS-PROJ-004: Target products must exist (4.0)
+
+**Error:** `Target product 'X' does not exist in products/`
+
+**Fix Options:**
+1. Create the product folder and configuration
+2. Correct the product reference in project.yml
 
 ---
 
@@ -108,10 +279,10 @@ roles:
 
 #### TS-FEAT-001: Feature file required for story link
 
-**Error:** `Referenced feature 'F-XXX' not found in features/`
+**Error:** `Referenced feature 'f-PRX-XXX' not found in features/`
 
 **Fix Options:**
-1. Create missing feature file: `features/F-XXX-description.md`
+1. Create missing feature file: `products/<product>/features/f-PRX-XXX-description.md`
 2. Correct the feature reference in the story
 
 #### TS-FEAT-002: Feature must include canon sections
@@ -217,27 +388,50 @@ Replace any TBD/placeholder text with actual criteria.
 1. Check all DoR items: `- [x] Item`
 2. Move story out of `ready-for-development/` folder
 
----
+#### TS-STORY-006: Story must link to Epic (4.0)
 
-### 4.4 ADR Rules (TS-ADR)
+**Error:** `Story filename must include Epic ID (s-eXXX-YYY-description.md)`
 
-#### TS-ADR-001: ADR required when architecture marked
+**Fix:** Rename story file to include Epic ID:
+```
+# Before
+s-001-user-login.md
 
-**Error:** `Story has "ADR Required" checked but no ADR reference found`
+# After
+s-e001-001-user-login.md
+```
+
+Update all cross-references (dev plans, test cases).
+
+#### TS-STORY-007: Linked Epic must exist (4.0)
+
+**Error:** `Referenced Epic eXXX does not exist in epics folder`
 
 **Fix Options:**
-1. Create ADR and add reference: `See ADR-XXX for details`
-2. Uncheck "ADR Required" checkbox if not needed
+1. Create the missing Epic: `epics/epic-PRX-XXX-description.md`
+2. Correct the Epic reference in the story filename
 
-#### TS-ADR-002: ADR must link to features
+---
 
-**Error:** `ADR must link to at least one feature`
+### 4.4 Technical Architecture Rules (TS-TA)
 
-**Fix:** Add to ADR:
+#### TS-TA-001: TA required when architecture marked
+
+**Error:** `Story has "TA Required" checked but no TA reference found`
+
+**Fix Options:**
+1. Create TA and add reference: `See ta-PRX-XXX for details`
+2. Uncheck "TA Required" checkbox if not needed
+
+#### TS-TA-002: TA must link to features
+
+**Error:** `TA must link to at least one feature`
+
+**Fix:** Add to TA:
 ```markdown
 ## Related Features
 
-- [F-001](../features/F-001-description.md) — Feature Name
+- [f-PRX-001](../../products/<product>/features/f-PRX-001-description.md) — Feature Name
 ```
 
 ---
@@ -248,12 +442,12 @@ Replace any TBD/placeholder text with actual criteria.
 
 **Error:** `Story is in sprint but dev plan is missing`
 
-**Fix:** Create `dev-plans/story-XXX-tasks.md`:
+**Fix:** Create `dev-plans/dp-eXXX-sYYY-tasks.md`:
 ```markdown
-# Dev Plan: S-XXX
+# Dev Plan: s-eXXX-YYY
 
 ## Story Reference
-[S-XXX](../stories/.../S-XXX-description.md)
+[s-eXXX-YYY](../stories/.../s-eXXX-YYY-description.md)
 
 ## Tasks
 
@@ -273,51 +467,113 @@ Replace any TBD/placeholder text with actual criteria.
 
 ### 4.6 DoD Rules (TS-DOD)
 
-#### TS-DOD-001: Canon must be updated when behavior changes
+#### TS-DOD-001: Canon sync before Done (Modified in 4.0)
 
-**Error:** `Story is marked Done with behavior changes but Feature Canon not updated`
+**Error:** `Story is marked Done with behavior changes but Feature-Increment TO-BE incomplete`
+
+**4.0 Logic:** Story cannot be Done if it affects behavior AND linked Feature-Increment TO-BE is incomplete.
 
 **Fix Options:**
-1. Update linked feature's "Current Behavior" section, then check DoD item `[x] Feature Canon updated`
-2. Uncheck "Adds Behavior" / "Changes Behavior" if no actual behavior change
+1. Complete the Feature-Increment TO-BE section
+2. Mark DoD item `[x] FI TO-BE complete`
+3. Uncheck "Adds Behavior" / "Changes Behavior" if no actual behavior change
+
+#### TS-DOD-003: Product sync after deployment (4.0)
+
+**Error:** `Project deployed but Product Canon not synced. Run ts:po sync`
+
+**Fix:** Execute Product Canon sync (PO role required):
+```
+ts:po sync --project <project-id>
+```
+
+This merges approved Feature-Increment TO-BE content into Product Canon features.
 
 ---
 
 ### 4.7 Naming Rules (TS-NAMING)
 
-#### TS-NAMING-FEATURE: Feature file naming
+#### TS-NAMING-FEATURE: Feature file naming (4.0)
 
-**Error:** `Feature file 'X' does not match naming convention: F-NNN-description.md`
+**Error:** `Feature file 'X' does not match naming convention: f-PRX-NNN-description.md`
 
-**Pattern:** `F-001-description.md`
-- `F-` prefix required
+**Pattern:** `f-PRX-001-description.md`
+- `f-` prefix required (lowercase)
+- `PRX` = product prefix (3-4 uppercase chars)
 - `NNN` = 3+ digit number
 - `description` = lowercase with hyphens
 
 **Fix Checklist:**
 1. Rename file
-2. Update header: `# F-001: Description`
+2. Update header: `# f-PRX-001: Description`
 3. Update internal ID reference
 4. Update all cross-references
 
-#### TS-NAMING-STORY: Story file naming
+#### TS-NAMING-STORY: Story file naming (4.0)
 
-**Error:** `Story file 'X' does not match naming convention: S-NNN-description.md`
+**Error:** `Story file 'X' does not match naming convention: s-eXXX-YYY-description.md`
 
-**Pattern:** `S-001-description.md`
+**Pattern:** `s-e001-001-description.md`
+- `s-` prefix for story
+- `eXXX` = epic number
+- `YYY` = story sequence within epic
 
 **Fix Checklist:**
 1. Rename file
-2. Update header: `# S-001: Description`
-3. Update cross-references in features, dev-plans
+2. Update header: `# s-eXXX-YYY: Description`
+3. Update cross-references in dev-plans, test cases
 
-#### TS-NAMING-ADR: ADR file naming
+#### TS-NAMING-TA: Technical Architecture file naming
 
-**Pattern:** `ADR-001-description.md`
+**Pattern:** `ta-PRX-NNN-description.md` or `tai-PRX-NNN-description.md` (increment)
 
-#### TS-NAMING-DEVPLAN: Dev plan file naming
+**Examples:**
+- ✅ `ta-DIT-001-auth-strategy.md`
+- ✅ `tai-CRM-003-api-versioning.md`
+- ❌ `ADR-001-something.md` (legacy pattern)
 
-**Pattern:** `story-001-tasks.md` (matches story number)
+#### TS-NAMING-SD: Solution Design file naming
+
+**Pattern:** `sd-PRX-NNN-description.md` or `sdi-PRX-NNN-description.md` (increment)
+
+**Examples:**
+- ✅ `sd-DIT-001-combat-module.md`
+- ✅ `sdi-CRM-002-contact-sync.md`
+
+#### TS-NAMING-DEVPLAN: Dev plan file naming (4.0)
+
+**Pattern:** `dp-eXXX-sYYY-tasks.md` (**explicit: e=epic, s=story**)
+
+**Examples:**
+- ✅ `dp-e001-s001-tasks.md` (for story `s-e001-001`)
+- ❌ `dp-s-e001-001-tasks.md` (wrong: mirrors story instead of explicit prefix)
+- ❌ `story-001-tasks.md` (legacy 2.0 pattern)
+
+#### TS-NAMING-007: Feature-Increment naming (4.0)
+
+**Pattern:** `fi-PRX-XXX-description.md`
+
+**Examples:**
+- ✅ `fi-DIT-001-combat-v2.md`
+- ✅ `fi-CRM-042-contacts-update.md`
+- ❌ `FI-DIT-001-something.md` (prefix must be lowercase)
+- ❌ `fi-001-something.md` (missing PRX)
+
+**Fix Checklist:**
+1. Extract PRX from target product
+2. Rename file to match pattern
+3. Update header
+4. Update Epic references
+
+#### TS-NAMING-008: Product folder naming (4.0)
+
+**Pattern:** `lowercase-with-dashes`
+
+**Examples:**
+- ✅ `dnd-initiative-tracker`
+- ✅ `user-management`
+- ❌ `CheckoutSystem` (no uppercase)
+- ❌ `checkout_system` (no underscores)
 
 ---
 
@@ -327,40 +583,50 @@ When renaming files, ALWAYS update:
 
 | Location | What to Update |
 |----------|----------------|
-| **File itself** | Header (e.g., `# F-001:` or `# S-001:`) |
-| **File itself** | Internal ID references (e.g., `Feature ID: F-001`) |
-| **Stories** | Feature links in Linked Features section |
+| **File itself** | Header (e.g., `# f-PRX-001:` or `# s-eXXX-YYY:`) |
+| **File itself** | Internal ID references |
+| **Stories** | Epic reference in filename, feature links |
 | **Features** | Story references in Story Ledger |
-| **Dev plans** | Story references |
-| **ADRs** | Feature references |
-| **Index files** | features-index.md, etc. |
+| **Dev plans** | Story references (dp-eXXX-sYYY pattern) |
+| **TA/SD** | Feature references |
+| **Index files** | features-index.md, products-index.md, etc. |
+| **Epics** | Feature-Increment references |
+| **FIs** | Feature and Product references |
 
 ---
 
-## 6. Example Session
+## 6. Example Session (4.0)
 
 ```
 > teamspec lint --project my-project
 
-📄 projects/my-project/project.yml
-   ❌ [TS-PROJ-002] project.yml is missing required field: 'status'
+📄 products/my-product/product.yml
+   ❌ [TS-PROD-002] product.yml is missing required field: 'product.prefix'
    
-📄 projects/my-project/features/FEAT-001-login.md
-   ⚠️ [TS-NAMING-FEATURE] Feature file does not match naming convention
+📄 projects/my-project/stories/backlog/s-001-login.md
+   ❌ [TS-STORY-006] Story filename must include Epic ID (s-eXXX-YYY-description.md)
 
-Summary: 1 error, 1 warning
+📄 projects/my-project/feature-increments/fi-001-login-update.md
+   ⚠️ [TS-NAMING-007] Feature-Increment file does not match naming convention
+
+Summary: 2 errors, 1 warning
 
 --- AGENT ACTIONS ---
 
-1. Edit project.yml:
-   - Add: status: "active"
+1. Edit product.yml:
+   - Add: prefix: "MYP"
 
-2. Rename feature file:
-   - FEAT-001-login.md → F-001-login.md
-   - Update header: # FEAT-001 → # F-001
-   - Search for cross-references (none found)
+2. Rename story file:
+   - s-001-login.md → s-e001-001-login.md
+   - Update header: # S-001 → # s-e001-001
+   - Update dev plan reference (if exists)
 
-3. Verify:
+3. Rename feature-increment file:
+   - fi-001-login-update.md → fi-MYP-001-login-update.md
+   - Update header
+   - Update Epic references
+
+4. Verify:
    > teamspec lint --project my-project
    ✅ No issues found
 
@@ -372,9 +638,13 @@ Summary: 1 error, 1 warning
 ## 7. Escalation
 
 If a fix requires **business judgment** (not mechanical):
-- Flag to human: "This fix requires BA/FA decision"
-- Example: Missing feature content, ambiguous requirements
+- Flag to human: "This fix requires BA/FA/PO decision"
+- Example: Missing feature content, ambiguous requirements, PRX assignment
 
 If a fix would **delete content**:
 - STOP and ask for confirmation
 - Never auto-delete existing documentation
+
+If a fix involves **PRX changes**:
+- PRX is immutable once assigned
+- Escalate to PO for guidance

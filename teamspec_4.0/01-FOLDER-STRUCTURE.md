@@ -72,7 +72,7 @@ TeamSpec 4.0 introduces `products/` as a first-class citizen alongside `projects
 │       ├── decisions/            # Project-specific decisions
 │       │   └── dec-XXX-*.md
 │       ├── dev-plans/            # Development plans
-│       │   └── dp-sXXX-*.md      # e.g., dp-s001-001-tasks.md
+│       │   └── dp-eXXX-sYYY-*.md  # e.g., dp-e001-s001-tasks.md
 │       ├── qa/                   # QA artifacts
 │       │   ├── test-cases/
 │       │   ├── bugs/

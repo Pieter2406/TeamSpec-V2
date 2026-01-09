@@ -477,7 +477,7 @@ ts:fa slice epic-DIT-001-combat
 
 | Command | Owner | Purpose |
 |---------|-------|---------|
-| `ts:dev plan` | DEV | Create dev plan for story (dp-sXXX-YYY-*.md) |
+| `ts:dev plan` | DEV | Create dev plan for story (dp-eXXX-sYYY-*.md) |
 | `ts:dev implement` | DEV | Execute implementation |
 | `ts:dev ready` | DEV | Move story to ready-to-develop |
 | `ts:qa test` | QA | Design test cases |
@@ -523,7 +523,7 @@ ts:fa slice epic-DIT-001-combat
 │        ├──→ ts:fa story    (create individual stories)                 │
 │        │                                                                │
 │        ▼                                                                │
-│  ts:dev plan ─────────────→ dp-sXXX-YYY-*.md Created                   │
+│  ts:dev plan ─────────────→ dp-eXXX-sYYY-*.md Created                   │
 │        │                                                                │
 │        ▼                                                                │
 │  ts:sm sprint plan ───────→ Stories in Sprint                          │
@@ -566,7 +566,7 @@ ts:fa slice epic-DIT-001-combat
 | **BA** | `ts:ba project`, `ts:ba epic`, `ts:ba feature-increment`, `ts:ba ba-increment`, `ts:ba decision` | `epic-PRX-XXX`, `fi-PRX-XXX`, `bai-PRX-XXX` |
 | **FA** | `ts:fa story`, `ts:fa slice`, `ts:fa storymap` | `s-eXXX-YYY-*.md` |
 | **SA** | `ts:sa adr` | `ta-PRX-XXX`, `tai-PRX-XXX` |
-| **DEV** | `ts:dev plan`, `ts:dev implement`, `ts:dev ready` | `dp-sXXX-YYY-*.md` |
+| **DEV** | `ts:dev plan`, `ts:dev implement`, `ts:dev ready` | `dp-eXXX-sYYY-*.md` |
 | **QA** | `ts:qa test`, `ts:qa dor-check`, `ts:qa dod-check` | Test cases |
 | **SM** | `ts:sm sprint create`, `ts:sm sprint plan`, `ts:sm sprint close`, `ts:sm deploy-checklist` | Sprint folders |
 | **Any** | `ts:status`, `ts:lint`, `ts:context`, `ts:agent`, `ts:deploy`, `ts:migrate` | Reports |

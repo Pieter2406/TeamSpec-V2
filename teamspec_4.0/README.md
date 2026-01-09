@@ -110,7 +110,7 @@ This solves the "time-pollution problem" where project artifacts contaminate the
 │      ├── decisions/                 # Project-specific decisions    │
 │      │   └── dec-XXX-*.md                                           │
 │      ├── dev-plans/                 # Development plans             │
-│      │   └── dp-sXXX-*.md           # e.g., dp-s001-001-tasks.md    │
+│      │   └── dp-eXXX-sYYY-*.md       # e.g., dp-e001-s001-tasks.md   │
 │      ├── qa/                        # Test cases, bugs, UAT         │
 │      │   ├── test-cases/                                            │
 │      │   ├── bugs/                                                  │
@@ -137,7 +137,7 @@ This solves the "time-pollution problem" where project artifacts contaminate the
 | `tai-` | Project | Technical Architecture Increment | `tai-DIT-001-cache.md` |
 | `epic-` | Project | Epic | `epic-DIT-001-combat-redesign.md` |
 | `s-eXXX-YYY` | Project | Story (eXXX=Epic, YYY=sequence) | `s-e001-001-add-button.md` |
-| `dp-` | Project | Dev Plan | `dp-s001-001-tasks.md` |
+| `dp-` | Project | Dev Plan | `dp-e001-s001-tasks.md` |
 
 ---
 

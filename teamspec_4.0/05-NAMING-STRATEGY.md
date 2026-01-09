@@ -47,7 +47,7 @@
 | `tai-` | Technical Architecture Increment | Project | `tai-DIT-001-cache.md` |
 | `epic-` | Epic | Project | `epic-DIT-001-combat-redesign.md` |
 | `s-eXXX-YYY` | Story | Project | `s-e001-001-add-button.md` |
-| `dp-` | Dev Plan | Project | `dp-s001-001-tasks.md` |
+| `dp-` | Dev Plan | Project | `dp-e001-s001-tasks.md` |
 
 ---
 
@@ -324,9 +324,9 @@ The Epic ID is embedded in the filename, providing instant traceability:
 
 ### 7.8 Dev Plan Naming
 
-**Pattern:** `dp-sXXX-YYY-description.md` (mirrors story ID)
+**Pattern:** `dp-eXXX-sYYY-tasks.md` (explicit prefix: e=epic, s=story)
 
-**Example:** `dp-s001-001-implementation.md` (dev plan for `s-e001-001-*.md`)
+**Example:** `dp-e001-s001-tasks.md` (dev plan for story `s-e001-001-*.md`)
 
 ---
 
@@ -476,5 +476,5 @@ Related: s-e001-001, s-e001-002, s-e001-003
 | Epic | `epic-PRX-XXX-slug.md` | Project | `epic-DIT-001-combat.md` |
 | Story | `s-eXXX-YYY-slug.md` | Project | `s-e001-001-add-button.md` |
 | Decision (project) | `dec-XXX-slug.md` | Project | `dec-001-scope.md` |
-| Dev Plan | `dp-sXXX-YYY-slug.md` | Project | `dp-s001-001-tasks.md` |
+| Dev Plan | `dp-eXXX-sYYY-tasks.md` | Project | `dp-e001-s001-tasks.md` |
 | Sprint | `sprint-N` | Project | `sprint-5` |

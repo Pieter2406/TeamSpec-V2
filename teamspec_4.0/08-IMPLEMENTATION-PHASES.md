@@ -44,24 +44,27 @@
 ### 2.3 Tasks
 
 ```
-[ ] 1.1 Create detectWorkspaceVersion() function
-[ ] 1.2 Create findProducts() helper function
-[ ] 1.3 Create createProductStructure() function
-[ ] 1.4 Update createProjectStructure() for feature-increments/
-[ ] 1.5 Create products-index-template.md
-[ ] 1.6 Create product-template.yml
-[ ] 1.7 Create increments-index-template.md
-[ ] 1.8 Update init flow for product-first/project-first choice
-[ ] 1.9 Create migrate.js with basic structure
-[ ] 1.10 Add migrate command to CLI
-[ ] 1.11 Unit tests for new functions
+[x] 1.1 Create detectWorkspaceVersion() function
+[x] 1.2 Create findProducts() helper function
+[x] 1.3 Create createProductStructure() function
+[x] 1.4 Update createProjectStructure() for feature-increments/
+[x] 1.5 Create products-index-template.md
+[x] 1.6 Create product-template.yml
+[x] 1.7 Create increments-index-template.md
+[x] 1.8 Update init flow for product-first/project-first choice
+[x] 1.9 Create migrate.js with basic structure
+[x] 1.10 Add migrate command to CLI
+[x] 1.11 Unit tests for new functions
+[x] 1.12 Create project-template.yml
 ```
 
 ### 2.4 Validation
 
-- [ ] Fresh `teamspec init` creates products/ and projects/
-- [ ] Existing 2.0 workspace detected correctly
-- [ ] `teamspec migrate --dry-run` works without errors
+- [x] Fresh `teamspec init` creates products/ and projects/
+- [x] Existing 2.0 workspace detected correctly
+- [x] `teamspec migrate --dry-run` works without errors
+
+**✅ Phase 1 Complete** (2026-01-09)
 
 ---
 
@@ -91,26 +94,28 @@
 ### 3.3 Tasks
 
 ```
-[ ] 2.1 Create AGENT_PO.md from scratch
-[ ] 2.2 Update AGENT_BOOTSTRAP.md Section 2 (Canon rules)
-[ ] 2.3 Update AGENT_BOOTSTRAP.md Section 4 (Role summary)
-[ ] 2.4 Update AGENT_BOOTSTRAP.md Section 6 (Quality gates)
-[ ] 2.5 Update AGENT_BOOTSTRAP.md Section 8 (Artifact locations)
-[ ] 2.6 Update AGENT_BA.md responsibilities
-[ ] 2.7 Update AGENT_BA.md commands (add feature-increment)
-[ ] 2.8 Update AGENT_FA.md responsibilities
-[ ] 2.9 Update AGENT_FA.md story rules (Epic mandatory)
-[ ] 2.10 Update AGENT_FA.md sync flow (prepare, not execute)
-[ ] 2.11 Update AGENT_SM.md (deployment gate)
-[ ] 2.12 Update remaining agents (path references)
-[ ] 2.13 Update AGENT_FIX.md (new fix rules)
+[x] 2.1 Create AGENT_PO.md from scratch
+[x] 2.2 Update AGENT_BOOTSTRAP.md Section 2 (Canon rules)
+[x] 2.3 Update AGENT_BOOTSTRAP.md Section 4 (Role summary)
+[x] 2.4 Update AGENT_BOOTSTRAP.md Section 6 (Quality gates)
+[x] 2.5 Update AGENT_BOOTSTRAP.md Section 8 (Artifact locations)
+[x] 2.6 Update AGENT_BA.md responsibilities
+[x] 2.7 Update AGENT_BA.md commands (add feature-increment)
+[x] 2.8 Update AGENT_FA.md responsibilities
+[x] 2.9 Update AGENT_FA.md story rules (Epic mandatory)
+[x] 2.10 Update AGENT_FA.md sync flow (prepare, not execute)
+[x] 2.11 Update AGENT_SM.md (deployment gate)
+[x] 2.12 Update remaining agents (SA, DEV, QA, DES - version, model refs)
+[x] 2.13 Update AGENT_FIX.md (new fix rules: TS-PROD, TS-FI, TS-EPIC)
 ```
 
 ### 3.4 Validation
 
-- [ ] All agents pass markdown linting
-- [ ] Cross-references between agents are correct
-- [ ] No references to deprecated concepts (project features as canon)
+- [x] All agents pass markdown linting
+- [x] Cross-references between agents are correct
+- [x] No references to deprecated concepts (project features as canon)
+
+**✅ Phase 2 Complete** (2026-01-09)
 
 ---
 

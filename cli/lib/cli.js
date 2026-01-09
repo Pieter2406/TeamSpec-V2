@@ -1500,7 +1500,7 @@ async function run(args) {
 
     // Dry run by default unless --fix is specified
     const dryRun = !options.fix;
-    
+
     if (dryRun) {
       console.log(`\n${colored('ℹ️  Dry run mode', colors.yellow)} - no changes will be made.`);
       console.log(`   Run with ${colored('--fix', colors.bold)} to apply changes.`);

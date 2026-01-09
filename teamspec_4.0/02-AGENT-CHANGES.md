@@ -226,7 +226,7 @@ flowchart TD
     end
     
     subgraph "Execution Artifacts"
-        DEV["Dev Plans<br/>dp-sXXX-*.md"]
+        DEV["Dev Plans<br/>dp-eXXX-sYYY-*.md"]
         TEST["Test Cases"]
     end
     
@@ -326,7 +326,7 @@ projects/{project-id}/                    # Change proposals (BA owns)
 ├── decisions/                            # Project decisions (BA)
 │   └── dec-XXX-*.md
 ├── dev-plans/                            # Dev plans (DEV)
-│   └── dp-sXXX-YYY-*.md                  # e.g., dp-s001-001-tasks.md
+│   └── dp-eXXX-sYYY-*.md                  # e.g., dp-e001-s001-tasks.md
 ├── qa/                                   # QA artifacts (QA)
 └── sprints/                              # Sprint tracking (SM)
 ```
@@ -684,7 +684,7 @@ Update auto-fix rules for new structure:
 | AGENT_FA.md | HIGH | s-eXXX-YYY stories (Epic in filename), sync preparation |
 | AGENT_SM.md | MEDIUM | Deployment gate, checklist |
 | AGENT_SA.md | LOW | ta-PRX-XXX / tai-PRX-XXX paths |
-| AGENT_DEV.md | LOW | dp-sXXX-YYY dev plans |
+| AGENT_DEV.md | LOW | dp-eXXX-sYYY dev plans |
 | AGENT_QA.md | LOW | Test against fi-PRX-XXX, deployment verification |
 | AGENT_DES.md | LOW | Path updates |
 | AGENT_FIX.md | MEDIUM | New fix rules for PRX naming patterns |

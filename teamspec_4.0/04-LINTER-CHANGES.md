@@ -645,8 +645,8 @@ const NAMING_PATTERNS = {
   // Decisions (project level)
   decisionProject: /^dec-\d{3,}-[a-z][a-z0-9-]*\.md$/,
   
-  // Dev Plans
-  devPlan: /^dp-s\d{3,}-\d{3,}-[a-z][a-z0-9-]*\.md$/,
+  // Dev Plans (explicit prefix: e=epic, s=story)
+  devPlan: /^dp-e\d{3,}-s\d{3,}-[a-z][a-z0-9-]*\.md$/,
   
   // Sprints
   sprint: /^sprint-\d+$/,
