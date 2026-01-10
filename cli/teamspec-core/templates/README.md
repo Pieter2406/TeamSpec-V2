@@ -1,14 +1,19 @@
-# TeamSpec 2.0 Templates
+# TeamSpec Templates
 
-> **Version:** 2.0  
-> **Last Updated:** 2026-01-07  
+> **Version:** 2.0 / 4.0  
+> **Last Updated:** 2026-01-10  
 > **Purpose:** Aligned templates for Feature Canon operating model
 
 ---
 
 ## Overview
 
-These templates are designed for the TeamSpec 2.0 Feature Canon operating model. Each template:
+These templates are designed for the TeamSpec operating model. Templates are available for both:
+
+- **TeamSpec 2.0** — Feature Canon model (features in projects)
+- **TeamSpec 4.0** — Product Canon model (features in products, increments in projects)
+
+Each template:
 
 1. **Identifies its owner** — Which role creates/maintains it
 2. **States its artifact type** — Source of Truth, Execution, Planning, or Operational
@@ -18,6 +23,19 @@ These templates are designed for the TeamSpec 2.0 Feature Canon operating model.
 ---
 
 ## Template Index
+
+### TeamSpec 4.0 Templates (NEW)
+
+Templates for the Product Canon operating model.
+
+| Template | Owner | Linter Rules | Purpose |
+|----------|-------|--------------|---------|
+| [epic-template.md](epic-template.md) | BA/PO | TS-EPIC-* | Epic definition (groups Feature-Increments) |
+| [story-template-v4.md](story-template-v4.md) | FA | TS-STORY-006/007 | Stories linked to Epics (s-eXXX-YYY) |
+| [feature-increment-template.md](feature-increment-template.md) | BA | TS-FI-* | Feature-Increment (delta to product feature) |
+| [product-template.yml](product-template.yml) | PO | TS-PROD-* | Product configuration |
+| [products-index-template.md](products-index-template.md) | PO | TS-PROD-001 | Product registry |
+| [increments-index-template.md](increments-index-template.md) | BA | TS-FI-004 | Increment registry |
 
 ### Source of Truth Templates
 
@@ -35,7 +53,7 @@ These templates create **execution artifacts** — deltas to the source of truth
 
 | Template | Owner | Linter Rules | Purpose |
 |----------|-------|--------------|---------|
-| [story-template.md](story-template.md) | FA | TS-STORY-* | User stories (deltas) |
+| [story-template.md](story-template.md) | FA | TS-STORY-* | User stories (deltas) - 2.0 |
 | [testcases-template.md](testcases-template.md) | QA | TS-QA-* | Feature-level test cases |
 | [bug-report-template.md](bug-report-template.md) | QA | TS-QA-002 | Bug reports with classification |
 | [uat-pack-template.md](uat-pack-template.md) | QA | TS-UAT-* | User acceptance testing |
@@ -160,6 +178,33 @@ Before sprint close, verify Canon is updated:
 ---
 
 ## Linter Rules Reference
+
+### TeamSpec 4.0 Rules (NEW)
+
+| Rule | Applies To | Description |
+|------|------------|-------------|
+| TS-PROD-001 | Products | Product registration required |
+| TS-PROD-002 | Products | product.yml metadata required |
+| TS-PROD-003 | Products | Bidirectional product-project links |
+| TS-PROD-004 | Products | features-index.md required |
+| TS-PROD-005 | Products | story-ledger.md required |
+| TS-FI-001 | Feature-Increments | Product/feature reference required |
+| TS-FI-002 | Feature-Increments | AS-IS/TO-BE sections required |
+| TS-FI-003 | Feature-Increments | Target feature must exist |
+| TS-FI-004 | Feature-Increments | ID must be unique |
+| TS-EPIC-001 | Epics | Feature-Increment link required |
+| TS-EPIC-002 | Epics | TO-BE section required |
+| TS-EPIC-003 | Epics | ID must be unique |
+| TS-PROJ-003 | Projects | Must target at least one product |
+| TS-PROJ-004 | Projects | Target products must exist |
+| TS-STORY-006 | Stories | Epic link required (via filename) |
+| TS-STORY-007 | Stories | Linked Epic must exist |
+| TS-DOD-003 | Projects | Product sync after deployment |
+| TS-NAMING-FI | Feature-Increments | Naming convention (fi-PRX-XXX) |
+| TS-NAMING-EPIC | Epics | Naming convention (epic-PRX-XXX) |
+| TS-NAMING-PRODUCT | Products | Naming convention (lowercase-dashes) |
+
+### TeamSpec 2.0 Rules
 
 | Rule | Applies To | Description |
 |------|------------|-------------|
