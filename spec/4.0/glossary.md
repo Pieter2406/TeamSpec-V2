@@ -123,13 +123,14 @@ Checklist verified before a story is marked complete.
 - **Owner:** FA
 - **Verifier:** QA
 
-### Deployment Gate
+### Deployment Verification Gate
 
-Checklist verified before code is deployed to production.
+Checklist verified **AFTER** code is deployed to production (and feature toggles enabled, if applicable), **BEFORE** `ts:po sync`. This ensures Canon is only updated when the change is available in production.
 
 - **Owner:** SM
 - **Approver:** PO
 - **Verifier:** QA
+- **Timing:** Post-deploy, pre-sync
 
 ### Canon Sync Gate
 

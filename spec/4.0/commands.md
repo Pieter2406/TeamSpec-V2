@@ -23,7 +23,7 @@
 | `ts:po product` | Create new product with PRX prefix | `products/{id}/` structure |
 | `ts:po project` | Create new project targeting product(s) | `projects/{id}/` structure |
 | `ts:po sync` | Sync project changes to Product Canon (post-deploy) | Updated `products/**` |
-| `ts:po status` | Product/project status overview | Status report |
+| `ts:po status` | Business/management report: health, stories, FI state, QA status, gate readiness, sync readiness (read-only, does not modify artifacts) | Status report |
 
 ### BA Commands (Business Analyst)
 
@@ -79,7 +79,6 @@
 
 | Command | Purpose | Output |
 |---------|---------|--------|
-| `ts:status` | Project/product status overview | Status report |
 | `ts:lint` | Run linter | Lint report |
 | `ts:fix` | Auto-fix lint errors | Fixed files |
 | `ts:agent <role>` | Load role-specific agent | Agent loaded |
@@ -110,7 +109,7 @@ These commands are run in the terminal, not in chat.
 | `teamspec lint` | Lint project artifacts against TeamSpec rules |
 | `teamspec lint --project <id>` | Lint specific project |
 | `teamspec update` | Update TeamSpec core files |
-| `teamspec migrate` | Migrate from older TeamSpec version |
+
 
 ---
 
@@ -125,4 +124,4 @@ These commands are run in the terminal, not in chat.
 | DEV | `ts:dev plan`, `ts:dev implement` |
 | QA | `ts:qa test`, `ts:qa regression`, `ts:qa verify` |
 | SM | `ts:sm sprint`, `ts:sm deploy-checklist` |
-| Any | `ts:status`, `ts:lint`, `ts:fix`, `ts:agent` |
+| Any | `ts:lint`, `ts:fix`, `ts:agent` |

@@ -177,7 +177,7 @@ roles:
       - "Deployment verification"
     creates:
       - "projects/{id}/qa/test-cases/tc-fi-PRX-NNN-*.md"
-      - "projects/{id}/qa/bug-reports/bug-PRX-NNN-*.md"
+      - "projects/{id}/qa/bug-reports/bug-{project-id}-NNN-*.md"
       - "products/{id}/qa/regression-tests/rt-f-PRX-NNN-*.md"
     reviews:
       - "Stories (for testability)"
@@ -319,9 +319,10 @@ artifacts:
 
   bug-report:
     location: "projects/{project-id}/qa/bug-reports/"
-    naming: "bug-{PRX}-{NNN}-{description}.md"
-    example: "bug-ACME-042-oauth-timeout.md"
+    naming: "bug-{project-id}-{NNN}-{description}.md"
+    example: "bug-q1-auth-042-oauth-timeout.md"
     owner: "QA"
+    note: "NNN is unique within project. Product PRX may be recorded as metadata if needed."
 
   regression-impact:
     location: "projects/{project-id}/qa/regression-impact/"
@@ -388,23 +389,27 @@ gates:
       - "Ready for deployment"
       
   deployment:
-    name: "Deployment Gate"
+    name: "Deployment Verification Gate"
     owner: "SM"
     approver: "PO"
     verifier: "QA"
+    timing: "After production deploy (+ toggles ON if applicable), before ts:po sync"
     checks:
       - "All sprint stories in terminal state (Done/Deferred/Out-of-Scope)"
       - "All Feature-Increments reviewed"
-      - "QA sign-off obtained"
-      - "Regression coverage confirmed (rt-f-* updated or 'no impact' recorded)"
       - "Code deployed to production"
-      - "Smoke tests passed"
+      - "Feature toggles enabled (or N/A)"
+      - "Smoke tests passed in production"
+      - "QA sign-off obtained"
+      - "Regression impact recorded (ri-fi-* with assessment)"
+      - "PO approval obtained"
     trigger: "SM runs ts:sm deploy-checklist"
+    note: "SM verifies checklist completion; SM does NOT deploy"
     
   canon-sync:
     name: "Canon Sync Gate"
     owner: "PO"
-    precondition: "Deployment gate passed"
+    precondition: "Deployment Verification gate passed"
     action: "ts:po sync"
     effect: "Feature-Increment TO-BE merged into Product Feature Canon"
     timing: "POST-DEPLOY ONLY"
@@ -430,15 +435,16 @@ commands:
     invocation: "ts:po sync"
     role: "PO"
     purpose: "Sync project changes to Product Canon (post-deploy)"
-    precondition: "Deployment gate passed"
+    precondition: "Deployment Verification gate passed"
     effect: "FI TO-BE → Feature Canon"
     changes: ["products/**"]
 
   - id: po.status
     invocation: "ts:po status"
     role: "PO"
-    purpose: "Product/project status overview"
+    purpose: "Business/management report: health, stories, FI state, QA status, gate readiness, sync readiness"
     output: "Status report"
+    note: "Read-only reporting command; does not modify artifacts"
 
   # BA commands
   - id: ba.analysis
@@ -567,12 +573,6 @@ commands:
     output: "Deployment checklist"
 
   # Universal commands
-  - id: status
-    invocation: "ts:status"
-    role: "Any"
-    purpose: "Project/product status overview"
-    output: "Status report"
-
   - id: lint
     invocation: "ts:lint"
     role: "Any"
@@ -618,7 +618,7 @@ commands:
 invariants:
   - id: INV-001
     rule: "Product Canon is updated ONLY after deployment"
-    enforcement: "ts:po sync requires deployment gate passed"
+    enforcement: "ts:po sync requires Deployment Verification gate passed"
     
   - id: INV-002
     rule: "Every artifact has exactly one owner role"

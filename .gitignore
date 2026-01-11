@@ -22,8 +22,9 @@ Thumbs.db
 .idea/
 
 # Package manager
-package-lock.json
-yarn.lock
+# Keep lockfiles for reproducible installs; root may stay lockfile-less but allow nested packages.
+!/cli/package-lock.json
+!/cli/yarn.lock
 
 # Test coverage
 coverage/

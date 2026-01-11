@@ -11,8 +11,8 @@
 |------|-------|----------|----------|------|
 | DoR | FA | SM | — | Before story enters development |
 | DoD | FA | QA | — | Before story marked complete |
-| Deployment | SM | QA | PO | After deployment, before Canon Sync |
-| Canon Sync | PO | — | — | After deployment gate passed |
+| Deployment Verification | SM | QA | PO | After production deploy (+ toggles ON if applicable), before `ts:po sync` |
+| Canon Sync | PO | — | — | After Deployment Verification gate passed |
 
 ---
 
@@ -62,21 +62,27 @@ Before a story moves to `done/`:
 
 ---
 
-## Deployment Gate
+## Deployment Verification Gate
 
 **Owner:** SM  
 **Approver:** PO  
 **Verifier:** QA
 
+### Timing
+
+This gate is verified **AFTER** production deployment (and feature toggles enabled, if applicable), **BEFORE** `ts:po sync`. Canon is NEVER updated before the change is available in production.
+
 ### Checklist
 
-After deployment, before `ts:po sync`:
+After production deploy + toggles ON (if applicable), before `ts:po sync`:
 
 - [ ] All sprint stories in terminal state (Done/Deferred/Out-of-Scope)
 - [ ] All Feature-Increments reviewed
+- [ ] **Code deployed to production**
+- [ ] **Feature toggles enabled** (or N/A if not using toggles)
+- [ ] Smoke tests passed in production
 - [ ] QA sign-off obtained
 - [ ] **Regression impact recorded** (ri-fi-* with assessment; enforced by `TS-QA-003`)
-- [ ] Deployment verified (smoke tests passed)
 - [ ] PO approval obtained
 
 ### Trigger
@@ -85,9 +91,9 @@ SM runs `ts:sm deploy-checklist`
 
 ### Enforcement
 
-- SM generates checklist
+- SM generates checklist and verifies completion (SM does NOT deploy)
 - QA verifies each item
-- PO approves final deployment
+- PO provides final approval
 
 ---
 
@@ -97,7 +103,7 @@ SM runs `ts:sm deploy-checklist`
 
 ### Precondition
 
-Deployment gate MUST be passed.
+Deployment Verification gate MUST be passed.
 
 ### Action
 
@@ -139,13 +145,15 @@ Canon is NEVER updated before deployment. This ensures:
 
 ### Promotion Rule
 
-At deployment gate, QA must confirm regression coverage is updated:
+At deployment verification gate, QA must confirm regression coverage is updated:
 
 1. For each `fi-PRX-NNN` delivered, either:
    - Update/create `rt-f-PRX-NNN-*` regression docs, OR
-   - Record "no regression impact" explicitly
+   - Record "no regression impact" explicitly via `ri-fi-PRX-NNN.md`
 
-2. Linter rule `TS-QA-001` enforces coverage check
+2. Enforcement:
+   - `TS-QA-003` enforces regression impact record + referenced `rt-f-*` files exist
+   - `TS-QA-001` enforces FI test case coverage (`tc-fi-*` exists)
 
 ---
 
@@ -155,6 +163,6 @@ At deployment gate, QA must confirm regression coverage is updated:
 |-------------------|-------|----------|----------|
 | Story ready for dev | FA | SM | — |
 | Story complete | FA | QA | — |
-| Code deployable | SM | QA | PO |
+| Deployment verification | SM | QA | PO |
 | Canon update | PO | — | — |
 | Regression coverage | QA | — | — |

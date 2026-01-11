@@ -99,8 +99,8 @@ sequenceDiagram
 stateDiagram-v2
     [*] --> backlog: ts:fa story
     backlog --> ready_to_refine: Needs refinement
-    ready_to_refine --> backlog: DoR passed
-    backlog --> in_progress: Sprint planning
+    ready_to_refine --> backlog: Refinement complete
+    backlog --> in_progress: Sprint planning + DoR passed
     in_progress --> done: DoD passed
     in_progress --> deferred: Postponed
     in_progress --> out_of_scope: Removed
@@ -121,7 +121,7 @@ stateDiagram-v2
 
 ---
 
-## Deployment Workflow
+## Deployment + Verification Workflow
 
 > **Gate Owner:** SM (process)  
 > **Gate Approver:** PO  
@@ -134,6 +134,11 @@ sequenceDiagram
     participant PO as Product Owner
     participant Ops as Operations
     
+    Note over Ops: Pre-deploy: Code ready
+    Ops->>Ops: Deploy to production
+    Ops->>Ops: Enable feature toggles (if applicable)
+    Ops->>SM: Deployed + toggles ON ✓
+    Note over SM,PO: POST-DEPLOY Verification Gate
     SM->>SM: ts:sm deploy-checklist
     SM->>QA: Request verification
     QA->>QA: ts:qa verify (all items)
@@ -141,29 +146,29 @@ sequenceDiagram
     QA->>SM: Sign-off ✓
     SM->>PO: Present checklist for approval
     PO->>PO: Review checklist
-    PO->>SM: Approve deployment ✓
-    SM->>Ops: Handoff to operations
-    Ops->>Ops: Deploy to production
-    Ops->>SM: Deployed ✓
+    PO->>SM: Approve ✓
+    Note over PO: Gate passed → Canon Sync enabled
 ```
 
-### Deployment Gate Checks (per [gates.md](gates.md))
+### Deployment Verification Gate Checks (per [gates.md](gates.md))
 
 1. All sprint stories in terminal state (Done/Deferred/Out-of-Scope)
 2. All Feature-Increments reviewed
-3. QA sign-off obtained
-4. Regression impact recorded for each FI (`ri-fi-PRX-NNN.md`)
-5. Code deployed to production
-6. Smoke tests passed
+3. **Code deployed to production**
+4. **Feature toggles enabled** (or N/A)
+5. Smoke tests passed in production
+6. QA sign-off obtained
+7. Regression impact recorded for each FI (`ri-fi-PRX-NNN.md`)
+8. PO approval obtained
 
-**Note:** SM owns the gate process (verification, checklist). PO has approval authority. SM does NOT perform the deploy - that is operations.
+**Note:** SM owns the gate process (verification, checklist). PO has approval authority. SM does NOT perform the deploy — that is operations. The sequence is: **deploy → toggle ON → verification gate → ts:po sync**.
 
 ---
 
 ## Canon Sync Workflow
 
 > **Gate Owner:** PO  
-> **Precondition:** Deployment gate passed
+> **Precondition:** Deployment Verification gate passed
 
 ```mermaid
 sequenceDiagram
@@ -171,9 +176,9 @@ sequenceDiagram
     participant System as TeamSpec
     participant QA as QA Engineer
     
-    Note over PO,System: Deployment gate MUST be passed
+    Note over PO,System: Deployment Verification gate MUST be passed
     PO->>System: ts:po sync
-    System->>System: Validate deployment gate
+    System->>System: Validate deployment verification gate
     System->>System: Merge FI TO-BE → Feature Canon
     System->>System: Merge increments → Canon
     System->>PO: Sync complete ✓
@@ -189,7 +194,7 @@ sequenceDiagram
 | `sdi-PRX-NNN-*.md` | `sd-PRX-NNN-*.md` | Merge/update |
 | `tai-PRX-NNN-*.md` | `ta-PRX-NNN-*.md` | Merge/update |
 
-**Note:** Regression tests (`rt-f-PRX-NNN`) are updated BEFORE deployment (part of deployment gate verification), not after sync.
+**Note:** Regression tests (`rt-f-PRX-NNN`) are updated as part of deployment verification gate (before canon sync), not after sync.
 
 ---
 
@@ -227,8 +232,9 @@ Team retrospective facilitated by SM.
 
 ### Deployment
 
-1. SM runs checklist: `ts:sm deploy-checklist`
-2. QA verifies and records regression impact
-3. PO approves
-4. Operations deploys to production
-5. PO syncs canon: `ts:po sync`
+1. Operations deploys to production
+2. Operations enables feature toggles (if applicable)
+3. SM runs verification checklist: `ts:sm deploy-checklist`
+4. QA verifies and records regression impact (`ri-fi-*`)
+5. PO approves deployment verification gate
+6. PO syncs canon: `ts:po sync`

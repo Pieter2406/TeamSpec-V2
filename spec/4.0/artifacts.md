@@ -41,7 +41,7 @@ These artifacts live in `projects/{project-id}/` and represent TO-BE state.
 | Story | `projects/{project-id}/stories/{state}/` | `s-e{EEE}-{SSS}-{description}.md` | `s-e001-042-add-google-oauth.md` | FA |
 | Dev Plan | `projects/{project-id}/dev-plans/` | `dp-e{EEE}-s{SSS}-{description}.md` | `dp-e001-s042-oauth-implementation.md` | DEV |
 | Test Case | `projects/{project-id}/qa/test-cases/` | `tc-fi-{PRX}-{NNN}-{description}.md` | `tc-fi-ACME-001-oauth-login-tests.md` | QA |
-| Bug Report | `projects/{project-id}/qa/bug-reports/` | `bug-{PRX}-{NNN}-{description}.md` | `bug-ACME-042-oauth-timeout.md` | QA |
+| Bug Report | `projects/{project-id}/qa/bug-reports/` | `bug-{project-id}-{NNN}-{description}.md` | `bug-q1-auth-042-oauth-timeout.md` | QA |
 | BA Increment | `projects/{project-id}/business-analysis-increments/` | `bai-{PRX}-{NNN}-{description}.md` | `bai-ACME-001-checkout-redesign.md` | BA |
 | SD Increment | `projects/{project-id}/solution-design-increments/` | `sdi-{PRX}-{NNN}-{description}.md` | `sdi-ACME-001-oauth-architecture.md` | SA |
 | TA Increment | `projects/{project-id}/technical-architecture-increments/` | `tai-{PRX}-{NNN}-{description}.md` | `tai-ACME-001-auth-refactor.md` | SA |
@@ -54,12 +54,15 @@ These artifacts live in `projects/{project-id}/` and represent TO-BE state.
 | Symbol | Meaning | Example |
 |--------|---------|---------|
 | `{PRX}` | Product prefix (3-4 uppercase chars) | `ACME` |
-| `{NNN}` | Sequential number (3 digits) | `001` |
+| `{NNN}` | Sequential number (3 digits, scope varies by artifact) | `001` |
 | `{EEE}` | Epic number (3 digits) | `001` |
 | `{SSS}` | Story sequence within epic (3 digits) | `042` |
 | `{N}` | Sprint number | `1` |
 | `{description}` | Kebab-case description | `user-login` |
 | `{state}` | Story state folder | `backlog`, `done` |
+| `{project-id}` | Project folder name (for bug reports) | `q1-auth` |
+
+**Note on bug numbering:** Bug NNN is unique within a project (not product). Product PRX may be recorded as metadata in the bug file if needed.
 
 ---
 
@@ -157,7 +160,7 @@ projects/                           # CHANGE PROPOSALS (TO-BE)
     │   ├── test-cases/
     │   │   └── tc-fi-PRX-NNN-*.md
     │   ├── bug-reports/
-    │   │   └── bug-PRX-NNN-*.md
+    │   │   └── bug-{project-id}-NNN-*.md
     │   └── regression-impact/
     │       └── ri-fi-PRX-NNN.md
     ├── business-analysis-increments/

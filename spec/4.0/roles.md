@@ -194,7 +194,7 @@
 
 **Creates:**
 - `projects/{id}/qa/test-cases/tc-fi-PRX-NNN-*.md`
-- `projects/{id}/qa/bug-reports/bug-PRX-NNN-*.md`
+- `projects/{id}/qa/bug-reports/bug-{project-id}-NNN-*.md`
 - `products/{id}/qa/regression-tests/rt-f-PRX-NNN-*.md`
 
 **Reviews:**

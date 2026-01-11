@@ -120,7 +120,7 @@ These rules are **always true** in TeamSpec 4.0:
 
 | ID | Invariant | Enforcement |
 |----|-----------|-------------|
-| INV-001 | Product Canon is updated ONLY after deployment | `ts:po sync` requires deployment gate passed |
+| INV-001 | Product Canon is updated ONLY after deployment | `ts:po sync` requires Deployment Verification gate passed |
 | INV-002 | Every artifact has exactly one owner role | registry.yml artifacts.*.owner is singular |
 | INV-003 | Stories link to Epics via filename | `s-eXXX-YYY-*.md` pattern mandatory |
 | INV-004 | Feature-Increments describe AS-IS and TO-BE | Linter rule TS-FI-001 |
