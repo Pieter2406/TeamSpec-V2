@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { loadRegistry, loadFolderStructure, getArtifactPatterns } = require('./structure-loader');
+const { loadRegistry, loadFolderStructure, getArtifactPatterns, getArtifactNamingRegex } = require('./structure-loader');
 
 // =============================================================================
 // SEVERITY LEVELS
@@ -177,16 +177,18 @@ function parseConfigYaml(filePath) {
 // NAMING PATTERN VALIDATION
 // =============================================================================
 
-const NAMING_PATTERNS = {
-    // Product artifacts
+// Cache for naming patterns loaded from registry
+let _namingPatterns = null;
+let _registry = null;
+
+// Fallback hardcoded patterns (used when registry unavailable)
+const FALLBACK_PATTERNS = {
     'feature': /^f-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'business-analysis': /^ba-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'solution-design': /^sd-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'technical-architecture': /^ta-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'product-decision': /^dec-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'product-regression-test': /^rt-f-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
-
-    // Project artifacts
     'feature-increment': /^fi-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'epic': /^epic-[A-Z]{3,4}-\d{3}-[\w-]+\.md$/,
     'story': /^s-e\d{3}-\d{3}-[\w-]+\.md$/,
@@ -198,6 +200,51 @@ const NAMING_PATTERNS = {
     'bug-report': /^bug-[\w-]+-\d{3}-[\w-]+\.md$/,
     'regression-impact': /^ri-fi-[A-Z]{3,4}-\d{3}\.md$/
 };
+
+/**
+ * Get naming patterns from registry (cached)
+ * Falls back to hardcoded patterns if registry unavailable
+ */
+function getNamingPatterns(workspaceDir) {
+    // Return fallback patterns if no workspace
+    if (!workspaceDir) {
+        return FALLBACK_PATTERNS;
+    }
+
+    if (_namingPatterns && _registry) {
+        return _namingPatterns;
+    }
+
+    // Try to load from registry
+    try {
+        const registry = loadRegistry(workspaceDir);
+        if (registry?.artifacts) {
+            _registry = registry;
+            _namingPatterns = getArtifactNamingRegex(registry);
+
+            // Fill in any missing patterns from fallback
+            for (const key of Object.keys(FALLBACK_PATTERNS)) {
+                if (!_namingPatterns[key]) {
+                    _namingPatterns[key] = FALLBACK_PATTERNS[key];
+                }
+            }
+            return _namingPatterns;
+        }
+    } catch (err) {
+        // Fall through to fallback
+    }
+
+    // Fallback to hardcoded patterns if registry not available
+    return FALLBACK_PATTERNS;
+}
+
+/**
+ * Reset cached patterns (for testing)
+ */
+function resetNamingPatterns() {
+    _namingPatterns = null;
+    _registry = null;
+}
 
 // =============================================================================
 // RULE IMPLEMENTATIONS
@@ -361,10 +408,12 @@ function checkFIFeatureLink(filePath, workspaceDir, result) {
 /**
  * TS-EPIC-001: Epic file naming convention
  */
-function checkEpicNaming(filePath, result) {
+function checkEpicNaming(filePath, result, workspaceDir = null) {
     const filename = path.basename(filePath);
+    const patterns = getNamingPatterns(workspaceDir);
+    const pattern = patterns.epic || patterns['epic'];
 
-    if (!NAMING_PATTERNS.epic.test(filename)) {
+    if (pattern && !pattern.test(filename)) {
         result.add('TS-EPIC-001', `Epic file '${filename}' does not match naming convention: epic-PRX-XXX-description.md`, filePath, SEVERITY.ERROR);
     }
 }
@@ -372,11 +421,13 @@ function checkEpicNaming(filePath, result) {
 /**
  * TS-STORY-001: Story must link to Epic via filename
  */
-function checkStoryEpicLink(filePath, projectDir, result) {
+function checkStoryEpicLink(filePath, projectDir, result, workspaceDir = null) {
     const filename = path.basename(filePath);
+    const patterns = getNamingPatterns(workspaceDir);
+    const pattern = patterns.story || patterns['story'];
 
     // Check naming pattern
-    if (!NAMING_PATTERNS.story.test(filename)) {
+    if (pattern && !pattern.test(filename)) {
         result.add('TS-STORY-001', `Story '${filename}' does not match naming convention: s-eXXX-YYY-description.md`, filePath, SEVERITY.ERROR);
         return;
     }
@@ -421,10 +472,19 @@ function checkStoryDelta(filePath, result) {
 
 /**
  * TS-NAMING-*: Artifact naming conventions
+ * Allows README.md and index files in artifact folders
  */
-function checkArtifactNaming(filePath, artifactType, result) {
+function checkArtifactNaming(filePath, artifactType, result, workspaceDir = null) {
     const filename = path.basename(filePath);
-    const pattern = NAMING_PATTERNS[artifactType];
+
+    // Skip documentation and index files - these are allowed in any artifact folder
+    const allowedFiles = ['README.md', 'readme.md', 'index.md', '.gitkeep'];
+    if (allowedFiles.includes(filename)) {
+        return;
+    }
+
+    const patterns = getNamingPatterns(workspaceDir);
+    const pattern = patterns[artifactType];
 
     if (pattern && !pattern.test(filename)) {
         const ruleId = `TS-NAMING-${artifactType.toUpperCase().replace(/-/g, '')}`;
@@ -620,19 +680,19 @@ function lintProduct(workspaceDir, productId, result, options) {
             const featuresDir = path.join(productDir, 'features');
             if (fs.existsSync(featuresDir)) {
                 const features = fs.readdirSync(featuresDir)
-                    .filter(f => f.endsWith('.md') && f !== 'features-index.md' && f !== 'story-ledger.md');
+                    .filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme') && f !== 'features-index.md' && f !== 'story-ledger.md');
 
                 for (const feature of features) {
-                    checkArtifactNaming(path.join(featuresDir, feature), 'feature', result);
+                    checkArtifactNaming(path.join(featuresDir, feature), 'feature', result, workspaceDir);
                 }
             }
 
             // Lint regression tests naming
             const rtDir = path.join(productDir, 'qa', 'regression-tests');
             if (fs.existsSync(rtDir)) {
-                const rtFiles = fs.readdirSync(rtDir).filter(f => f.endsWith('.md'));
+                const rtFiles = fs.readdirSync(rtDir).filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme'));
                 for (const rt of rtFiles) {
-                    checkArtifactNaming(path.join(rtDir, rt), 'product-regression-test', result);
+                    checkArtifactNaming(path.join(rtDir, rt), 'product-regression-test', result, workspaceDir);
                 }
             }
         }
@@ -666,7 +726,7 @@ function lintProject(workspaceDir, projectId, result, options) {
     // Lint Feature-Increments
     const fiDir = path.join(projectDir, 'feature-increments');
     if (fs.existsSync(fiDir)) {
-        const fiFiles = fs.readdirSync(fiDir).filter(f => f.endsWith('.md') && f !== 'increments-index.md');
+        const fiFiles = fs.readdirSync(fiDir).filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme') && f !== 'increments-index.md');
 
         for (const fi of fiFiles) {
             const fiPath = path.join(fiDir, fi);
@@ -683,7 +743,7 @@ function lintProject(workspaceDir, projectId, result, options) {
 
             // TS-NAMING-FI
             if (!options.rule || options.rule === 'TS-NAMING-FI') {
-                checkArtifactNaming(fiPath, 'feature-increment', result);
+                checkArtifactNaming(fiPath, 'feature-increment', result, workspaceDir);
             }
 
             // TS-QA-001: Test coverage (for deployed projects)
@@ -706,14 +766,14 @@ function lintProject(workspaceDir, projectId, result, options) {
     const epicsDir = path.join(projectDir, 'epics');
     if (fs.existsSync(epicsDir)) {
         const epics = fs.readdirSync(epicsDir)
-            .filter(f => f.endsWith('.md') && f !== 'epics-index.md');
+            .filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme') && f !== 'epics-index.md');
 
         for (const epic of epics) {
             const epicPath = path.join(epicsDir, epic);
 
             // TS-EPIC-001: Naming
             if (!options.rule || options.rule === 'TS-EPIC-001') {
-                checkEpicNaming(epicPath, result);
+                checkEpicNaming(epicPath, result, workspaceDir);
             }
         }
     }
@@ -734,7 +794,7 @@ function lintProject(workspaceDir, projectId, result, options) {
 
                 // TS-STORY-001: Epic link
                 if (!options.rule || options.rule === 'TS-STORY-001') {
-                    checkStoryEpicLink(storyPath, projectDir, result);
+                    checkStoryEpicLink(storyPath, projectDir, result, workspaceDir);
                 }
 
                 // TS-STORY-002: Delta language
@@ -762,7 +822,7 @@ function lintProject(workspaceDir, projectId, result, options) {
 
                 // TS-STORY-001
                 if (!options.rule || options.rule === 'TS-STORY-001') {
-                    checkStoryEpicLink(storyPath, projectDir, result);
+                    checkStoryEpicLink(storyPath, projectDir, result, workspaceDir);
                 }
 
                 // TS-DOD-001: Done stories need verified AC
@@ -776,18 +836,18 @@ function lintProject(workspaceDir, projectId, result, options) {
     // Lint test cases naming
     const tcDir = path.join(projectDir, 'qa', 'test-cases');
     if (fs.existsSync(tcDir)) {
-        const tcFiles = fs.readdirSync(tcDir).filter(f => f.endsWith('.md'));
+        const tcFiles = fs.readdirSync(tcDir).filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme'));
         for (const tc of tcFiles) {
-            checkArtifactNaming(path.join(tcDir, tc), 'project-test-case', result);
+            checkArtifactNaming(path.join(tcDir, tc), 'project-test-case', result, workspaceDir);
         }
     }
 
     // Lint bug reports naming
     const bugDir = path.join(projectDir, 'qa', 'bug-reports');
     if (fs.existsSync(bugDir)) {
-        const bugFiles = fs.readdirSync(bugDir).filter(f => f.endsWith('.md'));
+        const bugFiles = fs.readdirSync(bugDir).filter(f => f.endsWith('.md') && !f.toLowerCase().startsWith('readme'));
         for (const bug of bugFiles) {
-            checkArtifactNaming(path.join(bugDir, bug), 'bug-report', result);
+            checkArtifactNaming(path.join(bugDir, bug), 'bug-report', result, workspaceDir);
         }
     }
 }
@@ -859,7 +919,8 @@ module.exports = {
     formatResults,
     LintResult,
     SEVERITY,
-    NAMING_PATTERNS,
+    getNamingPatterns,
+    resetNamingPatterns,
     // Export individual checks for testing
     checkProductRegistered,
     checkProductYml,
