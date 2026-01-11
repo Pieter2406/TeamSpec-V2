@@ -77,7 +77,7 @@ The complete set of production-truth documentation for a product.
 - `business-analysis/` — BA artifacts
 - `solution-designs/` — SA artifacts
 - `technical-architecture/` — SA artifacts
-- `decisions/` — PO/BA decisions
+- `decisions/` — Product decisions (PO)
 - `qa/regression-tests/` — QA regression suite
 
 ### Feature Canon (Subset)

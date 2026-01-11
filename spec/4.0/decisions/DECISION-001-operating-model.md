@@ -26,7 +26,7 @@ TeamSpec evolved from version 2.0 (Feature Canon model) to 4.0 (Product-Canon mo
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Primary Command | **`ts:po sync`** | PO owns canon sync; command reflects ownership |
-| `ts:deploy` | **Deprecated alias** | Prints warning, executes `ts:po sync`; removal in 5.0 |
+| `ts:deploy` | **Removed** | Conflicted with ts:po sync; one mechanism is clearer |
 | Sync Timing | **Post-deploy only** | Canon is never updated before deployment |
 
 ### 3. Artifact Ownership
@@ -88,7 +88,7 @@ TeamSpec evolved from version 2.0 (Feature Canon model) to 4.0 (Product-Canon mo
 ## Consequences
 
 1. All surfaces (agents, CLI, README, templates) must align with these decisions
-2. `ts:deploy` will show deprecation warning until TeamSpec 5.0
+2. `ts:deploy` is removed in 4.0; use `ts:po sync` instead
 3. BA no longer owns Projects, Features, or Feature-Increments (corrects 2.0 ambiguity)
 4. Registry.yml is the single source of truth; generated files derive from it
 

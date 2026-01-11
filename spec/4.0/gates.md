@@ -11,8 +11,8 @@
 |------|-------|----------|----------|------|
 | DoR | FA | SM | — | Before story enters development |
 | DoD | FA | QA | — | Before story marked complete |
-| Deployment | SM | QA | PO | Before production deployment |
-| Canon Sync | PO | — | — | After deployment |
+| Deployment | SM | QA | PO | After deployment, before Canon Sync |
+| Canon Sync | PO | — | — | After deployment gate passed |
 
 ---
 
@@ -70,14 +70,14 @@ Before a story moves to `done/`:
 
 ### Checklist
 
-Before `ts:po sync`:
+After deployment, before `ts:po sync`:
 
 - [ ] All sprint stories in terminal state (Done/Deferred/Out-of-Scope)
 - [ ] All Feature-Increments reviewed
 - [ ] QA sign-off obtained
-- [ ] **Regression coverage confirmed** (rt-f-* updated OR "no impact" recorded)
-- [ ] Code deployed to production
-- [ ] Smoke tests passed
+- [ ] **Regression impact recorded** (ri-fi-* with assessment; enforced by `TS-QA-003`)
+- [ ] Deployment verified (smoke tests passed)
+- [ ] PO approval obtained
 
 ### Trigger
 

@@ -22,7 +22,7 @@ TeamSpec enforces consistency through linter rules. Each rule has a unique ID, c
 | TS-STORY | Story | Story format and delta compliance |
 | TS-NAMING | Naming Conventions | Artifact filename patterns |
 | TS-DOD | Definition of Done | DoD gate compliance |
-| TS-DOD | Definition of Ready | DoR gate compliance |
+| TS-DOR | Definition of Ready | DoR gate compliance |
 | TS-QA | QA Coverage | Test coverage and regression rules |
 
 ---
@@ -42,7 +42,7 @@ TeamSpec enforces consistency through linter rules. Each rule has a unique ID, c
 Project 'my-project' is not registered in projects-index.md
 ```
 
-**Owner:** BA
+**Owner:** PO
 
 ---
 
@@ -312,13 +312,20 @@ Deployment without regression test confirmation. Add regression_confirmed: true 
 **Intent:** Every deployed FI needs explicit regression assessment.
 
 **Checks:**
-- For each `fi-PRX-NNN` in deployed project
-- Either `rt-f-PRX-NNN-*.md` exists (regression test updated), OR
-- `ri-fi-PRX-NNN.md` exists with `assessment: no-impact`
+- For each `fi-PRX-NNN` in deployed project:
+  - `ri-fi-PRX-NNN.md` MUST exist with valid `assessment` field
+- If `assessment: update-required`:
+  - `regression_tests` field must exist and be non-empty
+  - Each listed `rt-f-*` file must exist in `products/{id}/qa/regression-tests/`
+- If `assessment: no-impact`:
+  - `rationale` field must exist and be non-empty
 
-**Failure Message:**
+**Failure Messages:**
 ```
-FI 'fi-ACME-001' has no regression impact record. Create ri-fi-ACME-001.md or update rt-f-ACME-001-*.md
+FI 'fi-ACME-001' has no regression impact record. Create ri-fi-ACME-001.md
+ri-fi-ACME-001.md has assessment: update-required but no regression_tests listed
+ri-fi-ACME-001.md lists rt-f-ACME-001-auth.md but file does not exist
+ri-fi-ACME-001.md has assessment: no-impact but no rationale provided
 ```
 
 **Severity:** Error (blocks deployment gate)  
