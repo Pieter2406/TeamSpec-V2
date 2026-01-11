@@ -1,17 +1,14 @@
 # TeamSpec Templates
 
-> **Version:** 2.0 / 4.0  
-> **Last Updated:** 2026-01-10  
-> **Purpose:** Aligned templates for Feature Canon operating model
+> **Version:** 4.0  
+> **Last Updated:** 2026-01-11  
+> **Purpose:** Aligned templates for Product Canon operating model
 
 ---
 
 ## Overview
 
-These templates are designed for the TeamSpec operating model. Templates are available for both:
-
-- **TeamSpec 2.0** — Feature Canon model (features in projects)
-- **TeamSpec 4.0** — Product Canon model (features in products, increments in projects)
+These templates are designed for the TeamSpec 4.0 Product Canon operating model, where features live in products and increments are delivered through projects.
 
 Each template:
 
@@ -24,7 +21,7 @@ Each template:
 
 ## Template Index
 
-### TeamSpec 4.0 Templates (NEW)
+### Core Templates
 
 Templates for the Product Canon operating model.
 
@@ -53,7 +50,7 @@ These templates create **execution artifacts** — deltas to the source of truth
 
 | Template | Owner | Linter Rules | Purpose |
 |----------|-------|--------------|---------|
-| [story-template.md](story-template.md) | FA | TS-STORY-* | User stories (deltas) - 2.0 |
+| [story-template.md](story-template.md) | FA | TS-STORY-* | User stories (deltas) |
 | [testcases-template.md](testcases-template.md) | QA | TS-QA-* | Feature-level test cases |
 | [bug-report-template.md](bug-report-template.md) | QA | TS-QA-002 | Bug reports with classification |
 | [uat-pack-template.md](uat-pack-template.md) | QA | TS-UAT-* | User acceptance testing |
@@ -179,8 +176,6 @@ Before sprint close, verify Canon is updated:
 
 ## Linter Rules Reference
 
-### TeamSpec 4.0 Rules (NEW)
-
 | Rule | Applies To | Description |
 |------|------------|-------------|
 | TS-PROD-001 | Products | Product registration required |
@@ -197,22 +192,13 @@ Before sprint close, verify Canon is updated:
 | TS-EPIC-003 | Epics | ID must be unique |
 | TS-PROJ-003 | Projects | Must target at least one product |
 | TS-PROJ-004 | Projects | Target products must exist |
-| TS-STORY-006 | Stories | Epic link required (via filename) |
-| TS-STORY-007 | Stories | Linked Epic must exist |
-| TS-DOD-003 | Projects | Product sync after deployment |
-| TS-NAMING-FI | Feature-Increments | Naming convention (fi-PRX-XXX) |
-| TS-NAMING-EPIC | Epics | Naming convention (epic-PRX-XXX) |
-| TS-NAMING-PRODUCT | Products | Naming convention (lowercase-dashes) |
-
-### TeamSpec 2.0 Rules
-
-| Rule | Applies To | Description |
-|------|------------|-------------|
-| TS-STORY-001 | Stories | Feature link required |
+| TS-STORY-001 | Stories | Feature link recommended |
 | TS-STORY-002 | Stories | Delta-only format |
 | TS-STORY-003 | Stories | ACs testable |
 | TS-STORY-004 | Stories | Sprint assignment by SM only |
 | TS-STORY-005 | Stories | DoR complete |
+| TS-STORY-006 | Stories | Epic link required (via filename) |
+| TS-STORY-007 | Stories | Linked Epic must exist |
 | TS-FEAT-001 | Features | Feature must exist before stories |
 | TS-FEAT-002 | Features | All sections required |
 | TS-FEAT-003 | Features | Feature ID unique |
@@ -223,7 +209,11 @@ Before sprint close, verify Canon is updated:
 | TS-QA-002 | Bugs | Classification required |
 | TS-DOD-001 | All | Canon sync before Done |
 | TS-DOD-002 | Tests | Tests are feature-level |
+| TS-DOD-003 | Projects | Product sync after deployment |
 | TS-DEVPLAN-001 | Sprints | Dev plan before implementation |
+| TS-NAMING-FI | Feature-Increments | Naming convention (fi-PRX-XXX) |
+| TS-NAMING-EPIC | Epics | Naming convention (epic-PRX-XXX) |
+| TS-NAMING-PRODUCT | Products | Naming convention (lowercase-dashes) |
 
 ---
 

@@ -167,7 +167,6 @@ _High-level technical approach (SA input)._
 
 _Epic-level acceptance criteria (rolled up from stories)._
 
-- [ ] All Feature-Increments marked as `implemented`
 - [ ] All linked stories marked as Done
 - [ ] Feature Canon updated via `ts:po sync`
 - [ ] UAT completed and signed off
