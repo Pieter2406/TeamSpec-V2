@@ -830,3 +830,469 @@ describe('CLI: teamspec lint command', () => {
     assert.ok(typeof linter.groupByFile === 'function', 'linter.groupByFile should exist');
   });
 });
+
+// =============================================================================
+// TeamSpec 4.0 Test Suite: Version Detection
+// =============================================================================
+
+describe('TS-4.0: Version Detection', () => {
+  let tempDir;
+  let linter;
+  
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'teamspec-v4-test-'));
+    linter = new Linter(tempDir);
+  });
+  
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+  
+  test('detects 2.0 workspace (features in project)', () => {
+    // Create 2.0 structure
+    createTestProject(tempDir, {
+      'projects/test-project/features/F-001-test.md': VALID_FEATURE,
+    });
+    
+    const version = linter.getWorkspaceVersion();
+    assert.strictEqual(version, '2.0', 'Should detect 2.0 workspace');
+  });
+  
+  test('detects 4.0 workspace (products folder with product.yml)', () => {
+    // Create 4.0 structure
+    fs.mkdirSync(path.join(tempDir, 'products', 'test-product', 'features'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, 'products', 'test-product', 'product.yml'),
+      'product:\n  id: "test-product"\n  prefix: "TST"\n  name: "Test Product"\n  status: active\n'
+    );
+    
+    const version = linter.getWorkspaceVersion();
+    assert.strictEqual(version, '4.0', 'Should detect 4.0 workspace');
+  });
+  
+  test('defaults to 2.0 for empty workspace', () => {
+    const version = linter.getWorkspaceVersion();
+    assert.strictEqual(version, '2.0', 'Should default to 2.0');
+  });
+});
+
+// =============================================================================
+// TeamSpec 4.0 Test Suite: Product Rules (TS-PROD)
+// =============================================================================
+
+describe('TS-4.0: Product Rules (TS-PROD)', () => {
+  let tempDir;
+  let linter;
+  
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'teamspec-v4-test-'));
+    linter = new Linter(tempDir);
+  });
+  
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+  
+  /**
+   * Create a 4.0 product structure
+   */
+  function createTestProduct(baseDir, productId, productContent = {}) {
+    const productDir = path.join(baseDir, 'products', productId);
+    fs.mkdirSync(path.join(productDir, 'features'), { recursive: true });
+    fs.mkdirSync(path.join(productDir, 'business-analysis'), { recursive: true });
+    fs.mkdirSync(path.join(productDir, 'solution-designs'), { recursive: true });
+    fs.mkdirSync(path.join(productDir, 'technical-architecture'), { recursive: true });
+    fs.mkdirSync(path.join(productDir, 'decisions'), { recursive: true });
+    
+    // Create product.yml
+    const defaultProductYml = `product:
+  id: "${productId}"
+  prefix: "TST"
+  name: "Test Product"
+  status: active
+  owner: "Test Owner"
+`;
+    fs.writeFileSync(
+      path.join(productDir, 'product.yml'),
+      productContent['product.yml'] || defaultProductYml
+    );
+    
+    // Create products-index.md
+    if (!fs.existsSync(path.join(baseDir, 'products', 'products-index.md'))) {
+      fs.writeFileSync(
+        path.join(baseDir, 'products', 'products-index.md'),
+        `# Products Index\n\n| Prefix | ID | Name | Status |\n|--------|-----|------|--------|\n| TST | ${productId} | Test Product | active |\n`
+      );
+    }
+    
+    // Create any additional files
+    for (const [filePath, content] of Object.entries(productContent)) {
+      if (filePath === 'product.yml') continue;
+      const fullPath = path.join(productDir, filePath);
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, content);
+    }
+    
+    return productDir;
+  }
+  
+  describe('TS-PROD-001: Product folder must be registered', () => {
+    test('passes when product is in products-index.md', async () => {
+      createTestProduct(tempDir, 'test-product');
+      
+      const results = await linter.runRule('TS-PROD-001');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails when product is not in products-index.md', async () => {
+      createTestProduct(tempDir, 'unregistered-product');
+      // Overwrite the index to not include the product
+      fs.writeFileSync(
+        path.join(tempDir, 'products', 'products-index.md'),
+        '# Products Index\n\n| Prefix | ID | Name |\n|--------|-----|------|\n'
+      );
+      
+      const results = await linter.runRule('TS-PROD-001');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 1, 'Should have 1 error');
+      assert.match(errors[0].message, /not registered/i);
+    });
+  });
+  
+  describe('TS-PROD-002: product.yml required with minimum metadata', () => {
+    test('passes with all required fields', async () => {
+      createTestProduct(tempDir, 'test-product', {
+        'product.yml': `product:
+  id: "test-product"
+  prefix: "TST"
+  name: "Test Product"
+  status: active
+  owner: "Test Owner"
+`
+      });
+      
+      const results = await linter.runRule('TS-PROD-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails with invalid prefix format', async () => {
+      createTestProduct(tempDir, 'test-product', {
+        'product.yml': `product:
+  id: "test-product"
+  prefix: "ts"
+  name: "Test Product"
+  status: active
+`
+      });
+      
+      const results = await linter.runRule('TS-PROD-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.ok(errors.length > 0, 'Should have errors');
+      assert.ok(errors.some(e => e.message.includes('prefix')), 'Should have prefix error');
+    });
+  });
+  
+  describe('TS-PROD-004: Product features-index.md required', () => {
+    test('passes when features-index.md exists', async () => {
+      createTestProduct(tempDir, 'test-product', {
+        'features/features-index.md': '# Features Index\n'
+      });
+      
+      const results = await linter.runRule('TS-PROD-004');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails when features-index.md is missing', async () => {
+      createTestProduct(tempDir, 'test-product');
+      
+      const results = await linter.runRule('TS-PROD-004');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 1, 'Should have 1 error');
+      assert.match(errors[0].message, /features-index.md/i);
+    });
+  });
+  
+  describe('TS-PROD-005: Product story-ledger.md required', () => {
+    test('passes when story-ledger.md exists', async () => {
+      createTestProduct(tempDir, 'test-product', {
+        'features/story-ledger.md': '# Story Ledger\n'
+      });
+      
+      const results = await linter.runRule('TS-PROD-005');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails when story-ledger.md is missing', async () => {
+      createTestProduct(tempDir, 'test-product');
+      
+      const results = await linter.runRule('TS-PROD-005');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 1, 'Should have 1 error');
+      assert.match(errors[0].message, /story-ledger.md/i);
+    });
+  });
+});
+
+// =============================================================================
+// TeamSpec 4.0 Test Suite: Feature-Increment Rules (TS-FI)
+// =============================================================================
+
+describe('TS-4.0: Feature-Increment Rules (TS-FI)', () => {
+  let tempDir;
+  let linter;
+  
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'teamspec-v4-test-'));
+    linter = new Linter(tempDir);
+  });
+  
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+  
+  /**
+   * Create a 4.0 project with feature-increments
+   */
+  function createTestProject4(baseDir, projectId, files = {}) {
+    const projectDir = path.join(baseDir, 'projects', projectId);
+    fs.mkdirSync(path.join(projectDir, 'feature-increments'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'epics'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'stories', 'backlog'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'stories', 'ready-to-refine'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'stories', 'ready-to-develop'), { recursive: true });
+    
+    // Also create a product (for 4.0 detection)
+    fs.mkdirSync(path.join(baseDir, 'products', 'test-product', 'features'), { recursive: true });
+    fs.writeFileSync(
+      path.join(baseDir, 'products', 'test-product', 'product.yml'),
+      'product:\n  id: "test-product"\n  prefix: "TST"\n  name: "Test Product"\n  status: active\n'
+    );
+    
+    // Create project.yml
+    fs.writeFileSync(
+      path.join(projectDir, 'project.yml'),
+      `project:
+  id: "${projectId}"
+  name: "Test Project"
+  status: active
+  target_products:
+    - test-product
+`
+    );
+    
+    // Create any additional files
+    for (const [filePath, content] of Object.entries(files)) {
+      const fullPath = path.join(projectDir, filePath);
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, content);
+    }
+    
+    return projectDir;
+  }
+  
+  describe('TS-FI-002: Feature-Increment must have AS-IS and TO-BE sections', () => {
+    test('passes with AS-IS and TO-BE sections', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'feature-increments/fi-TST-001-test.md': `# Feature Increment
+
+## Target Product
+test-product (TST)
+
+## Target Feature
+f-TST-001-test
+
+## AS-IS
+Current behavior description
+
+## TO-BE
+New behavior description
+`
+      });
+      
+      const results = await linter.runRule('TS-FI-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails without AS-IS section', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'feature-increments/fi-TST-001-test.md': `# Feature Increment
+
+## Target Product
+test-product (TST)
+
+## TO-BE
+New behavior description
+`
+      });
+      
+      const results = await linter.runRule('TS-FI-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.ok(errors.length > 0, 'Should have errors');
+      assert.ok(errors.some(e => e.message.includes('AS-IS')), 'Should have AS-IS error');
+    });
+    
+    test('fails without TO-BE section', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'feature-increments/fi-TST-001-test.md': `# Feature Increment
+
+## Target Product
+test-product (TST)
+
+## AS-IS
+Current behavior description
+`
+      });
+      
+      const results = await linter.runRule('TS-FI-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.ok(errors.length > 0, 'Should have errors');
+      assert.ok(errors.some(e => e.message.includes('TO-BE')), 'Should have TO-BE error');
+    });
+  });
+});
+
+// =============================================================================
+// TeamSpec 4.0 Test Suite: Epic Rules (TS-EPIC)
+// =============================================================================
+
+describe('TS-4.0: Epic Rules (TS-EPIC)', () => {
+  let tempDir;
+  let linter;
+  
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'teamspec-v4-test-'));
+    linter = new Linter(tempDir);
+  });
+  
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+  
+  /**
+   * Create a 4.0 project with epics
+   */
+  function createTestProject4(baseDir, projectId, files = {}) {
+    const projectDir = path.join(baseDir, 'projects', projectId);
+    fs.mkdirSync(path.join(projectDir, 'feature-increments'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'epics'), { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'stories', 'backlog'), { recursive: true });
+    
+    // Also create a product (for 4.0 detection)
+    fs.mkdirSync(path.join(baseDir, 'products', 'test-product', 'features'), { recursive: true });
+    fs.writeFileSync(
+      path.join(baseDir, 'products', 'test-product', 'product.yml'),
+      'product:\n  id: "test-product"\n  prefix: "TST"\n  name: "Test Product"\n  status: active\n'
+    );
+    
+    // Create project.yml
+    fs.writeFileSync(
+      path.join(projectDir, 'project.yml'),
+      `project:
+  id: "${projectId}"
+  name: "Test Project"
+  status: active
+  target_products:
+    - test-product
+`
+    );
+    
+    // Create any additional files
+    for (const [filePath, content] of Object.entries(files)) {
+      const fullPath = path.join(projectDir, filePath);
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, content);
+    }
+    
+    return projectDir;
+  }
+  
+  describe('TS-EPIC-001: Epic must link to Feature-Increments', () => {
+    test('passes with Feature-Increment link', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'epics/epic-TST-001-test.md': `# Epic
+
+## Feature-Increments
+- fi-TST-001-test
+
+## TO-BE
+Target state description
+`
+      });
+      
+      const results = await linter.runRule('TS-EPIC-001');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails without Feature-Increment link', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'epics/epic-TST-001-test.md': `# Epic
+
+## TO-BE
+Target state description
+`
+      });
+      
+      const results = await linter.runRule('TS-EPIC-001');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.ok(errors.length > 0, 'Should have errors');
+      assert.match(errors[0].message, /Feature-Increment/i);
+    });
+  });
+  
+  describe('TS-EPIC-002: Epic must define TO-BE state', () => {
+    test('passes with TO-BE section', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'epics/epic-TST-001-test.md': `# Epic
+
+## Feature-Increments
+- fi-TST-001-test
+
+## TO-BE
+Target state description
+`
+      });
+      
+      const results = await linter.runRule('TS-EPIC-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('passes with Business Value section', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'epics/epic-TST-001-test.md': `# Epic
+
+## Feature-Increments
+- fi-TST-001-test
+
+## Business Value
+Value proposition description
+`
+      });
+      
+      const results = await linter.runRule('TS-EPIC-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.strictEqual(errors.length, 0, 'Should have no errors');
+    });
+    
+    test('fails without TO-BE or Business Value section', async () => {
+      createTestProject4(tempDir, 'test-project', {
+        'epics/epic-TST-001-test.md': `# Epic
+
+## Feature-Increments
+- fi-TST-001-test
+`
+      });
+      
+      const results = await linter.runRule('TS-EPIC-002');
+      const errors = results.filter(r => r.severity === SEVERITY.ERROR);
+      assert.ok(errors.length > 0, 'Should have errors');
+      assert.match(errors[0].message, /TO-BE|Business Value/i);
+    });
+  });
+});
