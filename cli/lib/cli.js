@@ -1284,6 +1284,86 @@ function updateTeamspecCore(targetDir, sourceDir) {
 }
 
 // =============================================================================
+// Git Status Check
+// =============================================================================
+
+/**
+ * Check if directory is a git repository with uncommitted changes
+ * @param {string} targetDir - Directory to check
+ * @returns {{ isGitRepo: boolean, hasChanges: boolean, changedFiles: number }}
+ */
+function checkGitStatus(targetDir) {
+  const { execSync } = require('child_process');
+  
+  try {
+    // Check if it's a git repo
+    execSync('git rev-parse --git-dir', { 
+      cwd: targetDir, 
+      stdio: 'pipe',
+      encoding: 'utf-8'
+    });
+    
+    // Check for uncommitted changes (staged + unstaged + untracked)
+    const status = execSync('git status --porcelain', {
+      cwd: targetDir,
+      stdio: 'pipe',
+      encoding: 'utf-8'
+    });
+    
+    const changedFiles = status.trim().split('\n').filter(line => line.trim()).length;
+    
+    return {
+      isGitRepo: true,
+      hasChanges: changedFiles > 0,
+      changedFiles
+    };
+  } catch {
+    // Not a git repo or git not available
+    return {
+      isGitRepo: false,
+      hasChanges: false,
+      changedFiles: 0
+    };
+  }
+}
+
+/**
+ * Warn user about uncommitted changes and prompt to continue
+ * @param {object} rl - Readline interface
+ * @param {object} gitStatus - Result from checkGitStatus
+ * @param {boolean} force - Skip confirmation if true
+ * @param {boolean} nonInteractive - Skip prompt if true
+ * @returns {Promise<boolean>} - Whether to proceed
+ */
+async function warnUncommittedChanges(rl, gitStatus, force, nonInteractive) {
+  if (!gitStatus.isGitRepo || !gitStatus.hasChanges) {
+    return true; // No warning needed
+  }
+  
+  console.log(colored(`\n⚠️  Git repository has ${gitStatus.changedFiles} uncommitted change(s)`, colors.yellow));
+  console.log(colored('   Recommendation: Commit your changes first so TeamSpec updates can be', colors.yellow));
+  console.log(colored('   easily verified and rolled back if needed.', colors.yellow));
+  
+  if (force) {
+    console.log(colored('   Proceeding anyway (--force flag used)', colors.yellow));
+    return true;
+  }
+  
+  if (nonInteractive) {
+    console.log(colored('\n❌ Uncommitted changes detected. Use --force to proceed anyway.', colors.red));
+    return false;
+  }
+  
+  const proceed = await promptYesNo(
+    rl,
+    `\n${colored('Proceed with uncommitted changes?', colors.bold)} `,
+    false
+  );
+  
+  return proceed;
+}
+
+// =============================================================================
 // IDE Integration
 // =============================================================================
 
@@ -1606,6 +1686,18 @@ async function run(args) {
     const pkg = require('../package.json');
     console.log(`\n${colored('TeamSpec Update', colors.bold + colors.cyan)} v${pkg.version} `);
 
+    // Check for uncommitted changes
+    const gitStatus = checkGitStatus(targetDir);
+    if (gitStatus.isGitRepo && gitStatus.hasChanges) {
+      const rl = createReadlineInterface();
+      const proceed = await warnUncommittedChanges(rl, gitStatus, options.force, options.nonInteractive);
+      rl.close();
+      if (!proceed) {
+        console.log('Cancelled. Please commit your changes first.');
+        process.exit(0);
+      }
+    }
+
     if (!options.force && !options.nonInteractive) {
       const rl = createReadlineInterface();
       const proceed = await promptYesNo(
@@ -1663,6 +1755,18 @@ async function run(args) {
   if (!fs.existsSync(targetDir)) {
     console.error(colored(`Error: Directory does not exist: ${targetDir} `, colors.red));
     process.exit(1);
+  }
+
+  // Check for uncommitted changes before init
+  const gitStatus = checkGitStatus(targetDir);
+  if (gitStatus.isGitRepo && gitStatus.hasChanges) {
+    const rl = createReadlineInterface();
+    const proceed = await warnUncommittedChanges(rl, gitStatus, options.force, options.nonInteractive);
+    rl.close();
+    if (!proceed) {
+      console.log('Cancelled. Please commit your changes first.');
+      process.exit(0);
+    }
   }
 
   const teamspecDir = path.join(targetDir, '.teamspec');
