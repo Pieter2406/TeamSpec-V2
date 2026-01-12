@@ -1,8 +1,9 @@
 # TeamSpec Marker Vocabulary Specification
 
-> **Status:** Proposed  
+> **Status:** Implemented  
 > **Spec Version:** 4.0.1  
 > **Created:** 2026-01-12  
+> **Updated:** 2026-01-12  
 > **Purpose:** Define a minimal, enforceable marker vocabulary for LLM agent retrieval and generation
 
 ---
