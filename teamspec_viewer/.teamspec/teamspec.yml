@@ -1,0 +1,85 @@
+# TeamSpec Configuration
+# Version: 4.0.0
+
+version: "4.0"
+name: "TeamSpec Product-Canon Operating Model"
+
+# Core principles
+principles:
+  - Product Canon is the source of truth for production behavior (AS-IS)
+  - Feature-Increments propose changes to products (TO-BE)
+  - Stories describe deltas (changes), not full behavior
+  - Canon is updated ONLY after deployment via ts:po sync
+  - Structural artifacts require explicit creation commands
+  - Each role has clear ownership boundaries
+
+# Folder structure reference
+structure:
+  teamspec_root: ".teamspec"
+  products_root: "products/{product-id}"
+  projects_root: "projects/{project-id}"
+  
+  product_folders:
+    features: "products/{product-id}/features"
+    business_analysis: "products/{product-id}/business-analysis"
+    solution_designs: "products/{product-id}/solution-designs"
+    technical_architecture: "products/{product-id}/technical-architecture"
+    decisions: "products/{product-id}/decisions"
+    regression_tests: "products/{product-id}/qa/regression-tests"
+    
+  project_folders:
+    feature_increments: "projects/{project-id}/feature-increments"
+    epics: "projects/{project-id}/epics"
+    stories: "projects/{project-id}/stories"
+    dev_plans: "projects/{project-id}/dev-plans"
+    test_cases: "projects/{project-id}/qa/test-cases"
+    bug_reports: "projects/{project-id}/qa/bug-reports"
+    sprints: "projects/{project-id}/sprints"
+
+# Role definitions
+roles:
+  PO:
+    name: "Product Owner"
+    owns:
+      - "Products (product.yml, structure)"
+      - "Projects (project.yml, scope)"
+      - "Product Canon (approval authority)"
+      - "Canon sync execution"
+  BA:
+    name: "Business Analyst"
+    owns:
+      - "Business Analysis artifacts"
+      - "Domain knowledge documentation"
+  FA:
+    name: "Functional Analyst"
+    owns:
+      - "Features (f-PRX-*.md)"
+      - "Feature-Increments (fi-PRX-*.md)"
+      - "Epics (epic-PRX-*.md)"
+      - "Stories (s-eXXX-YYY-*.md)"
+  SA:
+    name: "Solution Architect"
+    owns:
+      - "Solution Designs"
+      - "Technical Architecture"
+      - "ADRs"
+  DEV:
+    name: "Developer"
+    owns:
+      - "Implementation"
+      - "Dev plans (dp-eXXX-sYYY-*.md)"
+  QA:
+    name: "QA Engineer"
+    owns:
+      - "Project test cases (tc-fi-PRX-*.md)"
+      - "Product regression tests (rt-f-PRX-*.md)"
+      - "Bug reports"
+  SM:
+    name: "Scrum Master"
+    owns:
+      - "Sprint operations"
+      - "Deployment checklist"
+  DES:
+    name: "Designer"
+    owns:
+      - "UX/UI design artifacts"

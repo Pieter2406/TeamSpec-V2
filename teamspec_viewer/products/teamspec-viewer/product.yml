@@ -1,0 +1,11 @@
+# Product Configuration: Teamspec Viewer
+product:
+  id: "teamspec-viewer"
+  name: "Teamspec Viewer"
+  prefix: "TSV"
+  description: |
+    # TODO: Add product description - what IS this product (AS-IS)?
+  status: active  # active, deprecated, archived
+  
+  # List of projects currently modifying this product
+  active_projects: []

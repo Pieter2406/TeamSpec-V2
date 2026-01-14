@@ -1,0 +1,12 @@
+# Project Configuration: teamspecviewermvp
+# TeamSpec 4.0 - TO-BE changes project
+project:
+  id: "teamspecviewermvp"
+  name: "Teamspecviewermvp"
+  description: |
+    # TODO: Add project description - what CHANGES will this project deliver?
+  status: active  # active, paused, completed, archived
+  
+  # Products this project modifies (populated via ts:fa feature-increment)
+  target_products: 
+    - teamspec-viewer
