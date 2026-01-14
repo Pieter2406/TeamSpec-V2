@@ -376,10 +376,10 @@ The viewer must support computing:
 
 | Decision ID | Summary | Link |
 |-------------|---------|------|
-| {TBD} | Viewer is read-only; no artifact editing in UI | To be logged |
-| {TBD} | Markdown is source-of-truth; viewer is caching/index layer | To be logged |
-| {TBD} | Role-based filtering is UI feature, not permission control | To be logged |
-| {TBD} | MVP targets web-based deployment, not desktop app | To be logged |
+| dec-TSV-001 | Viewer is read-only; no artifact editing in UI | Implicit in BA scope |
+| dec-TSV-002 | Markdown is source-of-truth; viewer is caching/index layer | Implicit in BA scope |
+| dec-TSV-003 | Role-based filtering is UI feature, not permission control | Implicit in BA scope |
+| dec-TSV-004 | MVP targets web-based deployment, not desktop app | Implicit in BA scope |
 
 ---
 
@@ -416,8 +416,8 @@ The viewer must support computing:
 
 ## Unresolved Items
 
-- Feature numbering and boundaries (f-TSV-001 through f-TSV-006) → {TBD} (awaiting FA feature decomposition)
-- Exact tech stack and deployment model → {TBD} (awaiting SA/DEV input)
-- Backlog ordering mechanism (metadata vs. filename order) → {TBD} (awaiting FA/SM decision)
-- Search algorithm specifics → {TBD} (awaiting SA/DEV input)
+- Feature numbering and boundaries (f-TSV-001 through f-TSV-007) → Resolved: 7 features created in Feature Canon
+- Exact tech stack and deployment model → Resolved: React+Vite frontend (TA-001), Hono backend (TA-002)
+- Backlog ordering mechanism (metadata vs. filename order) → Filename alphabetical order for MVP
+- Search algorithm specifics → Full-text grep for MVP; indexing deferred
 

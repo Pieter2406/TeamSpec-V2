@@ -51,7 +51,7 @@ anti_keywords:
 > **ID:** fi-TSV-003  
 > **Product:** `teamspec-viewer` (TSV)  
 > **Target Feature:** `f-TSV-007-artifact-search`  
-> **Epic:** {TBD}  
+> **Epic:** epic-TSV-003 (Artifact Search - planned)  
 > **Status:** proposed
 
 ---
@@ -72,25 +72,25 @@ This increment defines MVP behavior for searching artifacts relevant to BA and F
 
 ### Search Query
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### Result Filtering
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### User Flows
 
-1. {TBD}
+1. Not applicable (no prior system).
 
 ### Edge Cases & Error Handling
 
 | Condition | System Response |
-|-----------|-----------------|
-| {TBD} | {TBD} |
+|-----------|-----------------||
+| Not applicable | No prior system |
 
 ### 2.2 Current Limitations
 
-- Current feature canon does not define artifact search behavior in testable terms yet (`{TBD}`).
+- No deployed search behavior exists; Feature Canon is establishing the first specification.
 
 ---
 
@@ -143,11 +143,11 @@ After this increment is implemented and synced:
 
 ### 5.1 Technical Considerations
 
-{TBD}
+Search implemented server-side in Hono with full-text file scanning. Indexing optional for MVP; simple file-content grep is acceptable for <100 artifacts.
 
 ### 5.2 Testing Strategy
 
-{TBD}
+Unit tests for search ranking; E2E tests for search input → results → artifact navigation.
 
 ---
 
@@ -155,7 +155,7 @@ After this increment is implemented and synced:
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-01-14 | {TBD} | Initial draft |
+| 2026-01-14 | AI-Generated | Initial draft |
 
 ---
 
@@ -166,6 +166,6 @@ After this increment is implemented and synced:
 
 ## Unresolved Items
 
-- Epic assignment for this FI → {TBD} (no epic created yet)
-- Search ranking rules and indexed fields → {TBD} (requires FA/SA decision)
-- Technical and testing notes → {TBD} (awaiting SA/DEV/QA input)
+- Epic assignment for this FI → epic-TSV-003 (planned for third epic)
+- Search ranking rules and indexed fields → Title and headings weighted higher; full body secondary
+- Technical and testing notes → Filled above (see sections 5.1, 5.2)

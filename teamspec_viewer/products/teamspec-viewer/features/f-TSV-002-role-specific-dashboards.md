@@ -92,6 +92,7 @@ Enable users to quickly access and browse the artifacts relevant to their TeamSp
 - [ ] Provide one dashboard per TeamSpec role.
 - [ ] Each dashboard lists the artifacts owned by that role.
 - [ ] The dashboard provides quick navigation into those artifacts.
+- [ ] `{TBD}` markers in rendered artifacts are highlighted and can be navigated (e.g., next/previous `{TBD}`) so users can quickly identify missing documentation.
 
 ---
 
@@ -99,6 +100,7 @@ Enable users to quickly access and browse the artifacts relevant to their TeamSp
 
 - [ ] Using dashboards as access control / permissions enforcement.
 - [ ] Editing artifacts from within the dashboard.
+- [ ] Resolving `{TBD}` items within the viewer (the viewer remains read-only).
 
 ---
 

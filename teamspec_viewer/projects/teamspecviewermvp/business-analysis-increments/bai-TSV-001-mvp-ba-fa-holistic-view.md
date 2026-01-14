@@ -53,7 +53,7 @@ completion_rules:
 > **Product:** teamspec-viewer (TSV)  
 > **Project:** teamspecviewermvp  
 > **Target BA:** ba-TSV-001-viewer-platform  
-> **Target Feature:** {TBD}  
+> **Target Feature:** f-TSV-002 (Role-Specific Dashboards)  
 > **Status:** proposed
 
 ---
@@ -71,9 +71,9 @@ completion_rules:
 | **BAI ID** | bai-TSV-001 |
 | **Status** | Proposed |
 | **Date** | 2026-01-14 |
-| **Author** | {TBD} |
+| **Author** | AI-Generated |
 | **Target BA** | [ba-TSV-001-viewer-platform](../../products/teamspec-viewer/business-analysis/ba-TSV-001-viewer-platform.md) |
-| **Feature Increment** | {TBD} |
+| **Feature Increment** | [fi-TSV-001](../feature-increments/fi-TSV-001-ba-fa-role-dashboards.md) |
 
 ---
 
@@ -229,8 +229,8 @@ This MVP increment proposes a **delivery focus** (not a change in final product 
 
 | Metric | Baseline | Target | Timeline |
 |--------|----------|--------|----------|
-| Time to Find Artifact | {TBD} | < 30 seconds | MVP release |
-| Search Relevance | {TBD} | Top result matches intent 90% of the time | MVP release |
+| Time to Find Artifact | No baseline (manual navigation) | < 30 seconds | MVP release |
+| Search Relevance | No baseline (no search exists) | Top result matches intent 90% of the time | MVP release |
 
 ### 4.3 Out of Scope
 
@@ -282,9 +282,9 @@ After project completion (or after MVP release), the product BA should be update
 
 | Role | Name | Status | Date |
 |------|------|--------|------|
-| BA (Author) | {TBD} | ✅ | 2026-01-14 |
-| PO | {TBD} | ⏳ | {TBD} |
-| FA | {TBD} | ⏳ | {TBD} |
+| BA (Author) | AI-Generated | ✅ | 2026-01-14 |
+| PO | (Approval pending) | ⏳ | — |
+| FA | (Approval pending) | ⏳ | — |
 
 ---
 
@@ -292,7 +292,7 @@ After project completion (or after MVP release), the product BA should be update
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-01-14 | {TBD} | Initial proposed increment |
+| 2026-01-14 | AI-Generated | Initial proposed increment |
 
 ---
 
@@ -304,6 +304,6 @@ After project completion (or after MVP release), the product BA should be update
 
 ## Unresolved Items
 
-- Author/approver names → {TBD} (not provided)
-- Target feature and related `fi-TSV-*` reference → {TBD} (FA artifacts not created yet)
-- Measured baselines for success metrics → {TBD} (requires measurement plan/analytics)
+- Author/approver names → Author: AI-Generated; PO/FA approvers pending assignment
+- Target feature and related `fi-TSV-*` reference → f-TSV-002 and fi-TSV-001 (filled above)
+- Measured baselines for success metrics → "No baseline" (no prior system exists)

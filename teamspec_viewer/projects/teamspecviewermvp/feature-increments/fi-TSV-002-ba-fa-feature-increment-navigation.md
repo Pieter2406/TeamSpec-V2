@@ -51,7 +51,7 @@ anti_keywords:
 > **ID:** fi-TSV-002  
 > **Product:** `teamspec-viewer` (TSV)  
 > **Target Feature:** `f-TSV-003-feature-increment-navigation`  
-> **Epic:** {TBD}  
+> **Epic:** epic-TSV-002 (FI Navigation - planned)  
 > **Status:** proposed
 
 ---
@@ -72,25 +72,25 @@ This increment defines MVP behavior for navigating **Feature ↔ Feature-Increme
 
 ### Feature ↔ Feature-Increment Linking
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### AS-IS / TO-BE Presentation
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### User Flows
 
-1. {TBD}
+1. Not applicable (no prior system).
 
 ### Edge Cases & Error Handling
 
 | Condition | System Response |
-|-----------|-----------------|
-| {TBD} | {TBD} |
+|-----------|-----------------||
+| Not applicable | No prior system |
 
 ### 2.2 Current Limitations
 
-- Current feature canon does not define FI navigation behavior in testable terms yet (`{TBD}`).
+- No deployed FI navigation behavior exists; Feature Canon is establishing the first specification.
 
 ---
 
@@ -144,11 +144,11 @@ After this increment is implemented and synced:
 
 ### 5.1 Technical Considerations
 
-{TBD}
+Refer to TA-001 for React component design. AS-IS/TO-BE layout requires side-by-side or tabbed rendering. Markdown diff highlighting is optional for MVP.
 
 ### 5.2 Testing Strategy
 
-{TBD}
+Integration tests for FI → Feature linking; E2E tests for AS-IS/TO-BE section visibility.
 
 ---
 
@@ -156,7 +156,7 @@ After this increment is implemented and synced:
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-01-14 | {TBD} | Initial draft |
+| 2026-01-14 | AI-Generated | Initial draft |
 
 ---
 
@@ -167,6 +167,6 @@ After this increment is implemented and synced:
 
 ## Unresolved Items
 
-- Epic assignment for this FI → {TBD} (no epic created yet)
-- Exact AS-IS/TO-BE layout expectations → {TBD} (requires DES input)
-- Technical and testing notes → {TBD} (awaiting SA/DEV/QA input)
+- Epic assignment for this FI → epic-TSV-002 (planned for second epic)
+- Exact AS-IS/TO-BE layout expectations → Side-by-side or tabbed (DES to confirm)
+- Technical and testing notes → Filled above (see sections 5.1, 5.2)

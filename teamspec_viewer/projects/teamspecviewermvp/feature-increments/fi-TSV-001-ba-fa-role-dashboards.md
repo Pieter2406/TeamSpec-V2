@@ -51,7 +51,7 @@ anti_keywords:
 > **ID:** fi-TSV-001  
 > **Product:** `teamspec-viewer` (TSV)  
 > **Target Feature:** `f-TSV-002-role-specific-dashboards`  
-> **Epic:** {TBD}  
+> **Epic:** [epic-TSV-001](../epics/epic-TSV-001-dashboard-implementation.md)  
 > **Status:** proposed
 
 ---
@@ -72,25 +72,25 @@ This increment defines the initial MVP behavior for **role-specific dashboards**
 
 ### Role Selection
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### Role Dashboard Content
 
-{TBD}
+No deployed behavior exists (greenfield product).
 
 ### User Flows
 
-1. {TBD}
+1. Not applicable (no prior system).
 
 ### Edge Cases & Error Handling
 
 | Condition | System Response |
-|-----------|-----------------|
-| {TBD} | {TBD} |
+|-----------|-----------------||
+| Not applicable | No prior system |
 
 ### 2.2 Current Limitations
 
-- Current feature canon does not define role dashboard behavior in testable terms yet (`{TBD}`).
+- No deployed dashboard behavior exists; Feature Canon is establishing the first specification.
 
 ---
 
@@ -106,11 +106,47 @@ After this increment is implemented and synced:
 - The role dashboard provides navigation entry points into the relevant artifacts.
 - The role dashboard does not enforce access control; it is a navigation/reading aid.
 
+#### Role Selection (MVP)
+
+- The system provides a role selection step that is required before showing a role dashboard.
+- The available roles for this increment are limited to **BA** and **FA**.
+- The selected role is clearly visible in the UI while browsing artifacts.
+- Role switching within a session is supported.
+  - Persisting the selected role across sessions is out of scope for MVP (browser session only).
+
+#### Role Dashboard Content (MVP)
+
+The role dashboard is a curated navigation view (not a file explorer) and provides entry points that support the BAI goal of “portfolio → product → project → artifact relationships”.
+
+**BA dashboard provides entry points to:**
+
+- Product Business Analysis documents for the selected product.
+- Project Business Analysis Increments for the selected project.
+- Clear traversal into related Feature Canon from BA artifacts when links exist (e.g., “Related Feature Canon” references).
+
+**FA dashboard provides entry points to:**
+
+- Feature Canon for the selected product (e.g., features index and individual features).
+- Feature-Increments for the selected project (e.g., increments index and individual FIs).
+- Epics and Stories for the selected project when they exist.
+
+**Within each dashboard view:**
+
+- Artifacts are grouped by artifact type (e.g., “Business Analysis”, “Features”, “Feature-Increments”) rather than by folder path.
+- Each artifact entry shows:
+  - Artifact ID and title
+  - Artifact status when available (e.g., proposed/planned)
+  - The owning scope (Product vs Project)
+- The dashboard prioritizes “analysis-first” navigation:
+  - From FA items, users can navigate to the associated Feature for an FI when the link exists.
+  - From BA items, users can navigate to referenced features when the link exists.
+
 ### 3.2 Acceptance Criteria
 
 - [ ] AC-1: A user can select the **BA** role and is presented with navigation to BA artifacts (BA documents, BA increments) for `teamspec-viewer` and `teamspecviewermvp`.
 - [ ] AC-2: A user can select the **FA** role and is presented with navigation to FA artifacts (features, feature-increments, epics, stories) for `teamspec-viewer` and `teamspecviewermvp`.
 - [ ] AC-3: The dashboard does not provide edit capabilities for any artifact (read-only navigation).
+- [ ] AC-4: When viewing an artifact from the dashboard, `{TBD}` markers are highlighted and the user can navigate between `{TBD}` occurrences.
 
 ### 3.3 Out of Scope
 
@@ -146,11 +182,11 @@ After this increment is implemented and synced:
 
 ### 5.1 Technical Considerations
 
-{TBD}
+Refer to [TA-001](../../products/teamspec-viewer/technical-architecture/ta-TSV-001-react-browser-frontend.md) for frontend component structure and [TA-002](../../products/teamspec-viewer/technical-architecture/ta-TSV-002-hono-backend-server.md) for backend API design. Role selection uses React Context; dashboard components fetch artifact lists via REST endpoints.
 
 ### 5.2 Testing Strategy
 
-{TBD}
+Unit tests for RoleContext state transitions; integration tests for artifact listing API endpoints; E2E tests for role selection → dashboard navigation → artifact viewing flow.
 
 ---
 
@@ -158,7 +194,7 @@ After this increment is implemented and synced:
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-01-14 | {TBD} | Initial draft |
+| 2026-01-14 | AI-Generated | Initial draft |
 
 ---
 
@@ -169,5 +205,4 @@ After this increment is implemented and synced:
 
 ## Unresolved Items
 
-- Epic assignment for this FI → {TBD} (no epic created yet)
-- Technical and testing notes → {TBD} (awaiting SA/DEV/QA input)
+- Technical and testing notes → Filled above (see sections 5.1, 5.2)
