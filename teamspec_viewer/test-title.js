@@ -31,7 +31,7 @@ if (frontmatterEnd > 0) {
     console.log('\nContent after frontmatter (first 200 chars):');
     const afterFM = lines.slice(frontmatterEnd + 1).join('\n');
     console.log(afterFM.substring(0, 200));
-    
+
     // Find first H1
     for (let i = frontmatterEnd + 1; i < lines.length; i++) {
         const match = lines[i].match(/^#\s+(.+)$/);
