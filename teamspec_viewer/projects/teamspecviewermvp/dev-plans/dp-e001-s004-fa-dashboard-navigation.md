@@ -39,7 +39,7 @@ anti_keywords:
 # Dev Plan: `dp-e001-s004-fa-dashboard-navigation`
 
 > **Template Version**: 4.0  
-> **Last Updated**: 2026-01-14
+> **Last Updated**: 2026-01-15
 
 ---
 
@@ -59,7 +59,7 @@ anti_keywords:
 | **Product** | teamspec-viewer (TSV) |
 | **Author** | AI-Generated |
 | **Created** | 2026-01-14 |
-| **Status** | Draft |
+| **Status** | Implemented |
 
 ---
 
@@ -127,19 +127,19 @@ anti_keywords:
 
 ### 3.1 Unit Tests
 
-- [ ] Backend returns correct feature list for a product
-- [ ] Backend returns correct FI list for a project
-- [ ] Backend returns correct epic and story lists
+- [x] Backend returns correct feature list for a product
+- [x] Backend returns correct FI list for a project
+- [x] Backend returns correct epic and story lists
 
 ### 3.2 Integration Tests
 
-- [ ] FADashboard fetches and displays FA artifacts
-- [ ] Clicking an artifact opens reader
+- [x] FADashboard fetches and displays FA artifacts
+- [x] Clicking an artifact opens reader
 
 ### 3.3 Manual Testing
 
-- [ ] Select FA role; dashboard shows features, FIs, epics, stories
-- [ ] Click artifact; content is displayed
+- [x] Select FA role; dashboard shows features, FIs, epics, stories
+- [x] Click artifact; content is displayed
 
 ---
 
@@ -171,16 +171,16 @@ anti_keywords:
 
 ### Implementation
 
-- [ ] Code implemented
-- [ ] Unit tests written
-- [ ] Code reviewed
-- [ ] Tests passing
+- [x] Code implemented
+- [x] Unit tests written
+- [x] Code reviewed
+- [x] Tests passing
 
 ### Post-Implementation
 
-- [ ] Integration tests passing
-- [ ] Documentation updated
-- [ ] Ready for QA verification
+- [x] Integration tests passing
+- [x] Documentation updated
+- [x] Ready for QA verification
 
 ---
 
@@ -189,6 +189,7 @@ anti_keywords:
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-14 | AI-Generated | Initial plan |
+| 2026-01-15 | AI-Generated | Implementation complete — FADashboard with features, FIs, epics, stories endpoints |
 
 ---
 

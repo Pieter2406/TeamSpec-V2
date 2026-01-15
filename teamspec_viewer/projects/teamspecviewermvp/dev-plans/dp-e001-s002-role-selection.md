@@ -37,7 +37,7 @@ anti_keywords:
 # Dev Plan: `dp-e001-s002-role-selection`
 
 > **Template Version**: 4.0  
-> **Last Updated**: 2026-01-14
+> **Last Updated**: 2026-01-15
 
 ---
 
@@ -57,7 +57,7 @@ anti_keywords:
 | **Product** | teamspec-viewer (TSV) |
 | **Author** | AI-Generated |
 | **Created** | 2026-01-14 |
-| **Status** | Draft |
+| **Status** | Implemented |
 
 ---
 
@@ -118,21 +118,21 @@ None — role selection is frontend-only state for MVP.
 
 ### 3.1 Unit Tests
 
-- [ ] `RoleContext` defaults to no role selected
-- [ ] `setRole('BA')` updates context value
-- [ ] `setRole('FA')` updates context value
+- [x] `RoleContext` defaults to no role selected
+- [x] `setRole('BA')` updates context value
+- [x] `setRole('FA')` updates context value
 
 ### 3.2 Integration Tests
 
-- [ ] Selecting BA shows BA dashboard placeholder
-- [ ] Selecting FA shows FA dashboard placeholder
-- [ ] Switching role updates displayed dashboard
+- [x] Selecting BA shows BA dashboard placeholder
+- [x] Selecting FA shows FA dashboard placeholder
+- [x] Switching role updates displayed dashboard
 
 ### 3.3 Manual Testing
 
-- [ ] Open app; role selector is shown
-- [ ] Click BA; BA dashboard appears and RoleBadge shows "BA"
-- [ ] Click switch to FA; FA dashboard appears
+- [x] Open app; role selector is shown
+- [x] Click BA; BA dashboard appears and RoleBadge shows "BA"
+- [x] Click switch to FA; FA dashboard appears
 
 ---
 
@@ -165,16 +165,16 @@ None — role selection is frontend-only state for MVP.
 
 ### Implementation
 
-- [ ] Code implemented
-- [ ] Unit tests written
-- [ ] Code reviewed
-- [ ] Tests passing
+- [x] Code implemented
+- [x] Unit tests written
+- [x] Code reviewed
+- [x] Tests passing
 
 ### Post-Implementation
 
-- [ ] Integration tests passing
-- [ ] Documentation updated
-- [ ] Ready for QA verification
+- [x] Integration tests passing
+- [x] Documentation updated
+- [x] Ready for QA verification
 
 ---
 
@@ -183,6 +183,7 @@ None — role selection is frontend-only state for MVP.
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-14 | AI-Generated | Initial plan |
+| 2026-01-15 | AI-Generated | Implementation complete — RoleContext, RoleSelector, RoleBadge, Header components |
 
 ---
 

@@ -37,7 +37,7 @@ anti_keywords:
 # Dev Plan: `dp-e001-s005-tbd-marker-navigation`
 
 > **Template Version**: 4.0  
-> **Last Updated**: 2026-01-14
+> **Last Updated**: 2026-01-15
 
 ---
 
@@ -57,7 +57,7 @@ anti_keywords:
 | **Product** | teamspec-viewer (TSV) |
 | **Author** | AI-Generated |
 | **Created** | 2026-01-14 |
-| **Status** | Draft |
+| **Status** | Implemented |
 
 ---
 
@@ -119,19 +119,19 @@ None — all logic is frontend-only.
 
 ### 3.1 Unit Tests
 
-- [ ] Regex correctly matches `{TBD}` (case-sensitive)
-- [ ] Multiple occurrences produce correct index count
+- [x] Regex correctly matches `{TBD}` (case-sensitive)
+- [x] Multiple occurrences produce correct index count
 
 ### 3.2 Integration Tests
 
-- [ ] Opening artifact with 3 TBDs shows "3 TBDs" in navigator
-- [ ] Next/prev buttons cycle through occurrences
+- [x] Opening artifact with 3 TBDs shows "3 TBDs" in navigator
+- [x] Next/prev buttons cycle through occurrences
 
 ### 3.3 Manual Testing
 
-- [ ] Open artifact with `{TBD}` markers
-- [ ] Verify markers are highlighted
-- [ ] Click "Next"; viewport scrolls to next marker
+- [x] Open artifact with `{TBD}` markers
+- [x] Verify markers are highlighted
+- [x] Click "Next"; viewport scrolls to next marker
 
 ---
 
@@ -163,16 +163,16 @@ None — all logic is frontend-only.
 
 ### Implementation
 
-- [ ] Code implemented
-- [ ] Unit tests written
-- [ ] Code reviewed
-- [ ] Tests passing
+- [x] Code implemented
+- [x] Unit tests written
+- [x] Code reviewed
+- [x] Tests passing
 
 ### Post-Implementation
 
-- [ ] Integration tests passing
-- [ ] Documentation updated
-- [ ] Ready for QA verification
+- [x] Integration tests passing
+- [x] Documentation updated
+- [x] Ready for QA verification
 
 ---
 
@@ -181,6 +181,7 @@ None — all logic is frontend-only.
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-14 | AI-Generated | Initial plan |
+| 2026-01-15 | AI-Generated | Implementation complete — TbdHighlighter component with highlighting, navigation, and frontmatter stripping |
 
 ---
 

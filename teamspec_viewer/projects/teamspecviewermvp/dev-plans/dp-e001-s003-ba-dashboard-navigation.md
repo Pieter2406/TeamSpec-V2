@@ -36,7 +36,7 @@ anti_keywords:
 # Dev Plan: `dp-e001-s003-ba-dashboard-navigation`
 
 > **Template Version**: 4.0  
-> **Last Updated**: 2026-01-14
+> **Last Updated**: 2026-01-15
 
 ---
 
@@ -56,7 +56,7 @@ anti_keywords:
 | **Product** | teamspec-viewer (TSV) |
 | **Author** | AI-Generated |
 | **Created** | 2026-01-14 |
-| **Status** | Draft |
+| **Status** | Implemented |
 
 ---
 
@@ -124,18 +124,18 @@ anti_keywords:
 
 ### 3.1 Unit Tests
 
-- [ ] Backend returns correct BA artifact list for a product
-- [ ] Backend returns correct BAI list for a project
+- [x] Backend returns correct BA artifact list for a product
+- [x] Backend returns correct BAI list for a project
 
 ### 3.2 Integration Tests
 
-- [ ] BADashboard fetches and displays BA artifacts
-- [ ] Clicking an artifact opens reader
+- [x] BADashboard fetches and displays BA artifacts
+- [x] Clicking an artifact opens reader
 
 ### 3.3 Manual Testing
 
-- [ ] Select BA role; dashboard shows BA docs and BA increments
-- [ ] Click artifact; content is displayed
+- [x] Select BA role; dashboard shows BA docs and BA increments
+- [x] Click artifact; content is displayed
 
 ---
 
@@ -167,16 +167,16 @@ anti_keywords:
 
 ### Implementation
 
-- [ ] Code implemented
-- [ ] Unit tests written
-- [ ] Code reviewed
-- [ ] Tests passing
+- [x] Code implemented
+- [x] Unit tests written
+- [x] Code reviewed
+- [x] Tests passing
 
 ### Post-Implementation
 
-- [ ] Integration tests passing
-- [ ] Documentation updated
-- [ ] Ready for QA verification
+- [x] Integration tests passing
+- [x] Documentation updated
+- [x] Ready for QA verification
 
 ---
 
@@ -185,6 +185,7 @@ anti_keywords:
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-14 | AI-Generated | Initial plan |
+| 2026-01-15 | AI-Generated | Implementation complete — artifacts.ts routes, BADashboard, ArtifactList, ArtifactReader components |
 
 ---
 
