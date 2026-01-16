@@ -176,3 +176,119 @@ export async function getProjectsForProduct(productId: string): Promise<Projects
     if (!response.ok) throw new Error('Failed to fetch projects');
     return response.json();
 }
+
+// ============================================================================
+// Feature Relationships API (Story s-e005-003)
+// ============================================================================
+
+export interface StoryInfo {
+    id: string;
+    title: string;
+    status?: string;
+    path: string;
+}
+
+export interface EpicInfo {
+    id: string;
+    title: string;
+    status?: string;
+    path: string;
+    stories: StoryInfo[];
+}
+
+export interface FIInfo {
+    id: string;
+    title: string;
+    status?: string;
+    project: string;
+    path: string;
+    epic?: EpicInfo;
+}
+
+export interface FeatureInfo {
+    id: string;
+    title: string;
+    status?: string;
+    path: string;
+}
+
+export interface FeatureRelationshipsResponse {
+    feature: FeatureInfo;
+    featureIncrements: FIInfo[];
+}
+
+/**
+ * Get full relationship tree for a feature (Feature → FIs → Epics → Stories)
+ */
+export async function getFeatureRelationships(featureId: string): Promise<FeatureRelationshipsResponse> {
+    const response = await fetch(`${API_BASE}/features/${featureId}/relationships`);
+    if (!response.ok) throw new Error('Failed to fetch feature relationships');
+    return response.json();
+}
+
+export interface FICountsResponse {
+    counts: Record<string, number>;
+}
+
+/**
+ * Get FI counts for multiple features at once (for dashboard optimization)
+ */
+export async function getFeatureFICounts(featureIds: string[]): Promise<FICountsResponse> {
+    const response = await fetch(`${API_BASE}/features/fi-counts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featureIds }),
+    });
+    if (!response.ok) throw new Error('Failed to fetch FI counts');
+    return response.json();
+}
+
+// ============================================================================
+// BA Relationships API
+// ============================================================================
+
+export interface BAInfo {
+    id: string;
+    title: string;
+    status?: string;
+    path: string;
+}
+
+export interface BAIInfo {
+    id: string;
+    title: string;
+    status?: string;
+    project: string;
+    path: string;
+}
+
+export interface BARelationshipsResponse {
+    ba: BAInfo;
+    baIncrements: BAIInfo[];
+}
+
+/**
+ * Get full relationship tree for a BA document (BA → BAIs)
+ */
+export async function getBARelationships(baId: string): Promise<BARelationshipsResponse> {
+    const response = await fetch(`${API_BASE}/ba/${baId}/relationships`);
+    if (!response.ok) throw new Error('Failed to fetch BA relationships');
+    return response.json();
+}
+
+export interface BAICountsResponse {
+    counts: Record<string, number>;
+}
+
+/**
+ * Get BAI counts for multiple BA documents at once (for dashboard optimization)
+ */
+export async function getBABAICounts(baIds: string[]): Promise<BAICountsResponse> {
+    const response = await fetch(`${API_BASE}/ba/bai-counts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ baIds }),
+    });
+    if (!response.ok) throw new Error('Failed to fetch BAI counts');
+    return response.json();
+}

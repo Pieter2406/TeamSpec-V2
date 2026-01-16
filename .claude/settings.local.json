@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node scripts/check-consistency.js:*)"
+      "Bash(node scripts/check-consistency.js:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

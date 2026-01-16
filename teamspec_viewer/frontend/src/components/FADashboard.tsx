@@ -1,43 +1,37 @@
-import { useState, useEffect } from 'react';
-import { Box, Typography, Container, Grid, Alert, Breadcrumbs, Link } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, Container, Grid, Alert, Breadcrumbs, Link, Paper } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {
     getFeatures,
-    getFeatureIncrements,
-    getEpics,
-    getStories,
     Artifact,
 } from '../api/artifacts';
-import { ArtifactList } from './ArtifactList';
+import { FeatureCardList } from './FeatureCard';
+import { ArtifactTree, TreeNodeData } from './ArtifactTree';
 import { ArtifactReader } from './ArtifactReader';
 import { FIDetailView } from './FIDetailView';
 
 // MVP hardcoded context
 const PRODUCT_ID = 'teamspec-viewer';
-const PROJECT_ID = 'teamspecviewermvp';
 
 export function FADashboard() {
     const [features, setFeatures] = useState<Artifact[]>([]);
-    const [featureIncrements, setFeatureIncrements] = useState<Artifact[]>([]);
-    const [epics, setEpics] = useState<Artifact[]>([]);
-    const [stories, setStories] = useState<Artifact[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
-    const [selectedFI, setSelectedFI] = useState<Artifact | null>(null);
 
+    // Feature selection state
+    const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null);
+    const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
+
+    // Full reader state
+    const [readerArtifact, setReaderArtifact] = useState<Artifact | null>(null);
+    const [fiDetailArtifact, setFiDetailArtifact] = useState<Artifact | null>(null);
+
+    // Load features
     useEffect(() => {
-        Promise.all([
-            getFeatures(PRODUCT_ID),
-            getFeatureIncrements(PROJECT_ID),
-            getEpics(PROJECT_ID),
-            getStories(PROJECT_ID),
-        ])
-            .then(([featuresData, fiData, epicsData, storiesData]) => {
-                setFeatures(featuresData.artifacts);
-                setFeatureIncrements(fiData.artifacts);
-                setEpics(epicsData.artifacts);
-                setStories(storiesData.artifacts);
+        getFeatures(PRODUCT_ID)
+            .then(response => {
+                setFeatures(response.artifacts);
             })
             .catch((err) => {
                 setError(err.message);
@@ -47,20 +41,43 @@ export function FADashboard() {
             });
     }, []);
 
-    const handleArtifactSelect = (artifact: Artifact) => {
-        // Open FI detail view for feature increments, regular reader for others
-        if (artifact.type === 'feature-increment') {
-            setSelectedFI(artifact);
+    // Handle feature card click
+    const handleFeatureClick = useCallback((feature: Artifact) => {
+        if (expandedFeatureId === feature.id) {
+            // Toggle off - collapse tree
+            setExpandedFeatureId(null);
+            setSelectedFeatureId(null);
         } else {
-            setSelectedArtifact(artifact);
+            // Expand tree for this feature
+            setSelectedFeatureId(feature.id);
+            setExpandedFeatureId(feature.id);
         }
-    };
+    }, [expandedFeatureId]);
 
-    const handleStoryClick = (story: Artifact) => {
-        // Close FI view and open story in reader
-        setSelectedFI(null);
-        setSelectedArtifact(story);
-    };
+    // Handle tree node click - open full reader directly
+    const handleNodeSelect = useCallback((node: TreeNodeData) => {
+        // Build artifact from node
+        const artifact: Artifact = {
+            id: node.id,
+            path: node.path,
+            title: node.title,
+            type: node.type,
+            status: node.status,
+        };
+
+        // Open appropriate viewer
+        if (node.type === 'feature-increment') {
+            setFiDetailArtifact(artifact);
+        } else {
+            setReaderArtifact(artifact);
+        }
+    }, []);
+
+    // Handle story click from FI detail view
+    const handleStoryClick = useCallback((story: Artifact) => {
+        setFiDetailArtifact(null);
+        setReaderArtifact(story);
+    }, []);
 
     return (
         <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
@@ -93,7 +110,7 @@ export function FADashboard() {
                         Functional Analysis Dashboard
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#64748b' }}>
-                        Product: <strong>{PRODUCT_ID}</strong> &bull; Project: <strong>{PROJECT_ID}</strong>
+                        Product: <strong>{PRODUCT_ID}</strong> &bull; Use-Case Centric View
                     </Typography>
                 </Box>
 
@@ -104,56 +121,109 @@ export function FADashboard() {
                     </Alert>
                 )}
 
-                {/* Artifact Grid */}
+                {/* Main Layout: Features + Tree */}
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                        <ArtifactList
-                            title="Features"
-                            artifacts={features}
-                            loading={loading}
-                            onSelect={handleArtifactSelect}
-                            icon="folder"
-                        />
+                    {/* Left Column: Feature Cards */}
+                    <Grid item xs={12} md={5} lg={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                borderRadius: 2,
+                                border: '1px solid #e2e8f0',
+                                bgcolor: 'white',
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#1e293b',
+                                    mb: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}
+                            >
+                                <AccountTreeIcon sx={{ color: '#3b82f6' }} />
+                                Features
+                            </Typography>
+                            <FeatureCardList
+                                features={features}
+                                loading={loading}
+                                selectedFeatureId={selectedFeatureId || undefined}
+                                expandedFeatureId={expandedFeatureId || undefined}
+                                onFeatureClick={handleFeatureClick}
+                            />
+                        </Paper>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <ArtifactList
-                            title="Feature Increments"
-                            artifacts={featureIncrements}
-                            loading={loading}
-                            onSelect={handleArtifactSelect}
-                            icon="document"
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <ArtifactList
-                            title="Epics"
-                            artifacts={epics}
-                            loading={loading}
-                            onSelect={handleArtifactSelect}
-                            icon="folder"
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <ArtifactList
-                            title="Stories"
-                            artifacts={stories}
-                            loading={loading}
-                            onSelect={handleArtifactSelect}
-                            icon="document"
-                        />
+
+                    {/* Right Column: Artifact Tree */}
+                    <Grid item xs={12} md={7} lg={8}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                borderRadius: 2,
+                                border: '1px solid #e2e8f0',
+                                bgcolor: 'white',
+                                minHeight: 400,
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#1e293b',
+                                    mb: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}
+                            >
+                                <AccountTreeIcon sx={{ color: '#8b5cf6' }} />
+                                Artifact Relationships
+                            </Typography>
+
+                            {expandedFeatureId ? (
+                                <ArtifactTree
+                                    featureId={expandedFeatureId}
+                                    onNodeSelect={handleNodeSelect}
+                                />
+                            ) : (
+                                <Box
+                                    sx={{
+                                        p: 4,
+                                        textAlign: 'center',
+                                        color: '#94a3b8',
+                                        bgcolor: '#f8fafc',
+                                        borderRadius: 2,
+                                        border: '1px dashed #e2e8f0',
+                                    }}
+                                >
+                                    <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                                    <Typography variant="body1">
+                                        Select a feature to view its artifact relationships
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                        Click a feature card on the left to expand its tree
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Paper>
                     </Grid>
                 </Grid>
 
                 {/* Artifact Reader Drawer (for non-FI artifacts) */}
                 <ArtifactReader
-                    artifact={selectedArtifact}
-                    onClose={() => setSelectedArtifact(null)}
+                    artifact={readerArtifact}
+                    onClose={() => setReaderArtifact(null)}
                 />
 
                 {/* FI Detail View (for feature increments with AS-IS/TO-BE tabs) */}
                 <FIDetailView
-                    artifact={selectedFI}
-                    onClose={() => setSelectedFI(null)}
+                    artifact={fiDetailArtifact}
+                    onClose={() => setFiDetailArtifact(null)}
                     onStoryClick={handleStoryClick}
                 />
             </Container>

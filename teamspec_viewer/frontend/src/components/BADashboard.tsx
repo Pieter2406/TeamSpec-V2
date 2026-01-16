@@ -1,33 +1,36 @@
-import { useState, useEffect } from 'react';
-import { Box, Typography, Container, Grid, Alert, Breadcrumbs, Link } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, Container, Grid, Alert, Breadcrumbs, Link, Paper } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import ArticleIcon from '@mui/icons-material/Article';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {
     getBusinessAnalysis,
-    getBusinessAnalysisIncrements,
     Artifact,
 } from '../api/artifacts';
-import { ArtifactList } from './ArtifactList';
+import { BACardList } from './BACard';
+import { BATree, BATreeNodeData } from './BATree';
 import { ArtifactReader } from './ArtifactReader';
 
 // MVP hardcoded context
 const PRODUCT_ID = 'teamspec-viewer';
-const PROJECT_ID = 'teamspecviewermvp';
 
 export function BADashboard() {
     const [baArtifacts, setBaArtifacts] = useState<Artifact[]>([]);
-    const [baiArtifacts, setBaiArtifacts] = useState<Artifact[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
 
+    // BA selection state
+    const [selectedBAId, setSelectedBAId] = useState<string | null>(null);
+    const [expandedBAId, setExpandedBAId] = useState<string | null>(null);
+
+    // Full reader state
+    const [readerArtifact, setReaderArtifact] = useState<Artifact | null>(null);
+
+    // Load BA documents
     useEffect(() => {
-        Promise.all([
-            getBusinessAnalysis(PRODUCT_ID),
-            getBusinessAnalysisIncrements(PROJECT_ID),
-        ])
-            .then(([baData, baiData]) => {
-                setBaArtifacts(baData.artifacts);
-                setBaiArtifacts(baiData.artifacts);
+        getBusinessAnalysis(PRODUCT_ID)
+            .then(response => {
+                setBaArtifacts(response.artifacts);
             })
             .catch((err) => {
                 setError(err.message);
@@ -35,6 +38,32 @@ export function BADashboard() {
             .finally(() => {
                 setLoading(false);
             });
+    }, []);
+
+    // Handle BA card click
+    const handleBAClick = useCallback((ba: Artifact) => {
+        if (expandedBAId === ba.id) {
+            // Toggle off - collapse tree
+            setExpandedBAId(null);
+            setSelectedBAId(null);
+        } else {
+            // Expand tree for this BA
+            setSelectedBAId(ba.id);
+            setExpandedBAId(ba.id);
+        }
+    }, [expandedBAId]);
+
+    // Handle tree node click - open full reader directly
+    const handleNodeSelect = useCallback((node: BATreeNodeData) => {
+        // Build artifact from node
+        const artifact: Artifact = {
+            id: node.id,
+            path: node.path,
+            title: node.title,
+            type: node.type === 'ba' ? 'business-analysis' : 'business-analysis-increment',
+            status: node.status,
+        };
+        setReaderArtifact(artifact);
     }, []);
 
     return (
@@ -68,7 +97,7 @@ export function BADashboard() {
                         Business Analysis Dashboard
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#64748b' }}>
-                        Product: <strong>{PRODUCT_ID}</strong> &bull; Project: <strong>{PROJECT_ID}</strong>
+                        Product: <strong>{PRODUCT_ID}</strong> &bull; Use-Case Centric View
                     </Typography>
                 </Box>
 
@@ -79,32 +108,103 @@ export function BADashboard() {
                     </Alert>
                 )}
 
-                {/* Artifact Grid */}
+                {/* Main Layout: BA Documents + Tree */}
                 <Grid container spacing={3}>
-                    <Grid item xs={12} lg={6}>
-                        <ArtifactList
-                            title="Business Analysis"
-                            artifacts={baArtifacts}
-                            loading={loading}
-                            onSelect={setSelectedArtifact}
-                            icon="document"
-                        />
+                    {/* Left Column: BA Cards */}
+                    <Grid item xs={12} md={5} lg={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                borderRadius: 2,
+                                border: '1px solid #e2e8f0',
+                                bgcolor: 'white',
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#1e293b',
+                                    mb: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}
+                            >
+                                <ArticleIcon sx={{ color: '#10b981' }} />
+                                Business Analysis
+                            </Typography>
+                            <BACardList
+                                baArtifacts={baArtifacts}
+                                loading={loading}
+                                selectedBAId={selectedBAId || undefined}
+                                expandedBAId={expandedBAId || undefined}
+                                onBAClick={handleBAClick}
+                            />
+                        </Paper>
                     </Grid>
-                    <Grid item xs={12} lg={6}>
-                        <ArtifactList
-                            title="Business Analysis Increments"
-                            artifacts={baiArtifacts}
-                            loading={loading}
-                            onSelect={setSelectedArtifact}
-                            icon="document"
-                        />
+
+                    {/* Right Column: Artifact Tree */}
+                    <Grid item xs={12} md={7} lg={8}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                borderRadius: 2,
+                                border: '1px solid #e2e8f0',
+                                bgcolor: 'white',
+                                minHeight: 400,
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#1e293b',
+                                    mb: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}
+                            >
+                                <AccountTreeIcon sx={{ color: '#10b981' }} />
+                                Artifact Relationships
+                            </Typography>
+
+                            {expandedBAId ? (
+                                <BATree
+                                    baId={expandedBAId}
+                                    onNodeSelect={handleNodeSelect}
+                                />
+                            ) : (
+                                <Box
+                                    sx={{
+                                        p: 4,
+                                        textAlign: 'center',
+                                        color: '#94a3b8',
+                                        bgcolor: '#f8fafc',
+                                        borderRadius: 2,
+                                        border: '1px dashed #e2e8f0',
+                                    }}
+                                >
+                                    <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                                    <Typography variant="body1">
+                                        Select a BA document to view its increments
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                        Click a BA card on the left to expand its tree
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Paper>
                     </Grid>
                 </Grid>
 
                 {/* Artifact Reader Drawer */}
                 <ArtifactReader
-                    artifact={selectedArtifact}
-                    onClose={() => setSelectedArtifact(null)}
+                    artifact={readerArtifact}
+                    onClose={() => setReaderArtifact(null)}
                 />
             </Container>
         </Box>

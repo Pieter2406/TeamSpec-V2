@@ -8,7 +8,8 @@ Epics are required containers for stories. Each Epic links to Feature-Increments
 | [epic-TSV-002](epic-TSV-002-fi-navigation.md) | Feature ↔ FI Navigation | proposed | [fi-TSV-002](../feature-increments/fi-TSV-002-ba-fa-feature-increment-navigation.md) | 3 |
 | [epic-TSV-003](epic-TSV-003-artifact-search.md) | Artifact Search | proposed | [fi-TSV-003](../feature-increments/fi-TSV-003-ba-fa-artifact-search.md) | 3 |
 | [epic-TSV-004](epic-TSV-004-product-portfolio.md) | Product Portfolio Navigation | proposed | [fi-TSV-004](../feature-increments/fi-TSV-004-product-portfolio-navigation.md) | 3 |
+| [epic-TSV-005](epic-TSV-005-usecase-centric-dashboard.md) | Use-Case Centric Dashboard | proposed | [fi-TSV-005](../feature-increments/fi-TSV-005-usecase-centric-dashboard.md) | 4 |
 
-## Next Available ID: epic-TSV-005
+## Next Available ID: epic-TSV-006
 
 > **To add epics:** Run `ts:fa epic`

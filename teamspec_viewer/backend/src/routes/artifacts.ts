@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { readdir, readFile, stat } from 'fs/promises';
 import { join, relative, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { getFeatureRelationships, getFeatureFICounts, getBARelationships, getBABAICounts } from '../services/relationshipService.js';
 
 const artifacts = new Hono();
 
@@ -392,6 +393,90 @@ artifacts.get('/features/:featureId/increments', async (c) => {
         increments: linkedFIs,
         count: linkedFIs.length,
     });
+});
+
+// ============================================================================
+// Feature Relationships API (Story s-e005-003)
+// ============================================================================
+
+/**
+ * GET /features/:featureId/relationships
+ * Get full relationship tree for a feature (Feature → FIs → Epics → Stories)
+ */
+artifacts.get('/features/:featureId/relationships', async (c) => {
+    const featureId = c.req.param('featureId');
+
+    try {
+        const relationships = await getFeatureRelationships(featureId);
+        return c.json(relationships);
+    } catch (error: any) {
+        if (error.message?.includes('not found')) {
+            return c.json({ error: error.message }, 404);
+        }
+        return c.json({ error: 'Failed to get feature relationships' }, 500);
+    }
+});
+
+/**
+ * POST /features/fi-counts
+ * Get FI counts for multiple features at once (for dashboard optimization)
+ */
+artifacts.post('/features/fi-counts', async (c) => {
+    try {
+        const body = await c.req.json();
+        const featureIds: string[] = body.featureIds || [];
+
+        if (!Array.isArray(featureIds) || featureIds.length === 0) {
+            return c.json({ error: 'featureIds array required' }, 400);
+        }
+
+        const counts = await getFeatureFICounts(featureIds);
+        return c.json({ counts });
+    } catch (error) {
+        return c.json({ error: 'Failed to get FI counts' }, 500);
+    }
+});
+
+// ============================================================================
+// BA Relationships API
+// ============================================================================
+
+/**
+ * GET /ba/:baId/relationships
+ * Get full relationship tree for a BA document (BA → BAIs)
+ */
+artifacts.get('/ba/:baId/relationships', async (c) => {
+    const baId = c.req.param('baId');
+
+    try {
+        const relationships = await getBARelationships(baId);
+        return c.json(relationships);
+    } catch (error: any) {
+        if (error.message?.includes('not found')) {
+            return c.json({ error: error.message }, 404);
+        }
+        return c.json({ error: 'Failed to get BA relationships' }, 500);
+    }
+});
+
+/**
+ * POST /ba/bai-counts
+ * Get BAI counts for multiple BA documents at once (for dashboard optimization)
+ */
+artifacts.post('/ba/bai-counts', async (c) => {
+    try {
+        const body = await c.req.json();
+        const baIds: string[] = body.baIds || [];
+
+        if (!Array.isArray(baIds) || baIds.length === 0) {
+            return c.json({ error: 'baIds array required' }, 400);
+        }
+
+        const counts = await getBABAICounts(baIds);
+        return c.json({ counts });
+    } catch (error) {
+        return c.json({ error: 'Failed to get BAI counts' }, 500);
+    }
 });
 
 export default artifacts;
