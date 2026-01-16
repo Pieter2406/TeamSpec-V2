@@ -12,9 +12,11 @@
     },
     "dependencies": {
         "@hono/node-server": "^1.4.0",
-        "hono": "^4.0.0"
+        "hono": "^4.0.0",
+        "js-yaml": "^4.1.1"
     },
     "devDependencies": {
+        "@types/js-yaml": "^4.0.9",
         "@types/node": "^20.11.5",
         "eslint": "^8.56.0",
         "tsx": "^4.7.0",

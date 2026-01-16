@@ -3,6 +3,8 @@ import { cors } from 'hono/cors'
 import { serve } from '@hono/node-server'
 import { apiRoutes } from './routes/api'
 import artifacts from './routes/artifacts'
+import searchRoutes from './routes/search'
+import productsRoutes from './routes/products'
 
 const app = new Hono()
 
@@ -21,6 +23,8 @@ app.get('/health', (c) => {
 // API routes
 app.route('/api', apiRoutes)
 app.route('/api', artifacts)
+app.route('/api/search', searchRoutes)
+app.route('/api/products', productsRoutes)
 
 const port = 3000
 console.log(`🚀 Backend server running on http://localhost:${port}`)

@@ -81,7 +81,7 @@ export function BADashboard() {
 
                 {/* Artifact Grid */}
                 <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, lg: 6 }}>
+                    <Grid item xs={12} lg={6}>
                         <ArtifactList
                             title="Business Analysis"
                             artifacts={baArtifacts}
@@ -90,7 +90,7 @@ export function BADashboard() {
                             icon="document"
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, lg: 6 }}>
+                    <Grid item xs={12} lg={6}>
                         <ArtifactList
                             title="Business Analysis Increments"
                             artifacts={baiArtifacts}

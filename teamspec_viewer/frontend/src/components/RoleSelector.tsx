@@ -1,9 +1,11 @@
 import { Box, Typography, Paper, Avatar } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { useRole, Role } from '../contexts/RoleContext';
+import { useRole } from '../contexts/RoleContext';
 
-const AVAILABLE_ROLES: { id: Role; label: string; description: string; icon: typeof BusinessIcon; color: string }[] = [
+type ActiveRole = 'BA' | 'FA';
+
+const AVAILABLE_ROLES: { id: ActiveRole; label: string; description: string; icon: typeof BusinessIcon; color: string }[] = [
     {
         id: 'BA',
         label: 'Business Analyst',

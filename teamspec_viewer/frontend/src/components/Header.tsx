@@ -1,7 +1,14 @@
-import { AppBar, Toolbar, Typography, Box, Container } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, Container, IconButton } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
 import { RoleBadge } from './RoleBadge';
+import { SearchBar } from './SearchBar';
 
-export function Header() {
+interface HeaderProps {
+    onSearch?: (query: string) => void;
+    onHomeClick?: () => void;
+}
+
+export function Header({ onSearch, onHomeClick }: HeaderProps) {
     return (
         <AppBar
             position="sticky"
@@ -12,8 +19,20 @@ export function Header() {
             }}
         >
             <Container maxWidth="xl">
-                <Toolbar sx={{ py: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
+                <Toolbar sx={{ py: 1, gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        {onHomeClick && (
+                            <IconButton
+                                onClick={onHomeClick}
+                                sx={{
+                                    color: 'white',
+                                    bgcolor: 'rgba(255,255,255,0.1)',
+                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                                }}
+                            >
+                                <HomeIcon />
+                            </IconButton>
+                        )}
                         <Box
                             sx={{
                                 width: 36,
@@ -26,7 +45,9 @@ export function Header() {
                                 fontWeight: 800,
                                 fontSize: '1rem',
                                 color: 'white',
+                                cursor: onHomeClick ? 'pointer' : 'default',
                             }}
+                            onClick={onHomeClick}
                         >
                             TS
                         </Box>
@@ -36,10 +57,15 @@ export function Header() {
                                 fontWeight: 700,
                                 letterSpacing: '-0.01em',
                                 color: 'white',
+                                cursor: onHomeClick ? 'pointer' : 'default',
                             }}
+                            onClick={onHomeClick}
                         >
                             TeamSpec Viewer
                         </Typography>
+                    </Box>
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+                        {onSearch && <SearchBar onSearch={onSearch} />}
                     </Box>
                     <RoleBadge />
                 </Toolbar>

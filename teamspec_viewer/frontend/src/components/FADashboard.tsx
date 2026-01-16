@@ -10,6 +10,7 @@ import {
 } from '../api/artifacts';
 import { ArtifactList } from './ArtifactList';
 import { ArtifactReader } from './ArtifactReader';
+import { FIDetailView } from './FIDetailView';
 
 // MVP hardcoded context
 const PRODUCT_ID = 'teamspec-viewer';
@@ -23,6 +24,7 @@ export function FADashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+    const [selectedFI, setSelectedFI] = useState<Artifact | null>(null);
 
     useEffect(() => {
         Promise.all([
@@ -44,6 +46,21 @@ export function FADashboard() {
                 setLoading(false);
             });
     }, []);
+
+    const handleArtifactSelect = (artifact: Artifact) => {
+        // Open FI detail view for feature increments, regular reader for others
+        if (artifact.type === 'feature-increment') {
+            setSelectedFI(artifact);
+        } else {
+            setSelectedArtifact(artifact);
+        }
+    };
+
+    const handleStoryClick = (story: Artifact) => {
+        // Close FI view and open story in reader
+        setSelectedFI(null);
+        setSelectedArtifact(story);
+    };
 
     return (
         <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
@@ -89,48 +106,55 @@ export function FADashboard() {
 
                 {/* Artifact Grid */}
                 <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <ArtifactList
                             title="Features"
                             artifacts={features}
                             loading={loading}
-                            onSelect={setSelectedArtifact}
+                            onSelect={handleArtifactSelect}
                             icon="folder"
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <ArtifactList
                             title="Feature Increments"
                             artifacts={featureIncrements}
                             loading={loading}
-                            onSelect={setSelectedArtifact}
+                            onSelect={handleArtifactSelect}
                             icon="document"
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <ArtifactList
                             title="Epics"
                             artifacts={epics}
                             loading={loading}
-                            onSelect={setSelectedArtifact}
+                            onSelect={handleArtifactSelect}
                             icon="folder"
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <ArtifactList
                             title="Stories"
                             artifacts={stories}
                             loading={loading}
-                            onSelect={setSelectedArtifact}
+                            onSelect={handleArtifactSelect}
                             icon="document"
                         />
                     </Grid>
                 </Grid>
 
-                {/* Artifact Reader Drawer */}
+                {/* Artifact Reader Drawer (for non-FI artifacts) */}
                 <ArtifactReader
                     artifact={selectedArtifact}
                     onClose={() => setSelectedArtifact(null)}
+                />
+
+                {/* FI Detail View (for feature increments with AS-IS/TO-BE tabs) */}
+                <FIDetailView
+                    artifact={selectedFI}
+                    onClose={() => setSelectedFI(null)}
+                    onStoryClick={handleStoryClick}
                 />
             </Container>
         </Box>

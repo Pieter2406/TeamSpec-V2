@@ -242,4 +242,156 @@ artifacts.get('/artifact', async (c) => {
     }
 });
 
+// Helper to parse FI sections (AS-IS/TO-BE)
+function parseFISections(content: string): { asIs: string; toBe: string } {
+    const lines = content.split(/\r?\n/);
+
+    let asIsStart = -1;
+    let toBeStart = -1;
+    let asIsEnd = -1;
+    let toBeEnd = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // Match "## 2. AS-IS" or similar
+        if (line.match(/^##\s*2\.?\s*AS-IS/i)) {
+            asIsStart = i + 1;
+        }
+        // Match "## 3. TO-BE" or similar
+        else if (line.match(/^##\s*3\.?\s*TO-BE/i)) {
+            toBeStart = i + 1;
+            if (asIsStart !== -1 && asIsEnd === -1) {
+                asIsEnd = i;
+            }
+        }
+        // Match next major section (## 4. or ## 5. etc.)
+        else if (line.match(/^##\s*[4-9]\./) && toBeStart !== -1 && toBeEnd === -1) {
+            toBeEnd = i;
+        }
+    }
+
+    // Handle case where TO-BE goes to end of file
+    if (toBeStart !== -1 && toBeEnd === -1) {
+        toBeEnd = lines.length;
+    }
+
+    const asIsContent = asIsStart !== -1 && asIsEnd !== -1
+        ? lines.slice(asIsStart, asIsEnd).join('\n').trim()
+        : '';
+
+    const toBeContent = toBeStart !== -1 && toBeEnd !== -1
+        ? lines.slice(toBeStart, toBeEnd).join('\n').trim()
+        : '';
+
+    return { asIs: asIsContent, toBe: toBeContent };
+}
+
+// GET /api/feature-increments/:fiId/sections - Get parsed AS-IS/TO-BE sections
+artifacts.get('/feature-increments/:fiId/sections', async (c) => {
+    const { fiId } = c.req.param();
+    const projectId = c.req.query('projectId') || 'teamspecviewermvp';
+
+    const fiDir = join(WORKSPACE_ROOT, 'projects', projectId, 'feature-increments');
+
+    try {
+        const files = await findMarkdownFiles(fiDir, new RegExp(`^${fiId}.*\\.md$`));
+
+        if (files.length === 0) {
+            return c.json({ error: 'Feature increment not found' }, 404);
+        }
+
+        const content = await readFile(files[0], 'utf-8');
+        const sections = parseFISections(content);
+
+        return c.json({
+            fiId,
+            ...sections,
+        });
+    } catch (error) {
+        return c.json({ error: 'Failed to parse feature increment' }, 500);
+    }
+});
+
+// GET /api/feature-increments/:fiId/stories - Get stories linked to a feature increment
+artifacts.get('/feature-increments/:fiId/stories', async (c) => {
+    const { fiId } = c.req.param();
+    const projectId = c.req.query('projectId') || 'teamspecviewermvp';
+
+    const storiesDir = join(WORKSPACE_ROOT, 'projects', projectId, 'stories');
+    const linkedStories: Artifact[] = [];
+
+    try {
+        const storyFiles = await findMarkdownFiles(storiesDir, /^s-.*\.md$/);
+
+        for (const filePath of storyFiles) {
+            const content = await readFile(filePath, 'utf-8');
+
+            // Check if story references this FI in front matter or body
+            const fiPattern = new RegExp(fiId, 'i');
+            if (fiPattern.test(content)) {
+                const relativePath = relative(storiesDir, filePath);
+                const folder = relativePath.split(/[/\\]/)[0];
+                const folderStatus = folder === 'done' ? 'Done' :
+                    folder === 'in-progress' ? 'In Progress' :
+                        folder === 'backlog' ? 'Backlog' : undefined;
+
+                linkedStories.push({
+                    id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+                    path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+                    title: await extractTitle(filePath),
+                    type: 'story',
+                    status: folderStatus || await extractStatus(filePath),
+                });
+            }
+        }
+    } catch (error) {
+        // No stories found
+    }
+
+    return c.json({
+        fiId,
+        stories: linkedStories,
+        count: linkedStories.length,
+    });
+});
+
+// GET /api/features/:featureId/increments - Get FIs targeting a specific feature
+artifacts.get('/features/:featureId/increments', async (c) => {
+    const { featureId } = c.req.param();
+    const projectId = c.req.query('projectId') || 'teamspecviewermvp';
+
+    const fiDir = join(WORKSPACE_ROOT, 'projects', projectId, 'feature-increments');
+    const linkedFIs: Artifact[] = [];
+
+    try {
+        const fiFiles = await findMarkdownFiles(fiDir, /^fi-.*\.md$/);
+
+        for (const filePath of fiFiles) {
+            const content = await readFile(filePath, 'utf-8');
+
+            // Check if FI references this feature in front matter or body
+            // Look for patterns like "Target Feature: f-TSV-002" or "links_required: f-TSV-002"
+            const featurePattern = new RegExp(featureId, 'i');
+            if (featurePattern.test(content)) {
+                linkedFIs.push({
+                    id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+                    path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+                    title: await extractTitle(filePath),
+                    type: 'feature-increment',
+                    status: await extractStatus(filePath),
+                });
+            }
+        }
+    } catch (error) {
+        // No FIs found
+    }
+
+    return c.json({
+        featureId,
+        increments: linkedFIs,
+        count: linkedFIs.length,
+    });
+});
+
 export default artifacts;
