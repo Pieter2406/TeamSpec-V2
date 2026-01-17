@@ -1,0 +1,183 @@
+# CodeQL Advanced Security Scanning for TeamSpec
+# Optimized for LLM-generated JavaScript/TypeScript codebase
+# Extra focus on prompt injection and input validation vulnerabilities
+
+name: "CodeQL Security Analysis"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "**.js"
+      - "**.ts"
+      - "**.tsx"
+      - "**.jsx"
+      - "**.json"
+      - ".github/workflows/codeql.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "**.js"
+      - "**.ts"
+      - "**.tsx"
+      - "**.jsx"
+      - "**.json"
+  schedule:
+    # Run weekly on Thursdays at 9:33 UTC
+    - cron: "33 9 * * 4"
+  workflow_dispatch:
+    # Allow manual triggering for security audits
+
+jobs:
+  analyze:
+    name: Analyze JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Initialize CodeQL with security-focused queries
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          # Use extended security queries plus quality checks
+          queries: security-extended,security-and-quality
+          # Custom config for LLM-specific security patterns
+          config: |
+            paths:
+              - cli
+              - teamspec_viewer/backend
+              - teamspec_viewer/frontend/src
+            paths-ignore:
+              - "**/*.test.js"
+              - "**/*.test.ts"
+              - "**/*.spec.js"
+              - "**/*.spec.ts"
+              - "**/test/**"
+              - "**/tests/**"
+              - "**/fixtures/**"
+              - "**/node_modules/**"
+              - "**/*.d.ts"
+              - "docs/**"
+              - "templates/**"
+              - "spec/**"
+              - "agents/**"
+              - "teamspec_test/**"
+            query-filters:
+              # Exclude low-severity issues to focus on critical security
+              - exclude:
+                  problem.severity: recommendation
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:javascript-typescript"
+          # Upload results even if analysis finds issues
+          upload: always
+
+  # Additional security checks for LLM-generated code
+  llm-security-scan:
+    name: LLM Security Patterns
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Check for common prompt injection patterns
+      - name: Scan for prompt injection vulnerabilities
+        run: |
+          echo "🔍 Scanning for prompt injection and LLM security patterns..."
+
+          # Check for unsanitized user input in template strings
+          echo "Checking for unsanitized template literals with user input..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E '\$\{.*req\.(body|query|params).*\}' \
+            cli/ teamspec_viewer/backend/ teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found potential unsanitized user input in template strings"
+          fi
+
+          # Check for eval/Function usage (code injection risk)
+          echo "Checking for dangerous eval/Function patterns..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E '\b(eval|Function)\s*\(' \
+            cli/ teamspec_viewer/backend/ teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found eval/Function usage - review for code injection"
+          fi
+
+          # Check for unsafe regex patterns (ReDoS)
+          echo "Checking for potentially unsafe regex patterns..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E 'new RegExp\s*\([^)]*\+' \
+            cli/ teamspec_viewer/backend/ teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found dynamic regex construction - review for ReDoS"
+          fi
+
+          # Check for unsafe file path construction
+          echo "Checking for path traversal vulnerabilities..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E '(path\.join|path\.resolve)\s*\([^)]*req\.' \
+            cli/ teamspec_viewer/backend/ teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found user input in path construction - verify sanitization"
+          fi
+
+          # Check for command injection patterns
+          echo "Checking for command injection patterns..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E '(exec|spawn|execSync|spawnSync)\s*\(' \
+            cli/ teamspec_viewer/backend/ teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found shell command execution - verify input sanitization"
+          fi
+
+          # Check for unsafe innerHTML/dangerouslySetInnerHTML
+          echo "Checking for XSS-prone patterns..."
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -E '(innerHTML|dangerouslySetInnerHTML)' \
+            teamspec_viewer/frontend/src/ 2>/dev/null; then
+            echo "⚠️ Warning: Found innerHTML usage - verify content sanitization"
+          fi
+
+          echo "✅ LLM security pattern scan complete"
+
+      # Check for sensitive data exposure
+      - name: Scan for secrets and sensitive patterns
+        run: |
+          echo "🔐 Scanning for potential secret exposure..."
+
+          # Check for hardcoded API keys or tokens
+          if grep -rn --include="*.ts" --include="*.js" --include="*.tsx" \
+            -iE '(api_key|apikey|secret|password|token)\s*[:=]\s*["\x27][^"\x27]{8,}["\x27]' \
+            cli/ teamspec_viewer/ 2>/dev/null | grep -v "\.test\." | grep -v "example"; then
+            echo "⚠️ Warning: Potential hardcoded secrets found"
+          fi
+
+          echo "✅ Secret scan complete"
+
+      # Dependency audit
+      - name: Audit npm dependencies
+        run: |
+          echo "📦 Auditing dependencies..."
+          cd cli && npm audit --audit-level=moderate || true
+          cd ../teamspec_viewer && npm audit --audit-level=moderate || true
+        continue-on-error: true
