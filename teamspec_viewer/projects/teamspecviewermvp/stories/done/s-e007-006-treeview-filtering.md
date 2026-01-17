@@ -55,7 +55,7 @@ anti_keywords:
 |-------|-------|
 | **Story ID** | s-e007-006 |
 | **Epic** | [epic-TSV-007](../../epics/epic-TSV-007-dashboard-filtering-ordering.md) |
-| **Status** | Backlog |
+| **Status** | Done |
 | **Estimate** | 3 pts |
 | **Author** | FA |
 | **Sprint** | — |

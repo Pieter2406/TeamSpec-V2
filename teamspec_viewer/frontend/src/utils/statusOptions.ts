@@ -28,10 +28,10 @@ export interface StatusConfig {
 
 export const STATUS_OPTIONS: Partial<Record<ArtifactType, StatusConfig[]>> = {
     'feature': [
-        { value: 'Planned', label: 'Planned', color: '#9e9e9e' },
-        { value: 'Active', label: 'Active', color: '#4caf50' },
-        { value: 'Deprecated', label: 'Deprecated', color: '#ff9800' },
-        { value: 'Retired', label: 'Retired', color: '#f44336' },
+        { value: 'Planned', label: 'Planned', color: '#9e9e9e' },  // Gray - Future work
+        { value: 'Active', label: 'Active', color: '#ff9800' },    // Orange - Ongoing work
+        { value: 'Deprecated', label: 'Deprecated', color: '#f57c00' },  // Dark Orange - Sunset phase
+        { value: 'Retired', label: 'Retired', color: '#795548' },  // Brown - End-of-lifecycle (terminal)
     ],
     'feature-increment': [
         { value: 'Proposed', label: 'Proposed', color: '#9e9e9e' },
@@ -42,8 +42,8 @@ export const STATUS_OPTIONS: Partial<Record<ArtifactType, StatusConfig[]>> = {
     ],
     'epic': [
         { value: 'Planned', label: 'Planned', color: '#9e9e9e' },
-        { value: 'Active', label: 'Active', color: '#4caf50' },
-        { value: 'Done', label: 'Done', color: '#2196f3' },
+        { value: 'Active', label: 'Active', color: '#ff9800' },    // Orange - consistent with feature
+        { value: 'Done', label: 'Done', color: '#4caf50' },        // Green - terminal state
         { value: 'Cancelled', label: 'Cancelled', color: '#f44336' },
     ],
     'story': [
@@ -57,13 +57,11 @@ export const STATUS_OPTIONS: Partial<Record<ArtifactType, StatusConfig[]>> = {
     ],
     'business-analysis': [
         { value: 'Draft', label: 'Draft', color: '#9e9e9e' },
-        { value: 'Active', label: 'Active', color: '#4caf50' },
-        { value: 'Deprecated', label: 'Deprecated', color: '#ff9800' },
+        { value: 'Complete', label: 'Complete', color: '#4caf50' },
     ],
     'ba-increment': [
-        { value: 'Proposed', label: 'Proposed', color: '#9e9e9e' },
-        { value: 'Approved', label: 'Approved', color: '#2196f3' },
-        { value: 'Done', label: 'Done', color: '#4caf50' },
+        { value: 'Active', label: 'Active', color: '#ff9800' },
+        { value: 'Accepted', label: 'Accepted', color: '#4caf50' },
         { value: 'Rejected', label: 'Rejected', color: '#f44336' },
     ],
     'dev-plan': [

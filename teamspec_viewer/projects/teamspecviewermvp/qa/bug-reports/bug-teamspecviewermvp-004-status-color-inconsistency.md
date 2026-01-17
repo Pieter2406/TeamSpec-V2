@@ -64,7 +64,7 @@ anti_keywords:
 | **Component** | Frontend - statusOptions.ts |
 | **Reporter** | QA |
 | **Date Reported** | 2026-01-17 |
-| **Status** | Open |
+| **Status** | Resolved |
 
 ---
 

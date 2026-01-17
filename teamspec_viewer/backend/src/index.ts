@@ -27,11 +27,18 @@ app.route('/api/search', searchRoutes)
 app.route('/api/products', productsRoutes)
 
 const port = 3000
-console.log(`🚀 Backend server running on http://localhost:${port}`)
 
-serve({
-    fetch: app.fetch,
-    port,
-})
+// Only start server when run directly (not when imported in tests)
+// Vitest sets import.meta.env.MODE to 'test' during test runs
+const isTestMode = typeof process !== 'undefined' && 
+    (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true')
+
+if (!isTestMode) {
+    console.log(`🚀 Backend server running on http://localhost:${port}`)
+    serve({
+        fetch: app.fetch,
+        port,
+    })
+}
 
 export default app

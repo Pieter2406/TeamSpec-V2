@@ -71,6 +71,8 @@ export function FeatureCard({
                 boxShadow: isSelected
                     ? '0 4px 12px rgba(59, 130, 246, 0.25)'
                     : '0 1px 3px rgba(0, 0, 0, 0.1)',
+                bgcolor: isSelected ? 'rgba(59, 130, 246, 0.04)' : 'white',
+                transform: isSelected ? 'scale(1.02)' : 'scale(1)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',

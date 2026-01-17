@@ -41,6 +41,7 @@ export function BADashboard() {
     );
 
     // Load BA documents
+    const [refreshKey, setRefreshKey] = useState(0);
     useEffect(() => {
         getBusinessAnalysis(PRODUCT_ID)
             .then(response => {
@@ -52,6 +53,11 @@ export function BADashboard() {
             .finally(() => {
                 setLoading(false);
             });
+    }, [refreshKey]);
+
+    // Refresh callback for status updates
+    const handleStatusUpdate = useCallback(() => {
+        setRefreshKey(prev => prev + 1);
     }, []);
 
     // Handle BA card click
@@ -232,6 +238,7 @@ export function BADashboard() {
                                     baId={expandedBAId}
                                     onNodeSelect={handleNodeSelect}
                                     showCompleted={showCompleted}
+                                    onStatusUpdate={handleStatusUpdate}
                                 />
                             ) : (
                                 <Box

@@ -64,7 +64,7 @@ anti_keywords:
 | **Component** | Frontend - Sidebar, Feature State Tag, React State Management |
 | **Reporter** | QA |
 | **Date Reported** | 2026-01-17 |
-| **Status** | Open |
+| **Status** | Resolved |
 | **Affects Features** | f-TSV-002 (Role-Specific Dashboards) |
 
 ---

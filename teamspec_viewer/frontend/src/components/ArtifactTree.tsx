@@ -45,6 +45,8 @@ interface ArtifactTreeProps {
     onNodeSelect?: (node: TreeNodeData) => void;
     /** Show completed/terminal artifacts. Defaults to true. */
     showCompleted?: boolean;
+    /** Callback after successful status update. */
+    onStatusUpdate?: () => void;
 }
 
 interface NodeStatusState {
@@ -122,6 +124,7 @@ export function ArtifactTree({
     featureId,
     onNodeSelect,
     showCompleted = true,
+    onStatusUpdate,
 }: ArtifactTreeProps) {
     const [relationships, setRelationships] = useState<FeatureRelationshipsResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -213,6 +216,10 @@ export function ArtifactTree({
                     ...prev,
                     [path]: { status: newStatus, loading: false },
                 }));
+                // Trigger parent refresh
+                if (onStatusUpdate) {
+                    onStatusUpdate();
+                }
             } else {
                 // Rollback on error
                 setStatusStates(prev => ({

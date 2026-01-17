@@ -44,6 +44,8 @@ interface BATreeProps {
     onNodeSelect?: (node: BATreeNodeData) => void;
     /** Show completed/terminal artifacts. Defaults to true. */
     showCompleted?: boolean;
+    /** Callback after successful status update. */
+    onStatusUpdate?: () => void;
 }
 
 interface NodeStatusState {
@@ -121,6 +123,7 @@ export function BATree({
     baId,
     onNodeSelect,
     showCompleted = true,
+    onStatusUpdate,
 }: BATreeProps) {
     const [relationships, setRelationships] = useState<BARelationshipsResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -218,6 +221,10 @@ export function BATree({
                     ...prev,
                     [path]: { status: newStatus, loading: false },
                 }));
+                // Trigger parent refresh
+                if (onStatusUpdate) {
+                    onStatusUpdate();
+                }
             } else {
                 // Rollback on error
                 setStatusStates(prev => ({

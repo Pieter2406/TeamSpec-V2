@@ -49,7 +49,7 @@ anti_keywords:
 |-------|-------|
 | **Story ID** | s-e006-002 |
 | **Epic** | epic-TSV-006 |
-| **Status** | Backlog |
+| **Status** | Done |
 | **Estimate** | 3 SP |
 | **Author** | FA |
 | **Sprint** | — |

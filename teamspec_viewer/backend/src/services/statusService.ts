@@ -33,9 +33,9 @@ const STATUS_OPTIONS: Record<string, string[]> = {
     'fi': ['Proposed', 'Approved', 'In-Progress', 'Done', 'Rejected'],  // Alias for feature-increment
     'epic': ['Planned', 'Active', 'Done', 'Cancelled'],
     'story': ['Backlog', 'Refining', 'Ready', 'In-Progress', 'Done', 'Deferred', 'Out-of-Scope'],
-    'business-analysis': ['Draft', 'Active', 'Deprecated'],
-    'ba-increment': ['Proposed', 'Approved', 'Done', 'Rejected'],
-    'bai': ['Proposed', 'Approved', 'Done', 'Rejected'],  // Alias for ba-increment
+    'business-analysis': ['Draft', 'Complete'],
+    'ba-increment': ['Active', 'Accepted', 'Rejected'],
+    'bai': ['Active', 'Accepted', 'Rejected'],  // Alias for ba-increment
     'devplan': ['Draft', 'In-Progress', 'Implemented', 'Blocked'],
     'solution-design': ['Draft', 'Active', 'Deprecated'],
     'sd-increment': ['Proposed', 'Approved', 'Done', 'Rejected'],

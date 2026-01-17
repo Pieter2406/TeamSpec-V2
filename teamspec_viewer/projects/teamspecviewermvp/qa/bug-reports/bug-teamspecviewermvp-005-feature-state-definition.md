@@ -63,7 +63,7 @@ anti_keywords:
 | **Component** | Frontend - statusOptions.ts, Product Canon - Feature state definitions |
 | **Reporter** | QA |
 | **Date Reported** | 2026-01-17 |
-| **Status** | Open |
+| **Status** | Resolved |
 
 ---
 

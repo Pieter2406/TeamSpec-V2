@@ -39,6 +39,7 @@ export function FADashboard() {
     );
 
     // Load features
+    const [refreshKey, setRefreshKey] = useState(0);
     useEffect(() => {
         getFeatures(PRODUCT_ID)
             .then(response => {
@@ -50,6 +51,11 @@ export function FADashboard() {
             .finally(() => {
                 setLoading(false);
             });
+    }, [refreshKey]);
+
+    // Refresh callback for status updates
+    const handleStatusUpdate = useCallback(() => {
+        setRefreshKey(prev => prev + 1);
     }, []);
 
     // Handle feature card click
@@ -242,6 +248,7 @@ export function FADashboard() {
                                     featureId={expandedFeatureId}
                                     onNodeSelect={handleNodeSelect}
                                     showCompleted={showCompleted}
+                                    onStatusUpdate={handleStatusUpdate}
                                 />
                             ) : (
                                 <Box

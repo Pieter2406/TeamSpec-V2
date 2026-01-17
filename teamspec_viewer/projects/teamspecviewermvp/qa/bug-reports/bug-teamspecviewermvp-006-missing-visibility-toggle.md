@@ -59,7 +59,7 @@ anti_keywords:
 | **Version** | Current dev build |
 | **Reporter** | QA |
 | **Date Reported** | 2026-01-17 |
-| **Status** | Open |
+| **Status** | Resolved |
 
 ---
 

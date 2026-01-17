@@ -1,30 +1,21 @@
 ---
-# === LLM Retrieval Metadata ===
 artifact_kind: feature
-spec_version: "4.0"
-template_version: "4.0.1"
-title: "Product Portfolio Overview"
-
-# === Ownership ===
+spec_version: '4.0'
+template_version: 4.0.1
+title: Product Portfolio Overview
 role_owner: FA
 artifact_type: Product Canon
 canonicality: canon
 lifecycle: permanent
-
-# === Naming ===
-id_pattern: "f-TSV-001"
-filename_pattern: "f-TSV-001-product-portfolio-view.md"
-
-# === Required Relationships ===
+id_pattern: f-TSV-001
+filename_pattern: f-TSV-001-product-portfolio-view.md
 links_required:
   - type: product
-    pattern: "product.yml"
+    pattern: product.yml
     optional: false
   - type: decision
-    pattern: "dec-TSV-*"
+    pattern: dec-TSV-*
     optional: true
-
-# === Search Optimization ===
 keywords:
   - feature canon
   - product portfolio
@@ -39,6 +30,7 @@ anti_keywords:
   - story
   - delta
   - proposed change
+status: Active
 ---
 
 # Feature: `f-TSV-001-product-portfolio-view`
@@ -60,7 +52,7 @@ anti_keywords:
 |-------|-------|
 | **Feature ID** | f-TSV-001 |
 | **Product** | teamspec-viewer (TSV) |
-| **Status** | Planned |
+| **Status** | Active|
 | **Owner** | FA (Functional Analyst) |
 | **Created** | 2026-01-14 |
 | **Last Updated** | 2026-01-14 |

@@ -62,10 +62,13 @@ async function extractTitle(filePath: string): Promise<string> {
                     startIndex = i + 1;
                     break;
                 }
-                // Check for title field in frontmatter
-                const titleMatch = lines[i].match(/^title:\s*["']?([^"'\n]+)["']?\s*$/);
+                // Check for title field in frontmatter (handles quoted and unquoted values)
+                const titleMatch = lines[i].match(/^title:\s*(.+?)\s*$/);
                 if (titleMatch) {
-                    return titleMatch[1].trim();
+                    let title = titleMatch[1].trim();
+                    // Remove surrounding quotes if present
+                    title = title.replace(/^["'](.+)["']$/, '$1');
+                    return title.trim();
                 }
             }
         }
@@ -80,11 +83,35 @@ async function extractTitle(filePath: string): Promise<string> {
                     continue;
                 }
                 // Remove backticks and other formatting
-                return title.replace(/`/g, '').trim();
+                let cleanTitle = title.replace(/`/g, '').trim();
+
+                // For epic headings like "Epic: epic-TSV-005-...", extract human-readable from ID
+                const epicMatch = cleanTitle.match(/^Epic:\s+(epic-\w+-\d+-(.+))$/);
+                if (epicMatch) {
+                    // Convert kebab-case to Title Case
+                    return epicMatch[2]
+                        .split('-')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
+
+                return cleanTitle;
             }
         }
-        // Fallback to filename
-        return filePath.split(/[/\\]/).pop()?.replace('.md', '') || 'Untitled';
+
+        // Fallback to filename - extract human-readable from ID pattern
+        const filename = filePath.split(/[/\\]/).pop()?.replace('.md', '') || '';
+
+        // Handle patterns like "epic-TSV-005-usecase-centric-dashboard"
+        const idMatch = filename.match(/^(?:epic|story|feature|fi|ba|sd|ta)-\w+-\d+-(.+)$/);
+        if (idMatch) {
+            return idMatch[1]
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        return filename || 'Untitled';
     } catch {
         return 'Untitled';
     }

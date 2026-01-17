@@ -40,7 +40,7 @@ links_required:
 | **Story ID** | s-e007-002 |
 | **Epic** | epic-TSV-007 |
 | **Feature-Increment** | fi-TSV-007 |
-| **Status** | Backlog |
+| **Status** | Done |
 | **Estimate** | 5 pts |
 | **Author** | FA |
 | **Sprint** | — |
