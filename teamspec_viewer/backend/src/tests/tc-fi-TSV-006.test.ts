@@ -57,10 +57,10 @@ describe('TC-fi-TSV-006: Inline Status Editing MVP', () => {
             const featuresJson = await featuresRes.json();
 
             expect(featuresJson.artifacts.length).toBeGreaterThan(0);
-            
+
             const feature = featuresJson.artifacts[0];
             expect(feature.path).toBeDefined();
-            
+
             // Update status
             const updateRes = await app.request('/api/artifacts/status', {
                 method: 'PATCH',
@@ -72,13 +72,13 @@ describe('TC-fi-TSV-006: Inline Status Editing MVP', () => {
             });
 
             const updateJson = await updateRes.json();
-            
+
             // Skip assertion if file is locked (common on Windows with file watchers)
             if (updateJson.error?.includes('EPERM') || updateJson.error?.includes('EBUSY')) {
                 console.log('Skipping test: File locked by another process');
                 return;
             }
-            
+
             expect(updateRes.status).toBe(200);
             expect(updateJson.success).toBe(true);
         });
@@ -142,7 +142,7 @@ describe('TC-fi-TSV-006: Inline Status Editing MVP', () => {
                 });
 
                 const updateJson = await updateRes.json();
-                
+
                 // Skip test if file is locked (common on Windows with file watchers)
                 if (updateJson.error?.includes('EPERM') || updateJson.error?.includes('EBUSY')) {
                     console.log('Skipping test: File locked by another process');

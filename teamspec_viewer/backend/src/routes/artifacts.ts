@@ -548,4 +548,168 @@ artifacts.patch('/artifacts/status', async (c) => {
     }
 });
 
+// ============================================================================
+// DEV Dashboard Endpoints (Story s-e009-005)
+// ============================================================================
+
+// GET /api/projects/:projectId/dev-plans
+artifacts.get('/projects/:projectId/dev-plans', async (c) => {
+    const { projectId } = c.req.param();
+    const devPlansDir = join(WORKSPACE_ROOT, 'projects', projectId, 'dev-plans');
+
+    const files = await findMarkdownFiles(devPlansDir, /^dp-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'dev-plan',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'project' });
+});
+
+// ============================================================================
+// SA Dashboard Endpoints (Story s-e009-005)
+// ============================================================================
+
+// GET /api/products/:productId/technical-architecture
+artifacts.get('/products/:productId/technical-architecture', async (c) => {
+    const { productId } = c.req.param();
+    const taDir = join(WORKSPACE_ROOT, 'products', productId, 'technical-architecture');
+
+    const files = await findMarkdownFiles(taDir, /^ta-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'technical-architecture',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'product' });
+});
+
+// GET /api/projects/:projectId/tai
+artifacts.get('/projects/:projectId/tai', async (c) => {
+    const { projectId } = c.req.param();
+    const taiDir = join(WORKSPACE_ROOT, 'projects', projectId, 'tai');
+
+    const files = await findMarkdownFiles(taiDir, /^tai-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'technical-architecture-increment',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'project' });
+});
+
+// GET /api/products/:productId/solution-designs
+artifacts.get('/products/:productId/solution-designs', async (c) => {
+    const { productId } = c.req.param();
+    const sdDir = join(WORKSPACE_ROOT, 'products', productId, 'solution-designs');
+
+    const files = await findMarkdownFiles(sdDir, /^sd-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'solution-design',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'product' });
+});
+
+// GET /api/projects/:projectId/sdi
+artifacts.get('/projects/:projectId/sdi', async (c) => {
+    const { projectId } = c.req.param();
+    const sdiDir = join(WORKSPACE_ROOT, 'projects', projectId, 'sdi');
+
+    const files = await findMarkdownFiles(sdiDir, /^sdi-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'solution-design-increment',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'project' });
+});
+
+// ============================================================================
+// QA Dashboard Endpoints (Story s-e009-005)
+// ============================================================================
+
+// GET /api/projects/:projectId/test-cases
+artifacts.get('/projects/:projectId/test-cases', async (c) => {
+    const { projectId } = c.req.param();
+    const testCasesDir = join(WORKSPACE_ROOT, 'projects', projectId, 'qa', 'test-cases');
+
+    const files = await findMarkdownFiles(testCasesDir, /^tc-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'test-case',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'project' });
+});
+
+// GET /api/products/:productId/regression-tests
+artifacts.get('/products/:productId/regression-tests', async (c) => {
+    const { productId } = c.req.param();
+    const rtDir = join(WORKSPACE_ROOT, 'products', productId, 'qa', 'regression-tests');
+
+    const files = await findMarkdownFiles(rtDir, /^rt-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'regression-test',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'product' });
+});
+
+// GET /api/projects/:projectId/bug-reports
+artifacts.get('/projects/:projectId/bug-reports', async (c) => {
+    const { projectId } = c.req.param();
+    const bugsDir = join(WORKSPACE_ROOT, 'projects', projectId, 'qa', 'bug-reports');
+
+    const files = await findMarkdownFiles(bugsDir, /^bug-.*\.md$/);
+    const artifactsList: Artifact[] = await Promise.all(
+        files.map(async (filePath) => ({
+            id: filePath.split(/[/\\]/).pop()?.replace('.md', '') || '',
+            path: relative(WORKSPACE_ROOT, filePath).replace(/\\/g, '/'),
+            title: await extractTitle(filePath),
+            type: 'bug-report',
+            status: await extractStatus(filePath),
+        }))
+    );
+
+    return c.json({ artifacts: artifactsList, count: artifactsList.length, scope: 'project' });
+});
+
 export default artifacts;

@@ -2,6 +2,9 @@ import { Chip, Box, IconButton, Tooltip } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import BusinessIcon from '@mui/icons-material/Business';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import CodeIcon from '@mui/icons-material/Code';
+import ArchitectureIcon from '@mui/icons-material/Architecture';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import { useRole } from '../contexts/RoleContext';
 
 const ROLE_CONFIG: Record<string, { label: string; icon: typeof BusinessIcon; bgColor: string }> = {
@@ -13,6 +16,21 @@ const ROLE_CONFIG: Record<string, { label: string; icon: typeof BusinessIcon; bg
     FA: {
         label: 'Functional Analyst',
         icon: AccountTreeIcon,
+        bgColor: 'rgba(255,255,255,0.2)',
+    },
+    DEV: {
+        label: 'Developer',
+        icon: CodeIcon,
+        bgColor: 'rgba(255,255,255,0.2)',
+    },
+    SA: {
+        label: 'Solution Architect',
+        icon: ArchitectureIcon,
+        bgColor: 'rgba(255,255,255,0.2)',
+    },
+    QA: {
+        label: 'QA Engineer',
+        icon: BugReportIcon,
         bgColor: 'rgba(255,255,255,0.2)',
     },
 };

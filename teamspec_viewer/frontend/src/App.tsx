@@ -6,6 +6,9 @@ import { RoleSelector } from './components/RoleSelector';
 import { Header } from './components/Header';
 import { BADashboard } from './components/BADashboard';
 import { FADashboard } from './components/FADashboard';
+import { DEVDashboard } from './components/DEVDashboard';
+import { SADashboard } from './components/SADashboard';
+import { QADashboard } from './components/QADashboard';
 import { SearchResults } from './components/SearchResults';
 import { ProductPortfolio } from './components/ProductPortfolio';
 
@@ -47,6 +50,9 @@ function AppContent() {
                     <>
                         {role === 'BA' && <BADashboard />}
                         {role === 'FA' && <FADashboard />}
+                        {role === 'DEV' && <DEVDashboard />}
+                        {role === 'SA' && <SADashboard />}
+                        {role === 'QA' && <QADashboard />}
                     </>
                 );
         }

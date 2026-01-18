@@ -6,6 +6,7 @@ export interface Artifact {
     title: string;
     type: string;
     status?: string;
+    hasTBD?: boolean;
 }
 
 export interface ArtifactsResponse {
@@ -322,5 +323,95 @@ export async function updateArtifactStatus(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path, status }),
     });
+    return response.json();
+}
+
+// ============================================================================
+// DEV Dashboard API (Story s-e009-005)
+// ============================================================================
+
+export interface ScopedArtifactsResponse {
+    artifacts: Artifact[];
+    count: number;
+    scope: 'product' | 'project';
+}
+
+/**
+ * Get dev-plans for a project
+ */
+export async function getDevPlans(projectId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/projects/${projectId}/dev-plans`);
+    if (!response.ok) throw new Error('Failed to fetch dev-plans');
+    return response.json();
+}
+
+// ============================================================================
+// SA Dashboard API (Story s-e009-005)
+// ============================================================================
+
+/**
+ * Get technical architecture documents for a product
+ */
+export async function getTechnicalArchitecture(productId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/products/${productId}/technical-architecture`);
+    if (!response.ok) throw new Error('Failed to fetch technical architecture');
+    return response.json();
+}
+
+/**
+ * Get TA increments for a project
+ */
+export async function getTAIncrements(projectId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/projects/${projectId}/tai`);
+    if (!response.ok) throw new Error('Failed to fetch TA increments');
+    return response.json();
+}
+
+/**
+ * Get solution designs for a product
+ */
+export async function getSolutionDesigns(productId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/products/${productId}/solution-designs`);
+    if (!response.ok) throw new Error('Failed to fetch solution designs');
+    return response.json();
+}
+
+/**
+ * Get SD increments for a project
+ */
+export async function getSDIncrements(projectId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/projects/${projectId}/sdi`);
+    if (!response.ok) throw new Error('Failed to fetch SD increments');
+    return response.json();
+}
+
+// ============================================================================
+// QA Dashboard API (Story s-e009-005)
+// ============================================================================
+
+/**
+ * Get test cases for a project
+ */
+export async function getTestCases(projectId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/projects/${projectId}/test-cases`);
+    if (!response.ok) throw new Error('Failed to fetch test cases');
+    return response.json();
+}
+
+/**
+ * Get regression tests for a product
+ */
+export async function getRegressionTests(productId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/products/${productId}/regression-tests`);
+    if (!response.ok) throw new Error('Failed to fetch regression tests');
+    return response.json();
+}
+
+/**
+ * Get bug reports for a project
+ */
+export async function getBugReports(projectId: string): Promise<ScopedArtifactsResponse> {
+    const response = await fetch(`${API_BASE}/projects/${projectId}/bug-reports`);
+    if (!response.ok) throw new Error('Failed to fetch bug reports');
     return response.json();
 }

@@ -14,8 +14,12 @@ They are NOT the source of truth - the Product Canon is.
 | [fi-TSV-003](fi-TSV-003-ba-fa-artifact-search.md) | teamspec-viewer | [f-TSV-007](../../products/teamspec-viewer/features/f-TSV-007-artifact-search.md) | proposed | epic-TSV-003 (planned) |
 | [fi-TSV-004](fi-TSV-004-product-portfolio-navigation.md) | teamspec-viewer | [f-TSV-001](../../products/teamspec-viewer/features/f-TSV-001-product-portfolio-view.md) | proposed | epic-TSV-004 (planned) |
 | [fi-TSV-005](fi-TSV-005-usecase-centric-dashboard.md) | teamspec-viewer | [f-TSV-002](../../products/teamspec-viewer/features/f-TSV-002-role-specific-dashboards.md) | proposed | [epic-TSV-005](../epics/epic-TSV-005-usecase-centric-dashboard.md) |
+| [fi-TSV-006](fi-TSV-006-inline-status-editing-mvp.md) | teamspec-viewer | [f-TSV-008](../../products/teamspec-viewer/features/f-TSV-008-inline-status-editing.md) | Done | [epic-TSV-006](../epics/epic-TSV-006-inline-status-editing.md) |
+| [fi-TSV-007](fi-TSV-007-dashboard-filtering-ordering.md) | teamspec-viewer | [f-TSV-002](../../products/teamspec-viewer/features/f-TSV-002-role-specific-dashboards.md) | Done | [epic-TSV-007](../epics/epic-TSV-007-dashboard-filtering-ordering.md) |
+| [fi-TSV-008](fi-TSV-008-treeview-tbd-warnings.md) | teamspec-viewer | [f-TSV-002](../../products/teamspec-viewer/features/f-TSV-002-role-specific-dashboards.md) | proposed | [epic-TSV-008](../epics/epic-TSV-008-treeview-tbd-indicators.md) |
+| [fi-TSV-009](fi-TSV-009-dev-sa-qa-role-dashboards.md) | teamspec-viewer | [f-TSV-002](../../products/teamspec-viewer/features/f-TSV-002-role-specific-dashboards.md) | Proposed | [epic-TSV-009](../epics/epic-TSV-009-dev-sa-qa-dashboards.md) |
 
-## Next Available ID: _Derived from product prefix (fi-PRX-XXX)_
+## Next Available ID: fi-TSV-010
 
 ---
 

@@ -30,7 +30,7 @@ const port = 3000
 
 // Only start server when run directly (not when imported in tests)
 // Vitest sets import.meta.env.MODE to 'test' during test runs
-const isTestMode = typeof process !== 'undefined' && 
+const isTestMode = typeof process !== 'undefined' &&
     (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true')
 
 if (!isTestMode) {

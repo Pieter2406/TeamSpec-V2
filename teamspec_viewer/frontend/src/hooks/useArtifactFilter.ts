@@ -21,7 +21,7 @@ const STORAGE_KEY_PREFIX = 'tsv_showCompleted_';
 // Types
 // ============================================================================
 
-export type FilterRole = 'FA' | 'BA';
+export type FilterRole = 'FA' | 'BA' | 'DEV' | 'SA' | 'QA';
 
 export interface UseArtifactFilterOptions {
     /** Role determines the localStorage key (FA and BA have separate preferences) */
