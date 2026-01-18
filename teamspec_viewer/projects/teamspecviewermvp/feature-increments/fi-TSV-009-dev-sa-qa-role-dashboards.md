@@ -34,7 +34,7 @@ aliases:
 anti_keywords:
   - production truth
   - implementation details
-status: Proposed
+status: Active
 ---
 
 # Feature Increment: `fi-TSV-009-dev-sa-qa-role-dashboards`
@@ -48,7 +48,7 @@ status: Proposed
 > **Product:** `teamspec-viewer` (TSV)  
 > **Target Feature:** `f-TSV-002-role-specific-dashboards`  
 > **Epic:** [epic-TSV-009](../epics/epic-TSV-009-dev-sa-qa-dashboards.md)  
-> **Status:** Proposed
+> **Status:** Active
 
 ---
 

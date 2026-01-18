@@ -32,7 +32,7 @@ anti_keywords:
   - implementation detail
   - code
   - test case
-status: Proposed
+status: Active
 ---
 
 # Epic: `epic-TSV-009-dev-sa-qa-dashboards`
@@ -47,7 +47,7 @@ status: Proposed
 | Field | Value |
 |-------|-------|
 | **Epic ID** | epic-TSV-009 |
-| **Status** | Proposed |
+| **Status** | Active|
 | **Product** | teamspec-viewer (TSV) |
 | **Owner** | FA (Functional Analyst) |
 | **Created** | 2026-01-17 |
@@ -78,7 +78,7 @@ status: Proposed
 
 | FI ID | Description | Status |
 |-------|-------------|--------|
-| [fi-TSV-009](../feature-increments/fi-TSV-009-dev-sa-qa-role-dashboards.md) | DEV/SA/QA role selection + dashboard navigation entry points for technical team artifacts | Proposed |
+| [fi-TSV-009](../feature-increments/fi-TSV-009-dev-sa-qa-role-dashboards.md) | DEV/SA/QA role selection + dashboard navigation entry points for technical team artifacts | Active |
 
 ---
 
@@ -127,17 +127,18 @@ _Stories belonging to this Epic follow the naming pattern `s-e009-YYY-descriptio
 
 | Story ID | Description | Status | Sprint | Estimate |
 |----------|-------------|--------|--------|----------|
-| [s-e009-001](../stories/backlog/s-e009-001-extend-role-selector.md) | Extend RoleSelector component to include DEV, SA, QA options | Backlog | — | 2 SP |
-| [s-e009-002](../stories/backlog/s-e009-002-dev-dashboard-navigation.md) | DEV dashboard navigation entry points to dev-plans, stories, TA docs | Backlog | — | 5 SP |
+| [s-e009-001](../stories/backlog/s-e009-001-extend-role-selector.md) | Extend RoleSelector component to include DEV, SA, QA options | Done | — | 2 SP |
+| [s-e009-002](../stories/backlog/s-e009-002-dev-dashboard-navigation.md) | DEV dashboard navigation entry points to dev-plans, stories, TA docs | Done | — | 5 SP |
 | [s-e009-003](../stories/backlog/s-e009-003-sa-dashboard-navigation.md) | SA dashboard navigation entry points to SD, TA, and increments | Backlog | — | 5 SP |
 | [s-e009-004](../stories/backlog/s-e009-004-qa-dashboard-navigation.md) | QA dashboard navigation entry points to test cases, regression tests, bugs | Backlog | — | 5 SP |
-| [s-e009-005](../stories/backlog/s-e009-005-backend-api-endpoints.md) | Backend API endpoints for DEV/SA/QA artifact listing | Backlog | — | 8 SP |
+| [s-e009-005](../stories/backlog/s-e009-005-backend-api-endpoints.md) | Backend API endpoints for DEV/SA/QA artifact listing | Done | — | 8 SP |
 | [s-e009-006](../stories/backlog/s-e009-006-integration-testing.md) | Integration testing for new role dashboards | Backlog | — | 3 SP |
+| [s-e009-007](../stories/backlog/s-e009-007-enable-status-updates.md) | Enable status updates across role dashboards | Done | — | 5 SP |
 
-**Total Stories:** 6  
-**Total Estimate:** 28 SP  
-**Completed:** 0  
-**Remaining:** 6
+**Total Stories:** 7  
+**Total Estimate:** 33 SP  
+**Completed:** 4  
+**Remaining:** 3
 
 ---
 

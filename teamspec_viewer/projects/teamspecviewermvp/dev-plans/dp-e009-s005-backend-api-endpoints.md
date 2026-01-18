@@ -59,7 +59,7 @@ anti_keywords:
 | **Product** | teamspec-viewer (TSV) |
 | **Author** | DEV Agent |
 | **Created** | 2026-01-17 |
-| **Status** | Draft |
+| **Status** | Implemented |
 
 ---
 
