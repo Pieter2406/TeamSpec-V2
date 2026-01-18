@@ -84,6 +84,7 @@ function NodeLabel({ icon, title, badge, statusElement, hasTBD }: NodeLabelProps
                 alignItems: 'center',
                 gap: 1,
                 py: 0.5,
+                width: '100%', // Fill the label width for proper flex alignment (bug-014 fix)
             }}
         >
             <Box sx={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>

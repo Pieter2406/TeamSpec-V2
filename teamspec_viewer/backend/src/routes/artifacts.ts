@@ -85,11 +85,25 @@ async function extractTitle(filePath: string): Promise<string> {
                 // Remove backticks and other formatting
                 let cleanTitle = title.replace(/`/g, '').trim();
 
-                // For epic headings like "Epic: epic-TSV-005-...", extract human-readable from ID
-                const epicMatch = cleanTitle.match(/^Epic:\s+(epic-\w+-\d+-(.+))$/);
-                if (epicMatch) {
-                    // Convert kebab-case to Title Case
-                    return epicMatch[2]
+                // For headings like "Type: artifact-id-description", extract human-readable from description
+                // Patterns: "Business Analysis: ba-TSV-001-xxx", "Feature: f-TSV-001-xxx", "Epic: epic-TSV-001-xxx"
+                // "Solution Design: sd-TSV-001-xxx", "Technical Architecture: ta-TSV-001-xxx"
+                // "Feature Increment: fi-TSV-001-xxx", "Story: s-e001-042-xxx"
+                const artifactHeadingMatch = cleanTitle.match(
+                    /^(?:Business Analysis|Feature|Epic|Solution Design|Technical Architecture|Feature Increment|Story|Test Case|Regression Test|Bug Report):\s*(?:ba|f|epic|sd|ta|fi|s|tc|rt|bug)-[\w-]+-(\d+)-(.+)$/i
+                );
+                if (artifactHeadingMatch) {
+                    // Convert kebab-case description to Title Case
+                    return artifactHeadingMatch[2]
+                        .split('-')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
+
+                // Handle story patterns like "Story: s-e001-042-description"
+                const storyHeadingMatch = cleanTitle.match(/^Story:\s*s-e\d+-\d+-(.+)$/i);
+                if (storyHeadingMatch) {
+                    return storyHeadingMatch[1]
                         .split('-')
                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                         .join(' ');

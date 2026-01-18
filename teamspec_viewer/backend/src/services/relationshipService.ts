@@ -97,7 +97,31 @@ function extractTitle(content: string): string {
         const match = line.match(/^#\s+(.+)$/);
         if (match) {
             // Remove backticks and formatting
-            return match[1].replace(/`/g, '').trim();
+            let cleanTitle = match[1].replace(/`/g, '').trim();
+
+            // For headings like "Type: artifact-id-description", extract human-readable from description
+            // Patterns: "Business Analysis: ba-TSV-001-xxx", "Feature: f-TSV-001-xxx", etc.
+            const artifactHeadingMatch = cleanTitle.match(
+                /^(?:Business Analysis|Feature|Epic|Solution Design|Technical Architecture|Feature Increment|Story|Test Case|Regression Test|Bug Report):\s*(?:ba|f|epic|sd|ta|fi|s|tc|rt|bug)-[\w-]+-(\d+)-(.+)$/i
+            );
+            if (artifactHeadingMatch) {
+                // Convert kebab-case description to Title Case
+                return artifactHeadingMatch[2]
+                    .split('-')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
+
+            // Handle story patterns like "Story: s-e001-042-description"
+            const storyHeadingMatch = cleanTitle.match(/^Story:\s*s-e\d+-\d+-(.+)$/i);
+            if (storyHeadingMatch) {
+                return storyHeadingMatch[1]
+                    .split('-')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+            }
+
+            return cleanTitle;
         }
     }
     return 'Untitled';

@@ -73,7 +73,29 @@ function extractTitle(content: string, filePath: string): string {
         if (match) {
             const title = match[1].trim();
             if (!title.startsWith('===') && !title.includes('LLM Retrieval')) {
-                return title.replace(/`/g, '').trim();
+                let cleanTitle = title.replace(/`/g, '').trim();
+
+                // For headings like "Type: artifact-id-description", extract human-readable from description
+                const artifactHeadingMatch = cleanTitle.match(
+                    /^(?:Business Analysis|Feature|Epic|Solution Design|Technical Architecture|Feature Increment|Story|Test Case|Regression Test|Bug Report):\s*(?:ba|f|epic|sd|ta|fi|s|tc|rt|bug)-[\w-]+-(\d+)-(.+)$/i
+                );
+                if (artifactHeadingMatch) {
+                    return artifactHeadingMatch[2]
+                        .split('-')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
+
+                // Handle story patterns like "Story: s-e001-042-description"
+                const storyHeadingMatch = cleanTitle.match(/^Story:\s*s-e\d+-\d+-(.+)$/i);
+                if (storyHeadingMatch) {
+                    return storyHeadingMatch[1]
+                        .split('-')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
+
+                return cleanTitle;
             }
         }
     }
