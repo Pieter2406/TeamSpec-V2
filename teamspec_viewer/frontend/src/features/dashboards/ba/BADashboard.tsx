@@ -5,7 +5,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {
     getBusinessAnalysis,
     Artifact,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { BACardList } from './BACard';
 import { BATree, BATreeNodeData } from './BATree';

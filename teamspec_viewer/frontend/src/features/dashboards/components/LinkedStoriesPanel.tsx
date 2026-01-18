@@ -11,7 +11,7 @@ import {
     CircularProgress,
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { getLinkedStories, Artifact } from '@/api/artifacts';
+import { getLinkedStories, Artifact } from '@/api';
 
 interface LinkedStoriesPanelProps {
     fiId: string;

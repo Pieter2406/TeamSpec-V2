@@ -19,7 +19,7 @@ import {
     BAIInfo,
     getBARelationships,
     updateArtifactStatus,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { StatusDropdown, TBDIndicator } from '@/shared/components';
 import { useToast } from '@/shared/contexts';

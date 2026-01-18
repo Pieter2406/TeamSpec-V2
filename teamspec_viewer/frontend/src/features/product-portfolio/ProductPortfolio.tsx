@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Container, Grid, CircularProgress, Alert } from '@mui/material';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import { getProducts, Product } from '@/api/artifacts';
+import { getProducts, Product } from '@/api';
 import { ProductCard } from './ProductCard';
 import { ProductDetail } from './ProductDetail';
 

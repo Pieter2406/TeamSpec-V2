@@ -37,7 +37,7 @@ import {
     getSolutionDesigns,
     getTechnicalArchitecture,
     Artifact,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { SATree, SATreeNodeData } from './SATree';
 import { ArtifactReader } from '@/features/dashboards/components';

@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-import { getFISections, Artifact } from '@/api/artifacts';
+import { getFISections, Artifact } from '@/api';
 import { LinkedStoriesPanel } from '@/features/dashboards/components';
 import { TbdHighlighter } from '@/shared/components';
 

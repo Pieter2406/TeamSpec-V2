@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, IconButton, Drawer, Chip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { getArtifactContent, Artifact } from '@/api/artifacts';
+import { getArtifactContent, Artifact } from '@/api';
 import { TbdHighlighter } from '@/shared/components';
 
 interface ArtifactReaderProps {

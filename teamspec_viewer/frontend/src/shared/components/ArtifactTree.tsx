@@ -20,7 +20,7 @@ import {
     StoryInfo,
     getFeatureRelationships,
     updateArtifactStatus,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { StatusDropdown } from './StatusDropdown';
 import { TBDIndicator } from './TBDIndicator';

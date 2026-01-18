@@ -26,7 +26,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { TreeNodeData } from '@/shared/components';
-import { getArtifactContent } from '@/api/artifacts';
+import { getArtifactContent } from '@/api';
 
 // ============================================================================
 // Constants

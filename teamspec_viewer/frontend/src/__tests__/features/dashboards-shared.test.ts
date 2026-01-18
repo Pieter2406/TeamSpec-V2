@@ -59,7 +59,7 @@ describe('Dashboard Shared Components Migration', () => {
         it('should use @/api in QuickViewPanel', () => {
             const filePath = path.join(srcPath, 'features/dashboards/components/QuickViewPanel.tsx');
             const content = readFileSync(filePath, 'utf-8');
-            expect(content).toContain("from '@/api/artifacts'");
+            expect(content).toContain("from '@/api'");
         });
 
         it('should use @/shared in ArtifactReader', () => {

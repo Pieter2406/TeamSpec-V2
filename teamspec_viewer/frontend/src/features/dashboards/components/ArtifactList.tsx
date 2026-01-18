@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { Artifact } from '@/api/artifacts';
+import { Artifact } from '@/api';
 
 interface ArtifactListProps {
     title: string;

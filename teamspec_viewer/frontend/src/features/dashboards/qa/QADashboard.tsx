@@ -46,7 +46,7 @@ import {
     getFeatures,
     getBugReports,
     Artifact,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { QATree, QATreeNodeData } from './QATree';
 import { ArtifactReader } from '@/features/dashboards/components';

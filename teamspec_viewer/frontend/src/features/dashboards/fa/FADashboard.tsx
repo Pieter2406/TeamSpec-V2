@@ -5,7 +5,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {
     getFeatures,
     Artifact,
-} from '@/api/artifacts';
+} from '@/api';
 import { FeatureCardList } from './FeatureCard';
 import { ArtifactTree, TreeNodeData } from '@/shared/components';
 import { ArtifactReader } from '@/features/dashboards/components';

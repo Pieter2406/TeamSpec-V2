@@ -1,7 +1,7 @@
 import { Box, Typography, Container, Chip, IconButton, Paper } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
-import { Product } from '@/api/artifacts';
+import { Product } from '@/api';
 import { ProjectsList } from './ProjectsList';
 
 interface ProductDetailProps {

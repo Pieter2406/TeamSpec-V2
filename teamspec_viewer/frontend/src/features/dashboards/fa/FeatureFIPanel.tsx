@@ -11,7 +11,7 @@ import {
     CircularProgress,
 } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
-import { getFeatureIncrementsForFeature, Artifact } from '@/api/artifacts';
+import { getFeatureIncrementsForFeature, Artifact } from '@/api';
 
 interface FeatureFIPanelProps {
     featureId: string;

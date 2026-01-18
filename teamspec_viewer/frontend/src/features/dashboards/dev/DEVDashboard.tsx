@@ -38,7 +38,7 @@ import {
     getEpics,
     getTechnicalArchitecture,
     Artifact,
-} from '@/api/artifacts';
+} from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
 import { DEVTree, DEVTreeNodeData } from './DEVTree';
 import { SATree, SATreeNodeData } from '@/features/dashboards/sa';

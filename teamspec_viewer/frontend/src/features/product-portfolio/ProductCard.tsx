@@ -1,6 +1,6 @@
 import { Card, CardContent, CardActionArea, Typography, Chip, Box } from '@mui/material';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
-import { Product } from '@/api/artifacts';
+import { Product } from '@/api';
 
 interface ProductCardProps {
     product: Product;

@@ -13,7 +13,7 @@ import {
     Container,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { searchArtifacts, SearchResult, Artifact } from '@/api/artifacts';
+import { searchArtifacts, SearchResult, Artifact } from '@/api';
 import { SearchFilters } from './SearchFilters';
 import { ArtifactReader } from '@/components/ArtifactReader';
 import { getArtifactIcon, ArtifactType } from '@/shared/utils';

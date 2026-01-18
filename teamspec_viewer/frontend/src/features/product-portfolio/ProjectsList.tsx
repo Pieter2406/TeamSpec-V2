@@ -11,7 +11,7 @@ import {
     CircularProgress,
 } from '@mui/material';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { getProjectsForProduct, Project } from '@/api/artifacts';
+import { getProjectsForProduct, Project } from '@/api';
 
 interface ProjectsListProps {
     productId: string;
