@@ -82,7 +82,7 @@ export function FIDetailView({ artifact, onClose, onStoryClick }: FIDetailViewPr
     const renderMarkdown = (content: string) => {
         if (!content) {
             return (
-                <Typography sx={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                <Typography sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                     No content available
                 </Typography>
             );
@@ -96,36 +96,37 @@ export function FIDetailView({ artifact, onClose, onStoryClick }: FIDetailViewPr
                         dangerouslySetInnerHTML={{ __html: processedHtml }}
                         sx={{
                             '& h1, & h2, & h3, & h4': {
-                                color: '#1e293b',
+                                color: 'text.primary',
                                 fontWeight: 600,
                                 mt: 2,
                                 mb: 1,
                             },
                             '& h3': { fontSize: '1.1rem' },
                             '& h4': { fontSize: '1rem' },
-                            '& p': { color: '#475569', mb: 1.5, lineHeight: 1.7 },
+                            '& p': { color: 'text.secondary', mb: 1.5, lineHeight: 1.7 },
                             '& ul, & ol': { pl: 2.5, mb: 1.5 },
-                            '& li': { color: '#475569', mb: 0.5 },
+                            '& li': { color: 'text.secondary', mb: 0.5 },
                             '& table': {
                                 width: '100%',
                                 borderCollapse: 'collapse',
                                 mb: 2,
                                 '& th, & td': {
-                                    border: '1px solid #e2e8f0',
+                                    border: 1,
+                                    borderColor: 'divider',
                                     p: 1.5,
                                     textAlign: 'left',
                                 },
-                                '& th': { bgcolor: '#f8fafc', fontWeight: 600 },
+                                '& th': { bgcolor: 'action.hover', fontWeight: 600 },
                             },
                             '& code': {
-                                bgcolor: '#f1f5f9',
+                                bgcolor: 'action.selected',
                                 px: 0.75,
                                 py: 0.25,
                                 borderRadius: 1,
                                 fontFamily: 'monospace',
                                 fontSize: '0.875rem',
                             },
-                            '& strong': { fontWeight: 600, color: '#1e293b' },
+                            '& strong': { fontWeight: 600, color: 'text.primary' },
                         }}
                     />
                 )}
@@ -202,7 +203,7 @@ export function FIDetailView({ artifact, onClose, onStoryClick }: FIDetailViewPr
                 </Box>
 
                 {/* Tabs */}
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
                     <Tabs
                         value={tabValue}
                         onChange={handleTabChange}
@@ -212,10 +213,10 @@ export function FIDetailView({ artifact, onClose, onStoryClick }: FIDetailViewPr
                                 textTransform: 'none',
                             },
                             '& .Mui-selected': {
-                                color: '#667eea',
+                                color: 'primary.main',
                             },
                             '& .MuiTabs-indicator': {
-                                bgcolor: '#667eea',
+                                bgcolor: 'primary.main',
                             },
                         }}
                     >
@@ -225,16 +226,16 @@ export function FIDetailView({ artifact, onClose, onStoryClick }: FIDetailViewPr
                 </Box>
 
                 {/* Content */}
-                <Box sx={{ flexGrow: 1, overflow: 'auto', bgcolor: '#fafbfc', p: 3 }}>
+                <Box sx={{ flexGrow: 1, overflow: 'auto', bgcolor: 'background.default', p: 3 }}>
                     {loading && (
                         <Box sx={{ textAlign: 'center', py: 4 }}>
-                            <CircularProgress sx={{ color: '#667eea' }} />
+                            <CircularProgress sx={{ color: 'primary.main' }} />
                         </Box>
                     )}
 
                     {error && (
-                        <Paper elevation={0} sx={{ p: 3, bgcolor: '#fef2f2', borderRadius: 2 }}>
-                            <Typography sx={{ color: '#dc2626' }}>{error}</Typography>
+                        <Paper elevation={0} sx={{ p: 3, bgcolor: 'error.light', borderRadius: 2 }}>
+                            <Typography sx={{ color: 'error.dark' }}>{error}</Typography>
                         </Paper>
                     )}
 

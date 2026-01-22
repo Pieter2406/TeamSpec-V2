@@ -13,11 +13,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Box,
     Typography,
-    Container,
-    Grid,
     Alert,
-    Breadcrumbs,
-    Link,
     Paper,
     FormControlLabel,
     Checkbox,
@@ -28,9 +24,8 @@ import {
     CardContent,
     CardActionArea,
     Chip,
+    useTheme,
 } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import CodeIcon from '@mui/icons-material/Code';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -43,31 +38,14 @@ import { getArtifactIcon } from '@/shared/utils';
 import { DEVTree, DEVTreeNodeData } from './DEVTree';
 import { SATree, SATreeNodeData } from '@/features/dashboards/sa';
 import { ArtifactReader } from '@/features/dashboards/components';
+import { DashboardLayout } from '@/features/layout';
 import { useArtifactFilter, filterAndSortArtifacts } from '@/shared';
 import { TBDIndicator } from '@/shared/components';
+import { getCardSx, getThemedStatusColor } from '@/shared/styles';
 
 // MVP hardcoded context
 const PRODUCT_ID = 'teamspec-viewer';
 const PROJECT_ID = 'teamspecviewermvp';
-
-// ============================================================================
-// Status Colors (Bug-009 fix: match FeatureCard pattern)
-// ============================================================================
-
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-    active: { bg: '#dcfce7', text: '#166534' },
-    draft: { bg: '#fef9c3', text: '#854d0e' },
-    planned: { bg: '#e0e7ff', text: '#3730a3' },
-    deprecated: { bg: '#fee2e2', text: '#991b1b' },
-    done: { bg: '#d1fae5', text: '#065f46' },
-    'in progress': { bg: '#dbeafe', text: '#1e40af' },
-    default: { bg: '#f1f5f9', text: '#475569' },
-};
-
-function getStatusColor(status?: string) {
-    const normalizedStatus = status?.toLowerCase() || 'default';
-    return STATUS_COLORS[normalizedStatus] || STATUS_COLORS.default;
-}
 
 // ============================================================================
 // Artifact Card Component (Bug-009 fix: match FeatureCard pattern)
@@ -82,32 +60,24 @@ interface ArtifactCardProps {
 }
 
 function ArtifactCard({ artifact, isSelected, isExpanded, onClick, iconConfig }: ArtifactCardProps) {
+    const theme = useTheme();
     const Icon = iconConfig.icon;
-    const statusColor = getStatusColor(artifact.status);
+    const statusColor = getThemedStatusColor(theme, artifact.status);
+    const cardSx = getCardSx(theme, { isSelected, isExpanded });
 
     return (
         <Card
             sx={{
                 mb: 1,
                 borderRadius: 2,
-                border: isExpanded ? '2px solid #10b981' : isSelected ? '2px solid #3b82f6' : '1px solid #e2e8f0',
-                boxShadow: isSelected
-                    ? '0 4px 12px rgba(59, 130, 246, 0.25)'
-                    : '0 1px 3px rgba(0, 0, 0, 0.1)',
-                bgcolor: isExpanded ? 'rgba(16, 185, 129, 0.04)' : isSelected ? 'rgba(59, 130, 246, 0.04)' : 'white',
-                transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    borderColor: '#10b981',
-                },
+                ...cardSx,
             }}
         >
             <CardActionArea onClick={onClick}>
                 <CardContent sx={{ p: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                         {/* Expand/Collapse Icon */}
-                        <Box sx={{ color: '#64748b', mt: 0.25 }}>
+                        <Box sx={{ color: 'text.secondary', mt: 0.25 }}>
                             {isExpanded ? (
                                 <ExpandMoreIcon sx={{ fontSize: 20 }} />
                             ) : (
@@ -139,7 +109,7 @@ function ArtifactCard({ artifact, isSelected, isExpanded, onClick, iconConfig }:
                                     variant="subtitle1"
                                     sx={{
                                         fontWeight: 600,
-                                        color: '#1e293b',
+                                        color: 'text.primary',
                                         lineHeight: 1.3,
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
@@ -169,7 +139,7 @@ function ArtifactCard({ artifact, isSelected, isExpanded, onClick, iconConfig }:
                             <Typography
                                 variant="caption"
                                 sx={{
-                                    color: '#94a3b8',
+                                    color: 'text.secondary',
                                     fontFamily: 'monospace',
                                     fontSize: '0.75rem',
                                 }}
@@ -217,9 +187,10 @@ function ArtifactCardList({
                         sx={{
                             p: 2,
                             mb: 1,
-                            border: '1px solid #e2e8f0',
+                            border: 1,
+                            borderColor: 'divider',
                             borderRadius: 2,
-                            bgcolor: '#f8fafc',
+                            bgcolor: 'action.hover',
                             height: 64,
                         }}
                     />
@@ -230,14 +201,14 @@ function ArtifactCardList({
 
     if (artifacts.length === 0) {
         return (
-            <Box sx={{ p: 4, textAlign: 'center', color: '#94a3b8' }}>
+            <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
                 <Typography variant="body2">{emptyMessage}</Typography>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+        <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
             {artifacts.map((artifact) => (
                 <ArtifactCard
                     key={artifact.id}
@@ -355,263 +326,195 @@ export function DEVDashboard() {
     const selectedEpic = processedEpics.find(a => a.id === expandedEpicId);
     const selectedTA = processedTA.find(a => a.id === expandedTAId);
 
-    return (
-        <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                {/* Breadcrumbs */}
-                <Breadcrumbs sx={{ mb: 3 }}>
-                    <Link
-                        color="inherit"
-                        href="#"
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                        <HomeIcon sx={{ fontSize: 18 }} />
-                        Home
-                    </Link>
-                    <Typography color="text.primary" fontWeight={600}>
-                        DEV Dashboard
-                    </Typography>
-                </Breadcrumbs>
+    // Sidebar content
+    const sidebarContent = (
+        <>
+            {/* Tabs for Epics vs TA */}
+            <Paper elevation={0} sx={{ mb: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
+                <Tabs
+                    value={activeTab}
+                    onChange={(_, newValue) => setActiveTab(newValue)}
+                    sx={{
+                        '& .MuiTab-root': { fontWeight: 600 },
+                    }}
+                >
+                    <Tab
+                        label={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <epicIconConfig.icon sx={{ color: epicIconConfig.color, fontSize: 18 }} />
+                                Epics ({processedEpics.length})
+                            </Box>
+                        }
+                    />
+                    <Tab
+                        label={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <taIconConfig.icon sx={{ color: taIconConfig.color, fontSize: 18 }} />
+                                TA ({processedTA.length})
+                            </Box>
+                        }
+                    />
+                </Tabs>
+            </Paper>
 
-                {/* Page Header */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography
-                        variant="h4"
-                        sx={{ fontWeight: 800, color: '#1e293b', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
-                    >
-                        <CodeIcon sx={{ color: '#10b981', fontSize: 32 }} />
-                        Developer Dashboard
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#64748b' }}>
-                        Product: <strong>{PRODUCT_ID}</strong> &bull; Project: <strong>{PROJECT_ID}</strong>
-                    </Typography>
-                </Box>
+            {/* Error Alert */}
+            {error && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                    {error}
+                </Alert>
+            )}
 
-                {/* Error Alert */}
-                {error && (
-                    <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+            {/* Filter Toggle */}
+            <Box sx={{ mb: 2 }}>
+                <Tooltip
+                    title={
+                        <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                                Show Completed Artifacts
+                            </Typography>
+                            <Typography variant="body2">
+                                Toggle to show or hide artifacts with completed states (Done, Archived, etc.)
+                            </Typography>
+                        </Box>
+                    }
+                    placement="right"
+                    arrow
+                >
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={showCompleted}
+                                onChange={(e) => setShowCompleted(e.target.checked)}
+                                size="small"
+                            />
+                        }
+                        label={
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                Show Completed
+                            </Typography>
+                        }
+                    />
+                </Tooltip>
+            </Box>
 
-                {/* Tabs for Epics vs TA */}
-                <Paper elevation={0} sx={{ mb: 3, borderRadius: 2, border: '1px solid #e2e8f0' }}>
-                    <Tabs
-                        value={activeTab}
-                        onChange={(_, newValue) => setActiveTab(newValue)}
+            {activeTab === 0 ? (
+                <ArtifactCardList
+                    artifacts={processedEpics}
+                    loading={loadingEpics}
+                    selectedId={selectedEpicId || undefined}
+                    expandedId={expandedEpicId || undefined}
+                    onArtifactClick={handleEpicClick}
+                    iconConfig={epicIconConfig}
+                    emptyMessage="No epics found"
+                />
+            ) : (
+                <ArtifactCardList
+                    artifacts={processedTA}
+                    loading={loadingTA}
+                    selectedId={selectedTAId || undefined}
+                    expandedId={expandedTAId || undefined}
+                    onArtifactClick={handleTAClick}
+                    iconConfig={taIconConfig}
+                    emptyMessage="No technical architecture documents found"
+                />
+            )}
+        </>
+    );
+
+    // Main content
+    const mainContent = (
+        <>
+            <Typography
+                variant="h6"
+                sx={{
+                    fontWeight: 700,
+                    color: 'text.primary',
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                }}
+            >
+                <AccountTreeIcon sx={{ color: '#10b981' }} />
+                {activeTab === 0 ? 'Epic → Stories → Dev Plans' : 'TA → TAI Relationships'}
+            </Typography>
+
+            {activeTab === 0 ? (
+                selectedEpic ? (
+                    <DEVTree
+                        epicArtifact={selectedEpic}
+                        onNodeSelect={handleDevNodeSelect}
+                        showCompleted={showCompleted}
+                        projectId={PROJECT_ID}
+                    />
+                ) : (
+                    <Box
                         sx={{
-                            '& .MuiTab-root': { fontWeight: 600 },
-                            borderBottom: '1px solid #e2e8f0',
+                            p: 4,
+                            textAlign: 'center',
+                            color: 'text.secondary',
+                            bgcolor: 'action.hover',
+                            borderRadius: 2,
+                            border: '1px dashed',
+                            borderColor: 'divider',
                         }}
                     >
-                        <Tab
-                            label={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <epicIconConfig.icon sx={{ color: epicIconConfig.color }} />
-                                    Epics & Dev Plans ({processedEpics.length})
-                                </Box>
-                            }
-                        />
-                        <Tab
-                            label={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <taIconConfig.icon sx={{ color: taIconConfig.color }} />
-                                    Technical Architecture ({processedTA.length})
-                                </Box>
-                            }
-                        />
-                    </Tabs>
-                </Paper>
+                        <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                        <Typography variant="body1">
+                            Select an Epic to view its Stories and Dev Plans
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            Click an epic card on the left to expand its tree
+                        </Typography>
+                    </Box>
+                )
+            ) : (
+                selectedTA ? (
+                    <SATree
+                        parentArtifact={selectedTA}
+                        treeType="ta"
+                        onNodeSelect={handleSANodeSelect}
+                        showCompleted={showCompleted}
+                        projectId={PROJECT_ID}
+                    />
+                ) : (
+                    <Box
+                        sx={{
+                            p: 4,
+                            textAlign: 'center',
+                            color: 'text.secondary',
+                            bgcolor: 'action.hover',
+                            borderRadius: 2,
+                            border: '1px dashed',
+                            borderColor: 'divider',
+                        }}
+                    >
+                        <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                        <Typography variant="body1">
+                            Select a Technical Architecture doc to view its increments
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            Click a card on the left to expand its tree
+                        </Typography>
+                    </Box>
+                )
+            )}
+        </>
+    );
 
-                {/* Main Layout */}
-                <Grid container spacing={3}>
-                    {/* Left Column: Artifact Cards */}
-                    <Grid item xs={12} md={5} lg={4}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2,
-                                borderRadius: 2,
-                                border: '1px solid #e2e8f0',
-                                bgcolor: 'white',
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: '#1e293b',
-                                    mb: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                {activeTab === 0 ? (
-                                    <>
-                                        <epicIconConfig.icon sx={{ color: epicIconConfig.color }} />
-                                        Epics
-                                    </>
-                                ) : (
-                                    <>
-                                        <taIconConfig.icon sx={{ color: taIconConfig.color }} />
-                                        Technical Architecture
-                                    </>
-                                )}
-                            </Typography>
-
-                            {/* Filter Toggle */}
-                            <Box sx={{ mb: 2 }}>
-                                <Tooltip
-                                    title={
-                                        <Box>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                                                Show Completed Artifacts
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Toggle to show or hide artifacts with completed states (Done, Archived, etc.)
-                                            </Typography>
-                                        </Box>
-                                    }
-                                    placement="right"
-                                    arrow
-                                >
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={showCompleted}
-                                                onChange={(e) => setShowCompleted(e.target.checked)}
-                                                size="small"
-                                            />
-                                        }
-                                        label={
-                                            <Typography variant="body2" sx={{ color: '#64748b' }}>
-                                                Show Completed
-                                            </Typography>
-                                        }
-                                    />
-                                </Tooltip>
-                            </Box>
-
-                            {activeTab === 0 ? (
-                                <ArtifactCardList
-                                    artifacts={processedEpics}
-                                    loading={loadingEpics}
-                                    selectedId={selectedEpicId || undefined}
-                                    expandedId={expandedEpicId || undefined}
-                                    onArtifactClick={handleEpicClick}
-                                    iconConfig={epicIconConfig}
-                                    emptyMessage="No epics found"
-                                />
-                            ) : (
-                                <ArtifactCardList
-                                    artifacts={processedTA}
-                                    loading={loadingTA}
-                                    selectedId={selectedTAId || undefined}
-                                    expandedId={expandedTAId || undefined}
-                                    onArtifactClick={handleTAClick}
-                                    iconConfig={taIconConfig}
-                                    emptyMessage="No technical architecture documents found"
-                                />
-                            )}
-                        </Paper>
-                    </Grid>
-
-                    {/* Right Column: Tree View */}
-                    <Grid item xs={12} md={7} lg={8}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2,
-                                borderRadius: 2,
-                                border: '1px solid #e2e8f0',
-                                bgcolor: 'white',
-                                minHeight: 400,
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: '#1e293b',
-                                    mb: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <AccountTreeIcon sx={{ color: '#10b981' }} />
-                                {activeTab === 0 ? 'Epic → Stories → Dev Plans' : 'TA → TAI Relationships'}
-                            </Typography>
-
-                            {activeTab === 0 ? (
-                                selectedEpic ? (
-                                    <DEVTree
-                                        epicArtifact={selectedEpic}
-                                        onNodeSelect={handleDevNodeSelect}
-                                        showCompleted={showCompleted}
-                                        projectId={PROJECT_ID}
-                                    />
-                                ) : (
-                                    <Box
-                                        sx={{
-                                            p: 4,
-                                            textAlign: 'center',
-                                            color: '#94a3b8',
-                                            bgcolor: '#f8fafc',
-                                            borderRadius: 2,
-                                            border: '1px dashed #e2e8f0',
-                                        }}
-                                    >
-                                        <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-                                        <Typography variant="body1">
-                                            Select an Epic to view its Stories and Dev Plans
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                            Click an epic card on the left to expand its tree
-                                        </Typography>
-                                    </Box>
-                                )
-                            ) : (
-                                selectedTA ? (
-                                    <SATree
-                                        parentArtifact={selectedTA}
-                                        treeType="ta"
-                                        onNodeSelect={handleSANodeSelect}
-                                        showCompleted={showCompleted}
-                                        projectId={PROJECT_ID}
-                                    />
-                                ) : (
-                                    <Box
-                                        sx={{
-                                            p: 4,
-                                            textAlign: 'center',
-                                            color: '#94a3b8',
-                                            bgcolor: '#f8fafc',
-                                            borderRadius: 2,
-                                            border: '1px dashed #e2e8f0',
-                                        }}
-                                    >
-                                        <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-                                        <Typography variant="body1">
-                                            Select a Technical Architecture doc to view its increments
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                            Click a card on the left to expand its tree
-                                        </Typography>
-                                    </Box>
-                                )
-                            )}
-                        </Paper>
-                    </Grid>
-                </Grid>
-
-                {/* Artifact Reader Drawer */}
-                <ArtifactReader
-                    artifact={readerArtifact}
-                    onClose={() => setReaderArtifact(null)}
-                />
-            </Container>
-        </Box>
+    return (
+        <DashboardLayout
+            title="Developer Dashboard"
+            subtitle={`Product: ${PRODUCT_ID} • Project: ${PROJECT_ID}`}
+            breadcrumb="DEV Dashboard"
+            sidebar={sidebarContent}
+            main={mainContent}
+        >
+            {/* Artifact Reader Drawer */}
+            <ArtifactReader
+                artifact={readerArtifact}
+                onClose={() => setReaderArtifact(null)}
+            />
+        </DashboardLayout>
     );
 }

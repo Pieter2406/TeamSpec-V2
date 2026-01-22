@@ -70,17 +70,21 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
     };
 
     return (
-        <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
+        <Box sx={{ 
+            bgcolor: 'background.default', 
+            height: 'calc(100vh - 64px)',
+            overflow: 'auto',
+        }}>
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 {/* Header */}
                 <Box sx={{ mb: 4 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                        <SearchIcon sx={{ fontSize: 32, color: '#667eea' }} />
-                        <Typography variant="h4" sx={{ fontWeight: 800, color: '#1e293b' }}>
+                        <SearchIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
                             Search Results
                         </Typography>
                     </Box>
-                    <Typography variant="body1" sx={{ color: '#64748b', mb: 3 }}>
+                    <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
                         Showing results for "<strong>{query}</strong>" ({results.length} found)
                     </Typography>
 
@@ -97,7 +101,7 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                 {/* Loading */}
                 {loading && (
                     <Box sx={{ textAlign: 'center', py: 8 }}>
-                        <CircularProgress sx={{ color: '#667eea' }} />
+                        <CircularProgress sx={{ color: 'primary.main' }} />
                     </Box>
                 )}
 
@@ -111,10 +115,10 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                 {/* Results */}
                 {!loading && !error && results.length === 0 && (
                     <Paper elevation={0} sx={{ p: 6, textAlign: 'center', borderRadius: 3 }}>
-                        <Typography variant="h6" sx={{ color: '#64748b', mb: 1 }}>
+                        <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1 }}>
                             No results found
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Try adjusting your search query or filters
                         </Typography>
                     </Paper>
@@ -132,7 +136,7 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                                         key={result.id}
                                         disablePadding
                                         sx={{
-                                            borderBottom: index < results.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                            borderBottom: index < results.length - 1 ? 1 : 'none', borderColor: 'divider',
                                         }}
                                     >
                                         <ListItemButton
@@ -157,7 +161,7 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                                             <ListItemText
                                                 primary={
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                                                        <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                        <Typography sx={{ fontWeight: 600, color: 'text.primary' }}>
                                                             {result.title}
                                                         </Typography>
                                                         <Chip
@@ -188,7 +192,7 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                                                         <Typography
                                                             variant="body2"
                                                             sx={{
-                                                                color: '#64748b',
+                                                                color: 'text.secondary',
                                                                 fontFamily: 'monospace',
                                                                 fontSize: '0.75rem',
                                                                 mb: 0.5,
@@ -200,7 +204,7 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
                                                             <Typography
                                                                 variant="body2"
                                                                 sx={{
-                                                                    color: '#475569',
+                                                                    color: 'text.secondary',
                                                                     fontSize: '0.85rem',
                                                                     lineHeight: 1.5,
                                                                 }}

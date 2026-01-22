@@ -28,7 +28,7 @@ anti_keywords:
   - implementation detail
   - code
   - test case
-status: Proposed
+status: Done
 ---
 
 # Epic: `epic-TSV-010-frontend-architecture-refactor`
@@ -43,7 +43,7 @@ status: Proposed
 | Field | Value |
 |-------|-------|
 | **Epic ID** | epic-TSV-010 |
-| **Status** | Proposed|
+| **Status** | Done|
 | **Product** | teamspec-viewer (TSV) |
 | **Owner** | FA (Functional Analyst) |
 | **Created** | 2026-01-18 |

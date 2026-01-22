@@ -45,8 +45,8 @@ status: Active
 > **ID:** fi-TSV-010  
 > **Product:** `teamspec-viewer` (TSV)  
 > **Target Feature:** `f-TSV-002-role-specific-dashboards`  
-> **Epic:** {TBD}  
-> **Status:** proposed
+> **Epic:** `epic-TSV-011-role-dashboard-ux-polish`  
+> **Status:** Active
 
 ---
 

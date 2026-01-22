@@ -74,16 +74,17 @@ function NodeLabel({ icon, title, badge, statusElement, hasTBD }: NodeLabelProps
                 alignItems: 'center',
                 gap: 1,
                 py: 0.5,
+                width: '100%', // Fill the label width for proper flex alignment
             }}
         >
-            <Box sx={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
                 {icon}
             </Box>
             <Typography
                 variant="body2"
                 sx={{
                     fontWeight: 500,
-                    color: '#1e293b',
+                    color: 'text.primary',
                     flex: 1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -102,8 +103,8 @@ function NodeLabel({ icon, title, badge, statusElement, hasTBD }: NodeLabelProps
                         borderRadius: 0.5,
                         fontSize: '0.65rem',
                         fontWeight: 600,
-                        bgcolor: '#f1f5f9',
-                        color: '#64748b',
+                        bgcolor: 'action.selected',
+                        color: 'text.secondary',
                     }}
                 >
                     {badge}
@@ -302,7 +303,18 @@ export function BATree({
     // Clickable label wrapper
     const ClickableLabel = ({ nodeData, children }: { nodeData: BATreeNodeData; children: React.ReactNode }) => (
         <Box
+            role="button"
+            tabIndex={0}
             onClick={(e) => handleLabelClick(nodeData, e)}
+            onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (onNodeSelect) {
+                        onNodeSelect(nodeData);
+                    }
+                }
+            }}
             sx={{
                 cursor: 'pointer',
                 '&:hover': { textDecoration: 'underline' },
@@ -357,13 +369,14 @@ export function BATree({
     return (
         <Box sx={{ p: 1 }}>
             <SimpleTreeView
+                aria-label="Business analysis artifacts tree navigation"
                 expandedItems={expandedItems}
                 onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
                 sx={{
                     '& .MuiTreeItem-content': {
                         borderRadius: 1,
                         '&:hover': {
-                            bgcolor: '#f1f5f9',
+                            bgcolor: 'action.hover',
                         },
                     },
                     '& .MuiTreeItem-label': {

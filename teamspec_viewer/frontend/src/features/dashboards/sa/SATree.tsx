@@ -87,14 +87,14 @@ function NodeLabel({ icon, title, badge, statusElement, hasTBD }: NodeLabelProps
                 width: '100%', // Fill the label width for proper flex alignment (bug-013 fix)
             }}
         >
-            <Box sx={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
                 {icon}
             </Box>
             <Typography
                 variant="body2"
                 sx={{
                     fontWeight: 500,
-                    color: '#1e293b',
+                    color: 'text.primary',
                     flex: 1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -113,8 +113,8 @@ function NodeLabel({ icon, title, badge, statusElement, hasTBD }: NodeLabelProps
                         borderRadius: 0.5,
                         fontSize: '0.65rem',
                         fontWeight: 600,
-                        bgcolor: '#f1f5f9',
-                        color: '#64748b',
+                        bgcolor: 'action.selected',
+                        color: 'text.secondary',
                     }}
                 >
                     {badge}
@@ -308,7 +308,18 @@ export function SATree({
     const ClickableLabel = ({ nodeData, children }: { nodeData: SATreeNodeData; children: React.ReactNode }) => (
         <Box
             component="span"
+            role="button"
+            tabIndex={0}
             onClick={(e) => handleLabelClick(nodeData, e)}
+            onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (onNodeSelect) {
+                        onNodeSelect(nodeData);
+                    }
+                }
+            }}
             sx={{
                 cursor: 'pointer',
                 display: 'flex',
@@ -336,13 +347,14 @@ export function SATree({
     return (
         <Box sx={{ p: 1 }}>
             <SimpleTreeView
+                aria-label="Solution architecture tree navigation"
                 expandedItems={expandedItems}
                 onExpandedItemsChange={(_, items) => setExpandedItems(items)}
                 sx={{
                     '& .MuiTreeItem-content': {
                         borderRadius: 1,
                         '&:hover': {
-                            bgcolor: '#f1f5f9',
+                            bgcolor: 'action.hover',
                         },
                     },
                     '& .MuiTreeItem-label': {
@@ -428,7 +440,7 @@ export function SATree({
                         <TreeItem
                             itemId="empty"
                             label={
-                                <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic', py: 1 }}>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic', py: 1 }}>
                                     No increments found
                                 </Typography>
                             }

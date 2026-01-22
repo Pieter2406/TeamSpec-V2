@@ -54,7 +54,7 @@ export function ProjectsList({ productId }: ProjectsListProps) {
             <Box
                 sx={{
                     p: 2.5,
-                    borderBottom: '1px solid #f1f5f9',
+                    borderBottom: 1, borderColor: 'divider',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
@@ -74,10 +74,10 @@ export function ProjectsList({ productId }: ProjectsListProps) {
                     <AccountTreeIcon sx={{ color: 'white', fontSize: 20 }} />
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                         Targeting Projects
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#64748b' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         Projects implementing changes to this product
                     </Typography>
                 </Box>
@@ -95,7 +95,7 @@ export function ProjectsList({ productId }: ProjectsListProps) {
             {/* Empty state */}
             {projects.length === 0 && (
                 <Box sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography sx={{ color: '#64748b', fontStyle: 'italic' }}>
+                    <Typography sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                         No active projects targeting this product
                     </Typography>
                 </Box>
@@ -109,13 +109,13 @@ export function ProjectsList({ productId }: ProjectsListProps) {
                             key={project.id}
                             disablePadding
                             sx={{
-                                borderBottom: index < projects.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                borderBottom: index < projects.length - 1 ? 1 : 'none', borderColor: 'divider',
                             }}
                         >
                             <ListItemButton sx={{ py: 2, px: 3 }}>
                                 <ListItemText
                                     primary={
-                                        <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                        <Typography sx={{ fontWeight: 600, color: 'text.primary' }}>
                                             {project.name}
                                         </Typography>
                                     }
@@ -123,7 +123,7 @@ export function ProjectsList({ productId }: ProjectsListProps) {
                                         <Typography
                                             variant="body2"
                                             sx={{
-                                                color: '#64748b',
+                                                color: 'text.secondary',
                                                 fontFamily: 'monospace',
                                                 fontSize: '0.8rem',
                                             }}

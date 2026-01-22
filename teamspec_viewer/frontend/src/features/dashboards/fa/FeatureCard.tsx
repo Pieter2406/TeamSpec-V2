@@ -19,26 +19,13 @@ import {
     Box,
     Chip,
     Skeleton,
+    useTheme,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Artifact, getFeatureFICounts } from '@/api';
 import { getArtifactIcon } from '@/shared/utils';
-
-// Status → Color mapping
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-    active: { bg: '#dcfce7', text: '#166534' },
-    draft: { bg: '#fef9c3', text: '#854d0e' },
-    planned: { bg: '#e0e7ff', text: '#3730a3' },
-    deprecated: { bg: '#fee2e2', text: '#991b1b' },
-    done: { bg: '#d1fae5', text: '#065f46' },
-    default: { bg: '#f1f5f9', text: '#475569' },
-};
-
-function getStatusColor(status?: string) {
-    const normalizedStatus = status?.toLowerCase() || 'default';
-    return STATUS_COLORS[normalizedStatus] || STATUS_COLORS.default;
-}
+import { getCardSx, getThemedStatusColor } from '@/shared/styles';
 
 interface FeatureCardProps {
     feature: Artifact;
@@ -55,7 +42,9 @@ export function FeatureCard({
     fiCount,
     onClick,
 }: FeatureCardProps) {
-    const statusColor = getStatusColor(feature.status);
+    const theme = useTheme();
+    const statusColor = getThemedStatusColor(theme, feature.status);
+    const cardSx = getCardSx(theme, { isSelected, isExpanded });
 
     // Get icon configurations
     const featureIconConfig = getArtifactIcon('feature');
@@ -67,24 +56,14 @@ export function FeatureCard({
         <Card
             sx={{
                 borderRadius: 2,
-                border: isSelected ? '2px solid #3b82f6' : '1px solid #e2e8f0',
-                boxShadow: isSelected
-                    ? '0 4px 12px rgba(59, 130, 246, 0.25)'
-                    : '0 1px 3px rgba(0, 0, 0, 0.1)',
-                bgcolor: isSelected ? 'rgba(59, 130, 246, 0.04)' : 'white',
-                transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    borderColor: '#cbd5e1',
-                },
+                ...cardSx,
             }}
         >
             <CardActionArea onClick={onClick}>
                 <CardContent sx={{ p: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                         {/* Expand/Collapse Icon */}
-                        <Box sx={{ color: '#64748b', mt: 0.25 }}>
+                        <Box sx={{ color: 'text.secondary', mt: 0.25 }}>
                             {isExpanded ? (
                                 <ExpandMoreIcon sx={{ fontSize: 20 }} />
                             ) : (
@@ -116,7 +95,7 @@ export function FeatureCard({
                                     variant="subtitle1"
                                     sx={{
                                         fontWeight: 600,
-                                        color: '#1e293b',
+                                        color: 'text.primary',
                                         lineHeight: 1.3,
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
@@ -148,7 +127,7 @@ export function FeatureCard({
                                 <Typography
                                     variant="caption"
                                     sx={{
-                                        color: '#94a3b8',
+                                        color: 'text.secondary',
                                         fontFamily: 'monospace',
                                         fontSize: '0.75rem',
                                     }}
@@ -244,10 +223,12 @@ export function FeatureCardList({
                 sx={{
                     p: 4,
                     textAlign: 'center',
-                    color: '#94a3b8',
-                    bgcolor: '#f8fafc',
+                    color: 'text.secondary',
+                    bgcolor: 'action.hover',
                     borderRadius: 2,
-                    border: '1px dashed #e2e8f0',
+                    border: 1,
+                    borderStyle: 'dashed',
+                    borderColor: 'divider',
                 }}
             >
                 <Typography variant="body2">No features found</Typography>

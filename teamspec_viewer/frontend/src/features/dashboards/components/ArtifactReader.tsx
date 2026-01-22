@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { getArtifactContent, Artifact } from '@/api';
 import { TbdHighlighter } from '@/shared/components';
+import { useFocusManagement } from '@/shared/hooks';
 
 interface ArtifactReaderProps {
     artifact: Artifact | null;
@@ -14,6 +15,20 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
     const [content, setContent] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { saveFocus, restoreFocus } = useFocusManagement();
+
+    // Save focus when drawer opens
+    useEffect(() => {
+        if (artifact) {
+            saveFocus();
+        }
+    }, [artifact, saveFocus]);
+
+    // Handle close with focus restoration
+    const handleClose = () => {
+        onClose();
+        restoreFocus();
+    };
 
     useEffect(() => {
         if (!artifact) {
@@ -40,7 +55,7 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
         <Drawer
             anchor="right"
             open={!!artifact}
-            onClose={onClose}
+            onClose={handleClose}
             PaperProps={{
                 sx: {
                     width: { xs: '100%', md: '60%', lg: '50%' },
@@ -60,7 +75,7 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                     >
                         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                             <IconButton
-                                onClick={onClose}
+                                onClick={handleClose}
                                 aria-label="close"
                                 sx={{
                                     color: 'white',
@@ -108,7 +123,7 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                     </Box>
 
                     {/* Content */}
-                    <Box sx={{ flexGrow: 1, overflow: 'auto', bgcolor: '#fafbfc' }}>
+                    <Box sx={{ flexGrow: 1, overflow: 'auto', bgcolor: 'background.default' }}>
                         {loading && (
                             <Box sx={{ p: 4, textAlign: 'center' }}>
                                 <Typography color="text.secondary">Loading...</Typography>
@@ -131,8 +146,9 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                                                 fontWeight: 800,
                                                 mb: 2,
                                                 mt: 3,
-                                                color: '#1e293b',
-                                                borderBottom: '2px solid #e2e8f0',
+                                                color: 'text.primary',
+                                                borderBottom: 2,
+                                                borderColor: 'divider',
                                                 pb: 2,
                                             },
                                             '& h2': {
@@ -140,19 +156,19 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                                                 fontWeight: 700,
                                                 mb: 1.5,
                                                 mt: 3,
-                                                color: '#334155',
+                                                color: 'text.primary',
                                             },
                                             '& h3': {
                                                 fontSize: '1.1rem',
                                                 fontWeight: 600,
                                                 mb: 1,
                                                 mt: 2,
-                                                color: '#475569',
+                                                color: 'text.secondary',
                                             },
                                             '& p': {
                                                 mb: 1.5,
                                                 lineHeight: 1.7,
-                                                color: '#475569',
+                                                color: 'text.secondary',
                                             },
                                             '& ul, & ol': {
                                                 pl: 3,
@@ -161,7 +177,7 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                                             '& li': {
                                                 mb: 0.5,
                                                 lineHeight: 1.6,
-                                                color: '#475569',
+                                                color: 'text.secondary',
                                             },
                                             '& table': {
                                                 borderCollapse: 'collapse',
@@ -171,52 +187,53 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                                                 overflow: 'hidden',
                                                 boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                                                 '& th, & td': {
-                                                    border: '1px solid #e2e8f0',
+                                                    border: 1,
+                                                    borderColor: 'divider',
                                                     p: 1.5,
                                                     textAlign: 'left',
                                                 },
                                                 '& th': {
-                                                    bgcolor: '#f8fafc',
+                                                    bgcolor: 'action.hover',
                                                     fontWeight: 600,
-                                                    color: '#334155',
+                                                    color: 'text.primary',
                                                 },
                                                 '& tr:hover td': {
-                                                    bgcolor: '#f8fafc',
+                                                    bgcolor: 'action.hover',
                                                 },
                                             },
                                             '& code': {
-                                                bgcolor: '#f1f5f9',
+                                                bgcolor: 'action.selected',
                                                 px: 1,
                                                 py: 0.25,
                                                 borderRadius: 1,
                                                 fontFamily: '"Fira Code", monospace',
                                                 fontSize: '0.875rem',
-                                                color: '#7c3aed',
+                                                color: 'secondary.main',
                                             },
                                             '& pre': {
-                                                bgcolor: '#1e293b',
+                                                bgcolor: 'grey.900',
                                                 p: 2.5,
                                                 borderRadius: 2,
                                                 overflow: 'auto',
                                                 '& code': {
                                                     bgcolor: 'transparent',
-                                                    color: '#e2e8f0',
+                                                    color: 'grey.200',
                                                     p: 0,
                                                 },
                                             },
                                             '& blockquote': {
                                                 borderLeft: 4,
-                                                borderColor: '#667eea',
-                                                bgcolor: '#f8fafc',
+                                                borderColor: 'primary.main',
+                                                bgcolor: 'action.hover',
                                                 pl: 2,
                                                 py: 1,
                                                 ml: 0,
                                                 borderRadius: '0 8px 8px 0',
-                                                color: '#64748b',
+                                                color: 'text.secondary',
                                                 fontStyle: 'italic',
                                             },
                                             '& a': {
-                                                color: '#667eea',
+                                                color: 'primary.main',
                                                 textDecoration: 'none',
                                                 fontWeight: 500,
                                                 '&:hover': {
@@ -227,11 +244,11 @@ export function ArtifactReader({ artifact, onClose }: ArtifactReaderProps) {
                                                 my: 4,
                                                 border: 'none',
                                                 height: 2,
-                                                background: 'linear-gradient(90deg, #e2e8f0 0%, transparent 100%)',
+                                                bgcolor: 'divider',
                                             },
                                             '& strong': {
                                                 fontWeight: 600,
-                                                color: '#1e293b',
+                                                color: 'text.primary',
                                             },
                                         }}
                                         dangerouslySetInnerHTML={{ __html: processedContent }}

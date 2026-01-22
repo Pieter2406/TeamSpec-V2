@@ -2,3 +2,4 @@
 export { Header } from './Header';
 export { RoleBadge } from './RoleBadge';
 export { RoleSelector } from './RoleSelector';
+export { DashboardLayout } from './DashboardLayout';

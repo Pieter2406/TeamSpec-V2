@@ -19,18 +19,19 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
     const statusStyle = STATUS_COLORS[product.status] || STATUS_COLORS.active;
 
     return (
-        <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
+        <Box sx={{ bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)' }}>
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 {/* Back button */}
                 <Box sx={{ mb: 3 }}>
                     <IconButton
                         onClick={onBack}
                         sx={{
-                            bgcolor: 'white',
-                            border: '1px solid #e2e8f0',
+                            bgcolor: 'background.paper',
+                            border: 1,
+                            borderColor: 'divider',
                             '&:hover': {
-                                bgcolor: '#f8fafc',
-                                borderColor: '#667eea',
+                                bgcolor: 'action.hover',
+                                borderColor: 'primary.main',
                             },
                         }}
                     >

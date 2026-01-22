@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Typography, Container, Grid, Alert, Breadcrumbs, Link, Paper, FormControlLabel, Checkbox, Tooltip } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
+import { Box, Typography, Alert, FormControlLabel, Checkbox, Tooltip } from '@mui/material';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {
     getBusinessAnalysis,
@@ -10,6 +9,7 @@ import { getArtifactIcon } from '@/shared/utils';
 import { BACardList } from './BACard';
 import { BATree, BATreeNodeData } from './BATree';
 import { ArtifactReader } from '@/features/dashboards/components';
+import { DashboardLayout } from '@/features/layout';
 import { useArtifactFilter, filterAndSortArtifacts } from '@/shared';
 
 // MVP hardcoded context
@@ -85,190 +85,143 @@ export function BADashboard() {
         setReaderArtifact(artifact);
     }, []);
 
-    return (
-        <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                {/* Breadcrumbs */}
-                <Breadcrumbs sx={{ mb: 3 }}>
-                    <Link
-                        color="inherit"
-                        href="#"
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                        <HomeIcon sx={{ fontSize: 18 }} />
-                        Home
-                    </Link>
-                    <Typography color="text.primary" fontWeight={600}>
-                        BA Dashboard
-                    </Typography>
-                </Breadcrumbs>
+    // Sidebar content
+    const sidebarContent = (
+        <>
+            <Typography
+                variant="h6"
+                sx={{
+                    fontWeight: 700,
+                    color: 'text.primary',
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                }}
+            >
+                <BAIcon sx={{ color: baIconConfig.color }} />
+                Business Analysis
+            </Typography>
 
-                {/* Page Header */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            fontWeight: 800,
-                            color: '#1e293b',
-                            mb: 1,
-                        }}
-                    >
-                        Business Analysis Dashboard
+            {/* Error Alert */}
+            {error && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
+            {/* Filter Toggle */}
+            <Box sx={{ mb: 2 }}>
+                <Tooltip
+                    title={
+                        <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                                Show Completed Artifacts
+                            </Typography>
+                            <Typography variant="body2">
+                                Toggle to show or hide artifacts with completed states:
+                            </Typography>
+                            <Box component="ul" sx={{ m: 0, pl: 2, mt: 0.5, fontSize: '0.85rem' }}>
+                                <li>Done — Completed and closed</li>
+                                <li>Retired — No longer in use</li>
+                                <li>Deferred — Moved to later release</li>
+                                <li>Out-of-Scope — Explicitly excluded</li>
+                                <li>Archived — Historical reference</li>
+                            </Box>
+                        </Box>
+                    }
+                    placement="right"
+                    arrow
+                >
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={showCompleted}
+                                onChange={(e) => setShowCompleted(e.target.checked)}
+                                size="small"
+                            />
+                        }
+                        label={
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                Show Completed ({baArtifacts.length - processedBArtifacts.length} hidden)
+                            </Typography>
+                        }
+                    />
+                </Tooltip>
+            </Box>
+
+            <BACardList
+                baArtifacts={processedBArtifacts}
+                loading={loading}
+                selectedBAId={selectedBAId || undefined}
+                expandedBAId={expandedBAId || undefined}
+                onBAClick={handleBAClick}
+            />
+        </>
+    );
+
+    // Main content
+    const mainContent = (
+        <>
+            <Typography
+                variant="h6"
+                sx={{
+                    fontWeight: 700,
+                    color: 'text.primary',
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                }}
+            >
+                <AccountTreeIcon sx={{ color: baIconConfig.color }} />
+                Artifact Relationships
+            </Typography>
+
+            {expandedBAId ? (
+                <BATree
+                    baId={expandedBAId}
+                    onNodeSelect={handleNodeSelect}
+                    showCompleted={showCompleted}
+                    onStatusUpdate={handleStatusUpdate}
+                />
+            ) : (
+                <Box
+                    sx={{
+                        p: 4,
+                        textAlign: 'center',
+                        color: 'text.secondary',
+                        bgcolor: 'action.hover',
+                        borderRadius: 2,
+                        border: '1px dashed',
+                        borderColor: 'divider',
+                    }}
+                >
+                    <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                    <Typography variant="body1">
+                        Select a BA document to view its increments
                     </Typography>
-                    <Typography variant="body1" sx={{ color: '#64748b' }}>
-                        Product: <strong>{PRODUCT_ID}</strong> &bull; Use-Case Centric View
+                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                        Click a BA card on the left to expand its tree
                     </Typography>
                 </Box>
+            )}
+        </>
+    );
 
-                {/* Error Alert */}
-                {error && (
-                    <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                        {error}
-                    </Alert>
-                )}
-
-                {/* Main Layout: BA Documents + Tree */}
-                <Grid container spacing={3}>
-                    {/* Left Column: BA Cards */}
-                    <Grid item xs={12} md={5} lg={4}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2,
-                                borderRadius: 2,
-                                border: '1px solid #e2e8f0',
-                                bgcolor: 'white',
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: '#1e293b',
-                                    mb: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <BAIcon sx={{ color: baIconConfig.color }} />
-                                Business Analysis
-                            </Typography>
-
-                            {/* Filter Toggle */}
-                            <Box sx={{ mb: 2 }}>
-                                <Tooltip
-                                    title={
-                                        <Box>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                                                Show Completed Artifacts
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Toggle to show or hide artifacts with completed states:
-                                            </Typography>
-                                            <Box component="ul" sx={{ m: 0, pl: 2, mt: 0.5, fontSize: '0.85rem' }}>
-                                                <li>Done — Completed and closed</li>
-                                                <li>Retired — No longer in use</li>
-                                                <li>Deferred — Moved to later release</li>
-                                                <li>Out-of-Scope — Explicitly excluded</li>
-                                                <li>Archived — Historical reference</li>
-                                            </Box>
-                                        </Box>
-                                    }
-                                    placement="right"
-                                    arrow
-                                >
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={showCompleted}
-                                                onChange={(e) => setShowCompleted(e.target.checked)}
-                                                size="small"
-                                            />
-                                        }
-                                        label={
-                                            <Typography variant="body2" sx={{ color: '#64748b' }}>
-                                                Show Completed ({baArtifacts.length - processedBArtifacts.length} hidden)
-                                            </Typography>
-                                        }
-                                    />
-                                </Tooltip>
-                            </Box>
-
-                            <BACardList
-                                baArtifacts={processedBArtifacts}
-                                loading={loading}
-                                selectedBAId={selectedBAId || undefined}
-                                expandedBAId={expandedBAId || undefined}
-                                onBAClick={handleBAClick}
-                            />
-                        </Paper>
-                    </Grid>
-
-                    {/* Right Column: Artifact Tree */}
-                    <Grid item xs={12} md={7} lg={8}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2,
-                                borderRadius: 2,
-                                border: '1px solid #e2e8f0',
-                                bgcolor: 'white',
-                                minHeight: 400,
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: '#1e293b',
-                                    mb: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <AccountTreeIcon sx={{ color: baIconConfig.color }} />
-                                Artifact Relationships
-                            </Typography>
-
-                            {expandedBAId ? (
-                                <BATree
-                                    baId={expandedBAId}
-                                    onNodeSelect={handleNodeSelect}
-                                    showCompleted={showCompleted}
-                                    onStatusUpdate={handleStatusUpdate}
-                                />
-                            ) : (
-                                <Box
-                                    sx={{
-                                        p: 4,
-                                        textAlign: 'center',
-                                        color: '#94a3b8',
-                                        bgcolor: '#f8fafc',
-                                        borderRadius: 2,
-                                        border: '1px dashed #e2e8f0',
-                                    }}
-                                >
-                                    <AccountTreeIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-                                    <Typography variant="body1">
-                                        Select a BA document to view its increments
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                        Click a BA card on the left to expand its tree
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Paper>
-                    </Grid>
-                </Grid>
-
-                {/* Artifact Reader Drawer */}
-                <ArtifactReader
-                    artifact={readerArtifact}
-                    onClose={() => setReaderArtifact(null)}
-                />
-            </Container>
-        </Box>
+    return (
+        <DashboardLayout
+            title="Business Analysis Dashboard"
+            subtitle={`Product: ${PRODUCT_ID} • Use-Case Centric View`}
+            breadcrumb="BA Dashboard"
+            sidebar={sidebarContent}
+            main={mainContent}
+        >
+            {/* Artifact Reader Drawer */}
+            <ArtifactReader
+                artifact={readerArtifact}
+                onClose={() => setReaderArtifact(null)}
+            />
+        </DashboardLayout>
     );
 }

@@ -32,7 +32,7 @@ anti_keywords:
   - implementation detail
   - code
   - test case
-status: Active
+status: Done
 ---
 
 # Epic: `epic-TSV-009-dev-sa-qa-dashboards`
@@ -47,7 +47,7 @@ status: Active
 | Field | Value |
 |-------|-------|
 | **Epic ID** | epic-TSV-009 |
-| **Status** | Active|
+| **Status** | Done|
 | **Product** | teamspec-viewer (TSV) |
 | **Owner** | FA (Functional Analyst) |
 | **Created** | 2026-01-17 |

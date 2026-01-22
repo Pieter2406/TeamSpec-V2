@@ -8,3 +8,10 @@ export {
     isTerminalState,
     getStatePriority,
 } from './stateOrdering';
+
+export {
+    KEYBOARD_SHORTCUTS,
+    SHORTCUT_CATEGORIES,
+    getShortcutsByCategory,
+    type Shortcut,
+} from './keyboardShortcuts';

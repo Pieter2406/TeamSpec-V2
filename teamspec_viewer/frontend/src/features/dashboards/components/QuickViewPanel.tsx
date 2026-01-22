@@ -66,7 +66,7 @@ function getTypeIcon(type: TreeNodeData['type']) {
         case 'story':
             return <AssignmentIcon sx={{ color: '#f59e0b' }} />;
         default:
-            return <DescriptionIcon sx={{ color: '#64748b' }} />;
+            return <DescriptionIcon color="disabled" />;
     }
 }
 
@@ -167,8 +167,9 @@ export function QuickViewPanel({
             <Box
                 sx={{
                     p: 2,
-                    borderBottom: '1px solid #e2e8f0',
-                    bgcolor: '#f8fafc',
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    bgcolor: 'action.hover',
                 }}
             >
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
@@ -178,8 +179,9 @@ export function QuickViewPanel({
                             width: 40,
                             height: 40,
                             borderRadius: 1.5,
-                            bgcolor: 'white',
-                            border: '1px solid #e2e8f0',
+                            bgcolor: 'background.paper',
+                            border: 1,
+                            borderColor: 'divider',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -195,7 +197,7 @@ export function QuickViewPanel({
                             variant="subtitle1"
                             sx={{
                                 fontWeight: 600,
-                                color: '#1e293b',
+                                color: 'text.primary',
                                 lineHeight: 1.3,
                                 mb: 0.5,
                             }}
@@ -210,8 +212,8 @@ export function QuickViewPanel({
                                     height: 20,
                                     fontSize: '0.65rem',
                                     fontWeight: 600,
-                                    bgcolor: '#f1f5f9',
-                                    color: '#64748b',
+                                    bgcolor: 'action.selected',
+                                    color: 'text.secondary',
                                 }}
                             />
                             {node.status && (
@@ -235,8 +237,8 @@ export function QuickViewPanel({
                                         height: 20,
                                         fontSize: '0.65rem',
                                         fontWeight: 500,
-                                        bgcolor: '#dbeafe',
-                                        color: '#1e40af',
+                                        bgcolor: 'info.light',
+                                        color: 'info.dark',
                                     }}
                                 />
                             )}
@@ -256,7 +258,7 @@ export function QuickViewPanel({
                         display: 'block',
                         mt: 1,
                         fontFamily: 'monospace',
-                        color: '#94a3b8',
+                        color: 'text.disabled',
                         fontSize: '0.75rem',
                     }}
                 >
@@ -283,7 +285,7 @@ export function QuickViewPanel({
                     <Typography
                         variant="body2"
                         sx={{
-                            color: '#475569',
+                            color: 'text.secondary',
                             whiteSpace: 'pre-wrap',
                             lineHeight: 1.6,
                             fontFamily: 'inherit',
@@ -304,8 +306,8 @@ export function QuickViewPanel({
                     startIcon={<OpenInFullIcon />}
                     onClick={() => onOpenFull(node)}
                     sx={{
-                        bgcolor: '#3b82f6',
-                        '&:hover': { bgcolor: '#2563eb' },
+                        bgcolor: 'primary.main',
+                        '&:hover': { bgcolor: 'primary.dark' },
                         textTransform: 'none',
                         fontWeight: 600,
                     }}
@@ -318,7 +320,7 @@ export function QuickViewPanel({
                         display: 'block',
                         mt: 1,
                         textAlign: 'center',
-                        color: '#94a3b8',
+                        color: 'text.disabled',
                     }}
                 >
                     Double-click node to open directly

@@ -57,14 +57,14 @@ export function FeatureFIPanel({ featureId, projectId = 'teamspecviewermvp', onF
             <Box
                 sx={{
                     p: 2,
-                    borderBottom: '1px solid #f1f5f9',
+                    borderBottom: 1, borderColor: 'divider',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1.5,
                 }}
             >
                 <ChangeCircleIcon sx={{ color: '#667eea', fontSize: 20 }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1e293b', flex: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary', flex: 1 }}>
                     Related Feature Increments
                 </Typography>
                 <Chip
@@ -83,7 +83,7 @@ export function FeatureFIPanel({ featureId, projectId = 'teamspecviewermvp', onF
             {/* Empty state */}
             {increments.length === 0 && (
                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                         No feature increments found for this feature
                     </Typography>
                 </Box>
@@ -97,7 +97,7 @@ export function FeatureFIPanel({ featureId, projectId = 'teamspecviewermvp', onF
                             key={fi.id}
                             disablePadding
                             sx={{
-                                borderBottom: index < increments.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                borderBottom: index < increments.length - 1 ? 1 : 'none', borderColor: 'divider',
                             }}
                         >
                             <ListItemButton
@@ -108,7 +108,7 @@ export function FeatureFIPanel({ featureId, projectId = 'teamspecviewermvp', onF
                                     primary={
                                         <Typography
                                             variant="body2"
-                                            sx={{ fontWeight: 600, color: '#1e293b' }}
+                                            sx={{ fontWeight: 600, color: 'text.primary' }}
                                         >
                                             {fi.title}
                                         </Typography>
@@ -117,7 +117,7 @@ export function FeatureFIPanel({ featureId, projectId = 'teamspecviewermvp', onF
                                         <Typography
                                             variant="caption"
                                             sx={{
-                                                color: '#64748b',
+                                                color: 'text.secondary',
                                                 fontFamily: 'monospace',
                                             }}
                                         >

@@ -6,30 +6,44 @@
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-gradient-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     --card-hover-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-body {
+/* Prevent page-level scrolling - content areas scroll internally */
+html,
+body,
+#root {
+    height: 100%;
     margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #f8fafc;
 }
 
-/* Role selector background */
+/* Role selector background - light mode */
 .role-selector-bg {
-    background: var(--bg-gradient);
+    background: var(--bg-gradient-light);
     min-height: 100vh;
 }
 
-/* Card styles */
+/* Role selector background - dark mode */
+[data-mui-color-scheme="dark"] .role-selector-bg,
+.dark .role-selector-bg {
+    background: var(--bg-gradient-dark);
+}
+
+/* Card styles - light mode */
 .role-card {
-    background: white;
     border-radius: 16px;
     box-shadow: var(--card-shadow);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -49,20 +63,16 @@ body {
     border-top: 4px solid #f5576c;
 }
 
-/* Artifact section styling */
+/* Artifact section styling - light mode */
 .artifact-section {
-    background: white;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     margin-bottom: 24px;
-    border: 1px solid #e2e8f0;
 }
 
 .artifact-section-header {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     padding: 16px 20px;
-    border-bottom: 1px solid #e2e8f0;
 }
 
 .artifact-item {
@@ -71,7 +81,6 @@ body {
 }
 
 .artifact-item:hover {
-    background: #f8fafc;
     border-left-color: #667eea;
 }
 
@@ -102,24 +111,24 @@ body {
     box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling - adapts to theme */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: transparent;
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: rgba(100, 116, 139, 0.4);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: rgba(100, 116, 139, 0.6);
 }
 
 /* Logo/brand text effect */

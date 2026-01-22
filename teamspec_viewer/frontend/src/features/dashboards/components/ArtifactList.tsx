@@ -13,6 +13,7 @@ import {
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Artifact } from '@/api';
+import { useRovingTabindex } from '@/shared/hooks';
 
 interface ArtifactListProps {
     title: string;
@@ -43,6 +44,17 @@ export function ArtifactList({
     icon = 'folder',
 }: ArtifactListProps) {
     const IconComponent = icon === 'folder' ? FolderOpenIcon : DescriptionIcon;
+
+    // Roving tabindex for keyboard navigation
+    const { handleKeyDown, getItemProps } = useRovingTabindex({
+        itemCount: artifacts.length,
+        onSelect: (index) => {
+            if (artifacts[index]) {
+                onSelect(artifacts[index]);
+            }
+        },
+        orientation: 'vertical',
+    });
 
     if (loading) {
         return (
@@ -81,7 +93,7 @@ export function ArtifactList({
                     <IconComponent sx={{ color: 'white', fontSize: 20 }} />
                 </Box>
                 <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                         {title}
                     </Typography>
                 </Box>
@@ -104,62 +116,90 @@ export function ArtifactList({
                     </Typography>
                 </Box>
             ) : (
-                <List sx={{ py: 0 }}>
-                    {artifacts.map((artifact, index) => (
-                        <ListItem
-                            key={artifact.id}
-                            disablePadding
-                            className="artifact-item"
-                            sx={{
-                                borderBottom: index < artifacts.length - 1 ? '1px solid #f1f5f9' : 'none',
-                            }}
-                        >
-                            <ListItemButton
-                                onClick={() => onSelect(artifact)}
-                                sx={{ py: 2, px: 3 }}
+                <List
+                    sx={{ py: 0 }}
+                    role="listbox"
+                    aria-label={title}
+                >
+                    {artifacts.map((artifact, index) => {
+                        const itemProps = getItemProps(index);
+                        return (
+                            <ListItem
+                                key={artifact.id}
+                                disablePadding
+                                className="artifact-item"
+                                sx={{
+                                    borderBottom: index < artifacts.length - 1 ? 1 : 'none', borderColor: 'divider',
+                                }}
                             >
-                                <ListItemText
-                                    primary={
-                                        <Typography
-                                            sx={{
-                                                fontWeight: 600,
-                                                color: '#1e293b',
-                                                fontSize: '0.95rem',
-                                            }}
-                                        >
-                                            {artifact.title}
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: '#64748b',
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.8rem',
-                                                mt: 0.5,
-                                            }}
-                                        >
-                                            {artifact.id}
-                                        </Typography>
-                                    }
-                                />
-                                {artifact.status && (
-                                    <Chip
-                                        label={artifact.status}
-                                        size="small"
-                                        sx={{
-                                            background: STATUS_STYLES[artifact.status]?.bg || '#e2e8f0',
-                                            color: STATUS_STYLES[artifact.status]?.color || '#475569',
-                                            fontWeight: 600,
-                                            fontSize: '0.75rem',
-                                            border: 'none',
-                                        }}
+                                <ListItemButton
+                                    onClick={() => onSelect(artifact)}
+                                    onKeyDown={(e) => {
+                                        // Handle Space key explicitly (Enter is handled by MUI)
+                                        if (e.key === ' ') {
+                                            e.preventDefault();
+                                            onSelect(artifact);
+                                            return;
+                                        }
+                                        handleKeyDown(e);
+                                    }}
+                                    sx={{
+                                        py: 2,
+                                        px: 3,
+                                        '&:focus-visible': {
+                                            outline: '2px solid',
+                                            outlineColor: 'primary.main',
+                                            outlineOffset: -2,
+                                        },
+                                    }}
+                                    tabIndex={itemProps.tabIndex}
+                                    data-index={itemProps['data-index']}
+                                    ref={itemProps.ref as React.Ref<HTMLDivElement>}
+                                    role="option"
+                                >
+                                    <ListItemText
+                                        primary={
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: 'text.primary',
+                                                    fontSize: '0.95rem',
+                                                }}
+                                            >
+                                                {artifact.title}
+                                            </Typography>
+                                        }
+                                        secondary={
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: 'text.secondary',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '0.8rem',
+                                                    mt: 0.5,
+                                                }}
+                                            >
+                                                {artifact.id}
+                                            </Typography>
+                                        }
                                     />
-                                )}
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
+                                    {artifact.status && (
+                                        <Chip
+                                            label={artifact.status}
+                                            size="small"
+                                            sx={{
+                                                background: STATUS_STYLES[artifact.status]?.bg || '#e2e8f0',
+                                                color: STATUS_STYLES[artifact.status]?.color || '#475569',
+                                                fontWeight: 600,
+                                                fontSize: '0.75rem',
+                                                border: 'none',
+                                            }}
+                                        />
+                                    )}
+                                </ListItemButton>
+                            </ListItem>
+                        );
+                    })}
                 </List>
             )}
         </Paper>

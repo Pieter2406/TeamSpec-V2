@@ -21,7 +21,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             elevation={0}
             sx={{
                 borderRadius: 3,
-                border: '1px solid #e2e8f0',
+                border: 1, borderColor: 'divider',
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
                     transform: 'translateY(-4px)',
@@ -53,8 +53,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
                                 size="small"
                                 sx={{
                                     mb: 1,
-                                    bgcolor: '#f1f5f9',
-                                    color: '#64748b',
+                                    bgcolor: 'action.selected',
+                                    color: 'text.secondary',
                                     fontWeight: 700,
                                     fontFamily: 'monospace',
                                 }}
@@ -63,7 +63,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
                                 variant="h6"
                                 sx={{
                                     fontWeight: 700,
-                                    color: '#1e293b',
+                                    color: 'text.primary',
                                     lineHeight: 1.2,
                                 }}
                             >
@@ -76,7 +76,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
                     <Typography
                         variant="body2"
                         sx={{
-                            color: '#64748b',
+                            color: 'text.secondary',
                             mb: 2,
                             minHeight: 40,
                             display: '-webkit-box',
@@ -100,7 +100,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
                                 fontSize: '0.7rem',
                             }}
                         />
-                        <Typography variant="body2" sx={{ color: '#94a3b8', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                             {product.projectCount} project{product.projectCount !== 1 ? 's' : ''}
                         </Typography>
                     </Box>

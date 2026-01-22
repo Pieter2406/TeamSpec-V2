@@ -1,31 +1,22 @@
 ---
-# === LLM Retrieval Metadata ===
 artifact_kind: epic
-spec_version: "4.0"
-template_version: "4.0.1"
-title: "Treeview TBD Indicators"
-
-# === Ownership ===
+spec_version: '4.0'
+template_version: 4.0.1
+title: Treeview TBD Indicators
 role_owner: FA
 artifact_type: Project Execution
 canonicality: project-execution
 lifecycle: project-bound
-
-# === Naming ===
-id_pattern: "epic-TSV-008"
-filename_pattern: "epic-TSV-008-treeview-tbd-indicators.md"
-
-# === Required Relationships ===
+id_pattern: epic-TSV-008
+filename_pattern: epic-TSV-008-treeview-tbd-indicators.md
 links_required:
   - type: product
-    pattern: "product.yml"
+    pattern: product.yml
     optional: false
   - type: feature-increment
-    pattern: "fi-TSV-008"
+    pattern: fi-TSV-008
     optional: false
-    note: "At least one FI required"
-
-# === Search Optimization ===
+    note: At least one FI required
 keywords:
   - epic
   - dashboard UX
@@ -39,6 +30,7 @@ anti_keywords:
   - implementation detail
   - code
   - test case
+status: Done
 ---
 
 # Epic: `epic-TSV-008-treeview-tbd-indicators`
@@ -53,7 +45,7 @@ anti_keywords:
 | Field | Value |
 |-------|-------|
 | **Epic ID** | epic-TSV-008 |
-| **Status** | Proposed |
+| **Status** | Done|
 | **Product** | teamspec-viewer (TSV) |
 | **Owner** | FA (Functional Analyst) |
 | **Created** | 2026-01-17 |

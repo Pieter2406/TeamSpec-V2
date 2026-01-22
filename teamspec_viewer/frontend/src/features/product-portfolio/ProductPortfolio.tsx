@@ -34,7 +34,7 @@ export function ProductPortfolio() {
     }
 
     return (
-        <Box sx={{ bgcolor: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
+        <Box sx={{ bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)' }}>
             <Container maxWidth="xl" sx={{ py: 4 }}>
                 {/* Header */}
                 <Box sx={{ mb: 4 }}>
@@ -57,12 +57,12 @@ export function ProductPortfolio() {
                                 variant="h4"
                                 sx={{
                                     fontWeight: 800,
-                                    color: '#1e293b',
+                                    color: 'text.primary',
                                 }}
                             >
                                 Product Portfolio
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#64748b' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                 Browse and manage your TeamSpec products
                             </Typography>
                         </Box>
@@ -72,7 +72,7 @@ export function ProductPortfolio() {
                 {/* Loading */}
                 {loading && (
                     <Box sx={{ textAlign: 'center', py: 8 }}>
-                        <CircularProgress sx={{ color: '#667eea' }} />
+                        <CircularProgress sx={{ color: 'primary.main' }} />
                     </Box>
                 )}
 
@@ -89,16 +89,17 @@ export function ProductPortfolio() {
                         sx={{
                             textAlign: 'center',
                             py: 8,
-                            bgcolor: 'white',
+                            bgcolor: 'background.paper',
                             borderRadius: 3,
-                            border: '1px solid #e2e8f0',
+                            border: 1,
+                            borderColor: 'divider',
                         }}
                     >
-                        <BusinessCenterIcon sx={{ fontSize: 64, color: '#cbd5e1', mb: 2 }} />
-                        <Typography variant="h6" sx={{ color: '#64748b', mb: 1 }}>
+                        <BusinessCenterIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                        <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1 }}>
                             No products found
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                        <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                             Create a product using <code>ts:po product</code>
                         </Typography>
                     </Box>
