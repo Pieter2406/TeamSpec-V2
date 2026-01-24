@@ -3,7 +3,8 @@
  * Shared across all API domain modules
  */
 
-export const API_BASE = 'http://localhost:3000/api';
+// Use relative URL in production (standalone), absolute in development
+export const API_BASE = import.meta.env.DEV ? 'http://localhost:3000/api' : '/api';
 
 export interface Artifact {
     id: string;

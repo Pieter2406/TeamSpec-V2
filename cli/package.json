@@ -1,6 +1,6 @@
 {
   "name": "teamspec",
-  "version": "4.3.2",
+  "version": "4.4.0",
   "description": "CLI tool to bootstrap TeamSpec 4.0 Product-Canon operating model in any repository",
   "main": "lib/cli.js",
   "bin": {
@@ -29,7 +29,8 @@
     "templates",
     "scrum",
     "kanban",
-    "software-development"
+    "software-development",
+    "viewer"
   ],
   "author": "TeamSpec Contributors",
   "license": "MIT",
@@ -48,6 +49,7 @@
     "bin/",
     "lib/",
     "teamspec-core/",
+    "viewer-dist/",
     "extensions/",
     "README.md",
     "LICENSE"

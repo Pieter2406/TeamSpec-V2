@@ -70,8 +70,8 @@ export function SearchResults({ query, onClose: _onClose }: SearchResultsProps) 
     };
 
     return (
-        <Box sx={{ 
-            bgcolor: 'background.default', 
+        <Box sx={{
+            bgcolor: 'background.default',
             height: 'calc(100vh - 64px)',
             overflow: 'auto',
         }}>

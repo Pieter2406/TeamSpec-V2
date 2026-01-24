@@ -113,13 +113,14 @@ function parseArgs(args) {
     fix: false,
     rule: null,
     verbose: false,
+    port: 3456,
   };
 
   let i = 0;
 
   if (args.length > 0 && !args[0].startsWith('-')) {
     const cmd = args[0].toLowerCase();
-    if (['init', 'update', 'lint', 'generate-prompts', 'migrate'].includes(cmd)) {
+    if (['init', 'update', 'lint', 'generate-prompts', 'migrate', 'serve'].includes(cmd)) {
       options.command = cmd;
       i = 1;
     }
@@ -178,6 +179,12 @@ function parseArgs(args) {
       case '--verbose':
         options.verbose = true;
         break;
+      case '--port':
+        options.port = parseInt(args[++i], 10) || 3456;
+        break;
+      case '--no-open':
+        options.openBrowser = false;
+        break;
     }
   }
 
@@ -199,6 +206,7 @@ ${colored('COMMANDS:', colors.bold)}
   init [options]          Initialize TeamSpec in a repository (default)
   update [options]        Update TeamSpec core files (keeps team context)
   lint [options]          Lint project artifacts against TeamSpec rules
+  serve [options]         Start the TeamSpec Viewer web interface
 
 ${colored('OPTIONS:', colors.bold)}
   -h, --help              Show this help message
@@ -213,6 +221,8 @@ ${colored('OPTIONS:', colors.bold)}
   -y, --non-interactive   Run without prompts (use defaults)
   -f, --force             Force update/migrate without confirmation
   --fix                   Apply migration changes (default: dry-run)
+  --port <port>           Port for viewer server (default: 3456)
+  --no-open               Don't open browser automatically (serve command)
 
 ${colored('PROFILES:', colors.bold)}
   none           Vanilla TeamSpec
@@ -231,6 +241,8 @@ ${colored('EXAMPLES:', colors.bold)}
   teamspec migrate                      # Analyze 2.0 → 4.0 migration (dry-run)
   teamspec migrate --fix                # Execute 2.0 → 4.0 migration
   teamspec generate-prompts             # Generate GitHub Copilot prompt files
+  teamspec serve                        # Start viewer at http://localhost:3456
+  teamspec serve --port 8080            # Start viewer on custom port
 
 ${colored('WHAT GETS CREATED (4.0):', colors.bold)}
   .teamspec/                 Core framework
@@ -1545,6 +1557,31 @@ async function run(args) {
 
   if (options.version) {
     printVersion();
+    return;
+  }
+
+  // Handle serve command
+  if (options.command === 'serve') {
+    const { createViewerServer } = require('./viewer-server');
+    const targetDir = path.resolve(options.target);
+
+    console.log(colored('\n📊 TeamSpec Viewer', colors.bold + colors.cyan));
+
+    const server = createViewerServer({
+      workspaceRoot: targetDir,
+      port: options.port,
+      openBrowser: options.openBrowser !== false,
+    });
+
+    await server.start();
+
+    // Keep the process running
+    process.on('SIGINT', async () => {
+      console.log('\n\nShutting down...');
+      await server.stop();
+      process.exit(0);
+    });
+
     return;
   }
 
